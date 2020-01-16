@@ -44,6 +44,7 @@ jobs:
          sign.key.alias: ${{secrets.sign_key_alias}}
          sign.key.path: ${{secrets.sign_key_path}}
          g.license.key: ${{secrets.g_license_key}}
+         google.services.json: ${{secrets.google_services_json}}
       - name: Upload APK
         uses: actions/upload-artifact@v1
         with:
