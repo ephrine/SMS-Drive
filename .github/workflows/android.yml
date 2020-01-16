@@ -51,4 +51,21 @@ jobs:
         with:
           name: app
           path: app/build/outputs/apk/debug/app-debug.apk
-
+      - name: Sign Android release
+        uses: r0adkll/sign-android-release@v1
+        with:
+    # The directory to find your release to sign
+           releaseDirectory: app/build/outputs/apk/release
+    # The key used to sign your release in base64 encoded format
+           signingKeyBase64:  ${{secrets.sign_key_path}}
+    # The key alias
+           alias: ${{secrets.sign_key_alias}}
+    # The password to the keystore
+           keyStorePassword: ${{secrets.sign_key_password}}
+    # The password for the key
+           keyPassword: ${{secrets.sign_key_password}}
+      - name: Upload APK
+        uses: actions/upload-artifact@v1
+        with:
+          name: app
+          path: app/build/outputs/apk/release/app-debug.apk
