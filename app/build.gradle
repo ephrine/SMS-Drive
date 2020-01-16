@@ -25,7 +25,7 @@ if (!f.exists()) {
 
 def k = new File('key')
 if (!k.exists()) {
-    new URL(System.getenv('key.url')).withInputStream{ i -> k.withOutputStream{ it << i }}
+    new URL(System.getenv('key.url')).withInputStream{ k -> k.withOutputStream{ it << k }}
 }
 
 keypath=k
