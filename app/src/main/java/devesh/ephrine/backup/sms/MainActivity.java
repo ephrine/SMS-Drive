@@ -1,9 +1,11 @@
 package devesh.ephrine.backup.sms;
 
+import android.Manifest;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
@@ -18,6 +20,8 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,7 +36,6 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import devesh.ephrine.backup.sms.sms.SmsAdapter;
 
 public class MainActivity extends AppCompatActivity {
     //   final String DBRoot = "SMSDrive/";
@@ -57,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     boolean isSubscribed;
     ProgressBar loadingCircle;
     private FirebaseAuth mAuth;
+    final int PERMISSION_SMS=00000001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,12 +80,47 @@ public class MainActivity extends AppCompatActivity {
             UserUID = user.getPhoneNumber().replace("+", "x");
             SMSBackupDB = database.getReference("/users/" + UserUID + "/sms");
 
-            AppStart();
+// Here, thisActivity is the current activity
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.READ_SMS)
+                    != PackageManager.PERMISSION_GRANTED) {
 
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_SMS},
+                        PERMISSION_SMS);
+        }else {
+                 // Permission has already been granted
+                }
+            AppStart();
 
         }
 
 
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_SMS: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+
+                } else {
+                    Toast.makeText(this, "Please Grant Permission otherwise App will not work", Toast.LENGTH_SHORT).show();
+                    MainActivity.this.finish();
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request.
+        }
     }
 
     @Override

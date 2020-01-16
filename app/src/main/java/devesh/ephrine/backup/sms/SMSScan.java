@@ -1,11 +1,15 @@
 package devesh.ephrine.backup.sms;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.util.Log;
+
+import androidx.core.content.ContextCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -55,57 +59,65 @@ public class SMSScan {
     public void ScanNow() {
         isFinished = false;
         //  getSMS();
-        if (user != null && isSubscribed) {
-            UserUID = user.getPhoneNumber().replace("+", "x");
 
-            //Download Full Backup First to Prevent DataLoss
-            SMSBackupDB = database.getReference("/users/" + UserUID + "/sms");
-            SMSBackupDB.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    // This method is called once with the initial value and again
-                    // whenever data at this location is updated.
-                    //String value = dataSnapshot.getValue(String.class);
-                    // Log.d(TAG, "Value is: " + value);
+        if (ContextCompat.checkSelfPermission(mContext,
+                Manifest.permission.READ_SMS)
+                == PackageManager.PERMISSION_GRANTED) {
+            if (user != null && isSubscribed) {
+                UserUID = user.getPhoneNumber().replace("+", "x");
 
-                    if (dataSnapshot.exists() && isSubscribed) {
+                //Download Full Backup First to Prevent DataLoss
+                SMSBackupDB = database.getReference("/users/" + UserUID + "/sms");
+                SMSBackupDB.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        // This method is called once with the initial value and again
+                        // whenever data at this location is updated.
+                        //String value = dataSnapshot.getValue(String.class);
+                        // Log.d(TAG, "Value is: " + value);
 
-                        long total = dataSnapshot.getChildrenCount();
-                        long i;
-                        i = 0;
-                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                            // TODO: handle the post
-                            i = i + 1;
+                        if (dataSnapshot.exists() && isSubscribed) {
+
+                            long total = dataSnapshot.getChildrenCount();
+                            long i;
+                            i = 0;
+                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                // TODO: handle the post
+                                i = i + 1;
 
 
-                            String threadName = postSnapshot.getKey();
-                            Log.d(TAG, "onDataChange: threadName: " + threadName);
+                                String threadName = postSnapshot.getKey();
+                                Log.d(TAG, "onDataChange: threadName: " + threadName);
 
-                            GetThread(postSnapshot, threadName);
-                            Log.d(TAG, "i:" + i + "\n Total:" + total);
-                            if (i == total) {
-                                sms1();
+                                GetThread(postSnapshot, threadName);
+                                Log.d(TAG, "i:" + i + "\n Total:" + total);
+                                if (i == total) {
+                                    sms1();
+                                }
+
                             }
 
+                        } else {
+                            if (isSubscribed) {
+                                sms1();
+                            }
                         }
 
-                    } else {
-                        if (isSubscribed) {
-                            sms1();
-                        }
                     }
 
-                }
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        // Failed to read value
+                        Log.w(TAG, "Failed to read value.", error.toException());
+                    }
+                });
 
-                @Override
-                public void onCancelled(DatabaseError error) {
-                    // Failed to read value
-                    Log.w(TAG, "Failed to read value.", error.toException());
-                }
-            });
 
+            }
 
         }
+
+
     }
 
 

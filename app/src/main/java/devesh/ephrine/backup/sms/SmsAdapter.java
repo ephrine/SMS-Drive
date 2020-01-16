@@ -4,7 +4,7 @@
  * Website: https://www.ephrine.in
  */
 
-package devesh.ephrine.backup.sms.sms;
+package devesh.ephrine.backup.sms;
 
 import android.content.Context;
 import android.content.Intent;
@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-import devesh.ephrine.backup.sms.R;
 import devesh.ephrine.backup.sms.ThreadSmsActivity;
 
 
