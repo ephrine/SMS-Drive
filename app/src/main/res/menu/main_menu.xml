@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- <item
+         android:id="@+id/notification"
+         android:icon="@drawable/ic_notifications_white_50dp"
+         android:title="Notification"
+         app:showAsAction="always" />
+ -->
+
+    <item
+        android:id="@+id/syncnow"
+        android:icon="@drawable/ic_sync_white_50dp"
+        android:title="Sync Now"
+        app:showAsAction="always" />
+
+
+    <item
+        android:id="@+id/tutorial"
+        android:title="Tutorial" />
+
+
+    <item
+        android:id="@+id/settings"
+        android:title="Settings" />
+
+</menu>

@@ -1,0 +1,154 @@
+<!--
+  ~ Copyright 2018 The app Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/profile">
+
+        <Preference
+            app:key="@string/settings_pref_userphno"
+            app:summary="0"
+            app:title="Phone Number"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:key="@string/settings_pref_username"
+            app:title="@string/user_name"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="@string/settings_pref_useremail"
+            app:title="Email"
+            app:useSimpleSummaryProvider="true" />
+
+
+        <EditTextPreference
+            app:key="@string/settings_pref_userage"
+            app:title="Age"
+            app:useSimpleSummaryProvider="true" />
+        <Preference
+            app:key="sub"
+            app:summary="Manage your Subscription, Currently it's FREE for Beta App users"
+            app:title="Subscription" />
+
+        <!--     <ListPreference
+            app:entries="@array/gender"
+            app:entryValues="@array/gender_values"
+            app:key="pref_usergender"
+            app:title="Gender"
+            app:useSimpleSummaryProvider="true" />
+-->
+
+        <Preference
+            app:key="signout"
+            app:summary="Sign Out of my Account on this Device"
+            app:title="Sign Out" />
+    </PreferenceCategory>
+
+
+    <PreferenceCategory app:title="@string/sync_header">
+
+        <SwitchPreferenceCompat
+            app:key="@string/settings_sync"
+            app:summaryOff="@string/auto_sync_off_summary"
+            app:summaryOn="@string/auto_sync_on_summary"
+            app:title="@string/auto_sync" />
+
+        <ListPreference
+            android:entries="@array/auto_sync_intervals"
+            android:entryValues="@array/auto_sync_intervals"
+            android:key="@string/settings_sync_interval"
+            android:summary="@string/sync_interval_summary"
+            android:title="@string/sync_interval" />
+
+    </PreferenceCategory>
+
+
+    <PreferenceCategory app:title="About">
+
+        <Preference
+            app:key="version"
+            app:summary="@string/AppVersionName"
+            app:title="Version" />
+
+        <Preference
+            android:summary="For Feedback, Complaints and Compliments "
+            app:key="contact"
+            app:title="Contact us"
+            app:useSimpleSummaryProvider="true" />
+        <Preference
+            app:key="epwebsite"
+            app:summary="https://www.ephrine.in"
+            app:title="Official Website"
+            app:useSimpleSummaryProvider="true" />
+
+        <Preference
+            app:key="privacyp"
+            app:title="@string/fui_privacy_policy"
+            app:useSimpleSummaryProvider="true" />
+
+        <Preference
+            app:key="osl"
+            app:title="Open Source Licences" />
+
+
+        <!--     <Preference
+                 app:key="tc"
+                 app:title="Terms &amp; Conditions" />
+     -->
+
+    </PreferenceCategory>
+
+
+    <PreferenceCategory android:title="Follow us on">
+        <Preference
+            android:icon="@drawable/fb100px"
+            app:key="fb"
+            app:summary="@string/social_media_fb"
+            app:title="Facebook"
+            app:useSimpleSummaryProvider="true" />
+        <Preference
+            android:icon="@drawable/insta100px"
+            app:key="insta"
+            app:summary="@string/social_media_instagram"
+            app:title="Instagram"
+            app:useSimpleSummaryProvider="true" />
+        <Preference
+            android:icon="@drawable/youtube100px"
+            app:key="youtube"
+            app:summary="@string/social_media_youtube"
+            app:title="Youtube Channel"
+            app:useSimpleSummaryProvider="true" />
+        <Preference
+            android:icon="@drawable/twitter100px"
+            app:key="twitter"
+            app:summary="@string/social_media_twitter"
+            app:title="Twitter"
+            app:useSimpleSummaryProvider="true" />
+
+        <Preference
+            android:icon="@drawable/linkedin100px"
+            app:key="linkedin"
+            app:summary="@string/social_media_linkedin"
+            app:title="Linkedin"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+    <Preference
+        android:key="ab"
+        android:layout="@layout/ephrinelogo" />
+
+
+</androidx.preference.PreferenceScreen>

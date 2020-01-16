@@ -1,0 +1,13 @@
+<resources>
+    <!-- Reply Preference -->
+    <string-array name="auto_sync_intervals">
+        <item>Every Day</item> <!--0-->
+        <item>Every 12 Hours</item><!--1-->
+        <item>Every Hours</item><!--2-->
+        <item>Every Half Hours</item><!--3-->
+        <item>Every 15 Minutes</item><!--4-->
+
+    </string-array>
+
+
+</resources>

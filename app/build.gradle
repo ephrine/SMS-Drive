@@ -1,0 +1,96 @@
+ext {
+//    var = signingConfigs.production
+}
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
+
+//Properties properties = new Properties()
+//properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+//def keypassword = properties.getProperty('sign.key.password')
+
+
+ext.keypassword = System.getenv('sign.key.password')
+
+ext.keyalias = System.getenv('sign.key.alias')
+
+ext.keypath = System.getenv('sign.key.path')
+
+ext.gplaylicensekey = System.getenv('g.license.key')
+
+android {
+
+
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
+
+
+    defaultConfig {
+
+
+        applicationId "devesh.ephrine.backup.sms"
+        minSdkVersion 19
+        targetSdkVersion 29
+        versionCode 1
+        versionName "0.0.1 Beta Version"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        signingConfigs {
+            production {
+                storeFile file(keypath)
+                storePassword keypassword
+                keyAlias = keyalias
+                keyPassword keypassword
+            }
+        }
+
+        vectorDrawables.useSupportLibrary = true
+
+        buildConfigField "String", "GLicenseKey", "\"" + gplaylicensekey + "\""
+
+        resValue "string", "AdMob_AppId", "\"" + "none" + "\""
+
+        resValue "string", "AppVersionCode", "\"" + versionCode + "\""
+
+        resValue "string", "AppVersionName", "\"" + versionName + "\""
+
+
+    }
+
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation 'androidx.appcompat:appcompat:+'
+    implementation 'androidx.constraintlayout:constraintlayout:+'
+    implementation 'com.google.firebase:firebase-database:+'
+    implementation 'com.google.firebase:firebase-storage:+'
+    implementation 'com.google.firebase:firebase-auth:+'
+    implementation 'com.firebaseui:firebase-ui-auth:+'
+    implementation 'com.google.firebase:firebase-messaging:+'
+
+    //  implementation 'com.google.firebase:firebase-functions:+'
+    implementation 'androidx.preference:preference:+'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:+'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:+'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    implementation 'androidx.cardview:cardview:+'
+    //  implementation 'com.google.code.gson:gson:2.8.6'
+
+    implementation 'com.anjlab.android.iab.v3:library:+'
+
+
+}
