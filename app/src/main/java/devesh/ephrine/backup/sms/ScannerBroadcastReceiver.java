@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ScannerBroadcastReceiver extends BroadcastReceiver {
-    final String DBRoot = "SMSDrive/";
+    // final String DBRoot = "SMSDrive/";
     Context mContext;
     SharedPreferences sharedPrefAutoBackup;
     String UserUID;

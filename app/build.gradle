@@ -21,6 +21,14 @@ ext.gplaylicensekey = System.getenv('g.license.key')
 android {
 
 
+    signingConfigs {
+        release {
+            storeFile file(keypath)
+            storePassword keypassword
+            keyAlias = keyalias
+            keyPassword keypassword
+        }
+    }
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
 
@@ -35,7 +43,7 @@ android {
         versionName "0.0.1 Beta Version"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        signingConfigs {
+  /*      signingConfigs {
             production {
                 storeFile file(keypath)
                 storePassword keypassword
@@ -43,7 +51,7 @@ android {
                 keyPassword keypassword
             }
         }
-
+*/
         vectorDrawables.useSupportLibrary = true
 
         buildConfigField "String", "GLicenseKey", "\"" + gplaylicensekey + "\""
@@ -53,6 +61,7 @@ android {
         resValue "string", "AppVersionCode", "\"" + versionCode + "\""
 
         resValue "string", "AppVersionName", "\"" + versionName + "\""
+        signingConfig signingConfigs.release
 
 
     }

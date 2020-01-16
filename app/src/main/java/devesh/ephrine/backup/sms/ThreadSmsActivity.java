@@ -14,7 +14,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
@@ -23,7 +22,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 public class ThreadSmsActivity extends AppCompatActivity {
-    final String DBRoot = "SMSDrive/";
+    //  final String DBRoot = "SMSDrive/";
     ArrayList<HashMap<String, String>> SmsThreadHashMap = new ArrayList<>();
     String id;
     String TAG = "BackUp|SMS: ";
@@ -76,11 +75,11 @@ public class ThreadSmsActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.SmsThreadRecycleView);
         layoutManager = new LinearLayoutManager(this);
 
-        DatabaseReference GetSMS = database.getReference(DBRoot + "/users/" + UserUID + "/sms/" + id);
+        DatabaseReference GetSMS = database.getReference("/users/" + UserUID + "/sms/" + id);
         //final ArrayList<String> SMSList= new ArrayList<>();
 // My top posts by number of stars
 
-        Query myTopPostsQuery = database.getReference("DBRoot" + "/users/" + UserUID + "/sms/" + id).orderByChild("date");
+        //     Query myTopPostsQuery = database.getReference("DBRoot" + "/users/" + UserUID + "/sms/" + id).orderByChild("date");
 
   /*      myTopPostsQuery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

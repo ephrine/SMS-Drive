@@ -24,7 +24,7 @@ import java.util.List;
 public class SMSScan {
 
     final String TAG = "SMSScan";
-    final String DBRoot = "SMSDrive/";
+    //  final String DBRoot = "SMSDrive/";
     public HashMap<String, ArrayList<HashMap<String, String>>> iThread;
     //   public HashMap<String, Object> iThread;
     Context mContext;
@@ -59,7 +59,7 @@ public class SMSScan {
             UserUID = user.getPhoneNumber().replace("+", "x");
 
             //Download Full Backup First to Prevent DataLoss
-            SMSBackupDB = database.getReference(DBRoot + "/users/" + UserUID + "/sms");
+            SMSBackupDB = database.getReference("/users/" + UserUID + "/sms");
             SMSBackupDB.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {

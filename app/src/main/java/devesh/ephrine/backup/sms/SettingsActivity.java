@@ -38,7 +38,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     public static class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
         final String TAG = "Settings Activity";
-        final String DBRoot = "SMSDrive/";
+        // final String DBRoot = "SMSDrive/";
         SharedPreferences sharedPrefAutoBackup;
         boolean SMSAutoBackup;
         DatabaseReference UserDB;
@@ -245,7 +245,7 @@ public class SettingsActivity extends AppCompatActivity {
                 String age = sharedPreferences.getString(getString(R.string.settings_pref_userage), null);
 
                 UserUID = user.getPhoneNumber().replace("+", "x");
-                UserDB = FirebaseDatabase.getInstance().getReference(DBRoot + "/users/" + UserUID + "/profile");
+                UserDB = FirebaseDatabase.getInstance().getReference("/users/" + UserUID + "/profile");
 
                 if (name != null) {
                     if (name.equals("")) {

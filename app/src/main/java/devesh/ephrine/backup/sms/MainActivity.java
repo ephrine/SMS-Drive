@@ -35,7 +35,7 @@ import java.util.HashMap;
 import devesh.ephrine.backup.sms.sms.SmsAdapter;
 
 public class MainActivity extends AppCompatActivity {
-    final String DBRoot = "SMSDrive/";
+    //   final String DBRoot = "SMSDrive/";
     public HashMap<String, ArrayList<HashMap<String, String>>> iThread;
     DatabaseReference SMSBackupDB;
     DatabaseReference UserDB;
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             UserUID = user.getPhoneNumber().replace("+", "x");
-            SMSBackupDB = database.getReference(DBRoot + "/users/" + UserUID + "/sms");
+            SMSBackupDB = database.getReference("/users/" + UserUID + "/sms");
 
             AppStart();
 
@@ -438,7 +438,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        UserDB = database.getReference(DBRoot + "/users/" + UserUID + "/profile");
+        UserDB = database.getReference("/users/" + UserUID + "/profile");
         UserDB.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -448,21 +448,33 @@ public class MainActivity extends AppCompatActivity {
                 if (dataSnapshot.child("UserName").getValue(String.class) != null) {
                     UserName = dataSnapshot.child("UserName").getValue(String.class);
                     editor.putString(getString(R.string.settings_pref_username), UserName).apply();
+                    Log.d(TAG, "onDataChange: UserName " + UserName);
+
                 } else {
+                    UserName = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_pref_username), null);
+
                     Log.d(TAG, "onDataChange: UserName NULL");
                 }
 
                 if (dataSnapshot.child("UserEmail").getValue(String.class) != null) {
                     UserEmail = dataSnapshot.child("UserEmail").getValue(String.class);
                     editor.putString(getString(R.string.settings_pref_useremail), UserEmail).apply();
+                    Log.d(TAG, "onDataChange: UserEmail " + UserEmail);
+
                 } else {
+                    UserEmail = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_pref_useremail), null);
+
                     Log.d(TAG, "onDataChange: UserEmail NULL");
                 }
 
                 if (dataSnapshot.child("UserAge").getValue(String.class) != null) {
                     UserAge = dataSnapshot.child("UserAge").getValue(String.class);
                     editor.putString(getString(R.string.settings_pref_userage), UserAge).apply();
+                    Log.d(TAG, "onDataChange: UserAge " + UserAge);
+
                 } else {
+                    UserAge = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_pref_userage), null);
+
                     Log.d(TAG, "onDataChange: UserAge NULL");
                 }
 
@@ -477,9 +489,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        UserName = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_pref_username), null);
-        UserAge = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_pref_userage), null);
-        UserEmail = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_pref_useremail), null);
 
     }
 
@@ -507,6 +516,9 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "FileAutoBackUpBroadCast: FileSyncIntervals: " + sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_sync_interval), null));
         String syncinterval = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_sync_interval), null);
         String[] syncintervalArray = getResources().getStringArray(R.array.auto_sync_intervals);
+        if (syncinterval == null) {
+            syncinterval = syncintervalArray[4];
+        }
 
         if (syncinterval.equals(syncintervalArray[0])) {
             // 24 Hrs Sync

@@ -20,7 +20,7 @@ import com.google.firebase.messaging.RemoteMessage;
 
 
 public class FirebaseMessagingService extends com.google.firebase.messaging.FirebaseMessagingService {
-    String TAG = "TextBook Nerd Service";
+    String TAG = "SMS Drive";
 
     public FirebaseMessagingService() {
     }
