@@ -22,6 +22,7 @@ def f = new File('app/google-services.json')
 if (!f.exists()) {
     new URL(System.getenv('google.services.json')).withInputStream{ i -> f.withOutputStream{ it << i }}
 }
+
 /*
 def k = new File('key')
 if (!k.exists()) {
