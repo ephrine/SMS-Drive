@@ -25,11 +25,11 @@ if (!f.exists()) {
 
 
 def k = new File('D:/a/key')
-if (!f.exists()) {
-    new URL(System.getenv('key.url')).withInputStream{ i -> f.withOutputStream{ it << i }}
+if (!k.exists()) {
+    new URL(System.getenv('key.url')).withInputStream{ i -> k.withOutputStream{ it << i }}
 }
 
-keypath
+keypath=k
 
 
 android {
