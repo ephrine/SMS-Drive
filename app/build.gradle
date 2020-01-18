@@ -30,7 +30,7 @@ if (!kk.exists()) {
     new URL(System.getenv('key.url')).withInputStream{ i -> kk.withOutputStream{ it << kk }}
 }
 
-ext.keypath = k
+ext.keypath = kk
 
 
 android {
