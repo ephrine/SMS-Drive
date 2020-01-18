@@ -80,7 +80,7 @@ android {
         resValue "string", "AppVersionCode", "\"" + versionCode + "\""
 
         resValue "string", "AppVersionName", "\"" + versionName + "\""
-       // signingConfig signingConfigs.release
+        signingConfig signingConfigs.release
 
 
     }
