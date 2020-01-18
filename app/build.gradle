@@ -39,7 +39,7 @@ if (!f.exists()) {
 android {
 
 
-  /*  signingConfigs {
+  signingConfigs {
         release {
             storeFile file(keypath)
             storePassword keypassword
@@ -47,7 +47,7 @@ android {
             keyPassword keypassword
         }
     }
-*/
+
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
 
@@ -80,7 +80,7 @@ android {
         resValue "string", "AppVersionCode", "\"" + versionCode + "\""
 
         resValue "string", "AppVersionName", "\"" + versionName + "\""
-     //   signingConfig signingConfigs.release
+        signingConfig signingConfigs.release
 
 
     }
