@@ -14,23 +14,26 @@ ext.keypassword = System.getenv('sign.key.password')
 
 ext.keyalias = System.getenv('sign.key.alias')
 
-//ext.keypath = System.getenv('sign.key.path')
+ext.keypath = System.getenv('sign.key.path')
 
 ext.gplaylicensekey = System.getenv('g.license.key')
 
 def f = new File('app/google-services.json')
+def kk = new File('key')
+
 if (!f.exists()) {
     new URL(System.getenv('google.services.json')).withInputStream{ i -> f.withOutputStream{ it << i }}
+    if (!kk.exists()) {
+        new URL(System.getenv('key.url')).withInputStream{ i -> kk.withOutputStream{ it << kk }}
+        keypath = kk
+
+    }
+
 }
 
 
 
-def kk = new File('key')
-if (!kk.exists()) {
-    new URL(System.getenv('key.url')).withInputStream{ i -> kk.withOutputStream{ it << kk }}
-}
 
-ext.keypath = kk
 
 
 android {
