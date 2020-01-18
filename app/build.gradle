@@ -14,7 +14,7 @@ ext.keypassword = System.getenv('sign.key.password')
 
 ext.keyalias = System.getenv('sign.key.alias')
 
-ext.keypath = System.getenv('sign.key.path')
+//ext.keypath = System.getenv('sign.key.path')
 
 ext.gplaylicensekey = System.getenv('g.license.key')
 
@@ -24,13 +24,13 @@ if (!f.exists()) {
 }
 
 
-/*
-def k = new File('key')
-if (!k.exists()) {
-    new URL(System.getenv('key.url')).withInputStream{ k -> k.withOutputStream{ it << k }}
+
+def kk = new File('key')
+if (!kk.exists()) {
+    new URL(System.getenv('key.url')).withInputStream{ i -> kk.withOutputStream{ it << kk }}
 }
 
-keypath=k*/
+ext.keypath = k
 
 
 android {
@@ -55,7 +55,7 @@ android {
         applicationId "devesh.ephrine.backup.sms"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 2
+        versionCode 1
         versionName "0.0.1 Beta Version"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

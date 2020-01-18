@@ -43,6 +43,7 @@ public class SettingsActivity extends AppCompatActivity {
         boolean SMSAutoBackup;
         DatabaseReference UserDB;
         String UserUID;
+DatabaseReference DeleteDB;
 
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -220,6 +221,44 @@ public class SettingsActivity extends AppCompatActivity {
             });
 
 
+            Preference PrefDeleteBooks = findPreference("deletebooks");
+            PrefDeleteBooks.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                public boolean onPreferenceClick(Preference preference) {
+                    //open browser or intent here
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setMessage("Do you want to Delete Backup ?");
+                    builder.setIcon(R.drawable.ic_warning_black_24dp);
+// Add the buttons
+                    builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // User clicked OK button
+                            DeleteBackup();
+
+                        }
+                    });
+                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // User cancelled the dialog
+                        }
+                    });
+
+// Set other dialog properties
+
+// Create the AlertDialog
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+
+
+                    return true;
+                }
+            });
+
+
+
+
+
+
         }
 
         @Override
@@ -291,6 +330,21 @@ public class SettingsActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+
+        void DeleteBackup(){
+            Toast.makeText(getContext(), "Delete SMS Backup: Deleting...", Toast.LENGTH_SHORT).show();
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if (user != null) {
+                UserUID = user.getPhoneNumber().replace("+", "x");
+                DeleteDB = FirebaseDatabase.getInstance().getReference("/users/" + UserUID + "/sms");
+                DeleteDB.removeValue();
+                Toast.makeText(getContext(), "Delete SMS Backup: Successful", Toast.LENGTH_SHORT).show();
+
+            }
+
+
+        }
+
 
 
     }
