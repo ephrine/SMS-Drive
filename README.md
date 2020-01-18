@@ -9,4 +9,4 @@
 Back-up &amp; Sync Messages on your Device
 
 ### Developers:
-Devesh Chaudhari @DeveshRx
+Devesh Chaudhari [@DeveshRx](https://GitHub.com/deveshrx)
