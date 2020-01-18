@@ -35,7 +35,7 @@ ext.keypath = k
 
 android {
 
-/*
+
     signingConfigs {
         release {
             storeFile file(keypath)
@@ -44,7 +44,7 @@ android {
             keyPassword keypassword
         }
     }
-    */
+
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
 
