@@ -3,6 +3,7 @@ ext {
 }
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'io.fabric'
 
 //Properties properties = new Properties()
 //properties.load(project.rootProject.file('local.properties').newDataInputStream())
@@ -22,31 +23,28 @@ def f = new File('app/google-services.json')
 def kk = new File('key')
 
 if (!f.exists()) {
-    new URL(System.getenv('google.services.json')).withInputStream{ i -> f.withOutputStream{ it << i }}
+    new URL(System.getenv('google.services.json')).withInputStream { i ->
+        f.withOutputStream {
+            it << i
+        }
+    }
+    project.logger.info('Downloaded google-services.json')
+
     if (!kk.exists()) {
-        new URL(System.getenv('key.url')).withInputStream{ i -> kk.withOutputStream{ it << kk }}
+        new URL(System.getenv('key.url')).withInputStream { i -> kk.withOutputStream { it << kk } }
         keypath = kk
+        project.logger.info('Downloaded KEY for signing')
+
 
     }
 
+} else {
+    project.logger.info('google-services.json already exists')
 }
-
-
-
-
 
 
 android {
 
-
-  signingConfigs {
-        release {
-            storeFile file(keypath)
-            storePassword keypassword
-            keyAlias = keyalias
-            keyPassword keypassword
-        }
-    }
 
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
@@ -58,29 +56,28 @@ android {
         applicationId "devesh.ephrine.backup.sms"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 2
+        versionCode 1
         versionName "0.0.1 Beta Version"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-  /*      signingConfigs {
-            production {
-                storeFile file(keypath)
-                storePassword keypassword
-                keyAlias = keyalias
-                keyPassword keypassword
-            }
-        }
-*/
+        /*      signingConfigs {
+                  production {
+                      storeFile file(keypath)
+                      storePassword keypassword
+                      keyAlias = keyalias
+                      keyPassword keypassword
+                  }
+              }
+      */
         vectorDrawables.useSupportLibrary = true
 
         buildConfigField "String", "GLicenseKey", "\"" + gplaylicensekey + "\""
 
-        resValue "string", "AdMob_AppId", "\"" + "none" + "\""
+        //  resValue "string", "AdMob_AppId", "\"" + "none" + "\""
 
         resValue "string", "AppVersionCode", "\"" + versionCode + "\""
 
         resValue "string", "AppVersionName", "\"" + versionName + "\""
-        signingConfig signingConfigs.release
+        //  signingConfig signingConfigs.release
 
 
     }
@@ -103,11 +100,15 @@ dependencies {
 
     implementation 'androidx.appcompat:appcompat:+'
     implementation 'androidx.constraintlayout:constraintlayout:+'
+
+    implementation 'com.google.firebase:firebase-analytics:+'
     implementation 'com.google.firebase:firebase-database:+'
     implementation 'com.google.firebase:firebase-storage:+'
     implementation 'com.google.firebase:firebase-auth:+'
     implementation 'com.firebaseui:firebase-ui-auth:+'
     implementation 'com.google.firebase:firebase-messaging:+'
+    implementation 'com.crashlytics.sdk.android:crashlytics:+'
+
 
     //  implementation 'com.google.firebase:firebase-functions:+'
     implementation 'androidx.preference:preference:+'

@@ -11,6 +11,7 @@ import android.util.Log;
 
 import androidx.core.content.ContextCompat;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -24,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+
+import io.fabric.sdk.android.Fabric;
 
 public class SMSScan {
 
@@ -46,6 +49,8 @@ public class SMSScan {
 
     public SMSScan(Context context) {
         mContext = context;
+        Fabric.with(mContext, new Crashlytics());
+
         iThread = new HashMap<>();
         user = FirebaseAuth.getInstance().getCurrentUser();
         database = FirebaseDatabase.getInstance();

@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -36,20 +37,21 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import io.fabric.sdk.android.Fabric;
+
 
 public class MainActivity extends AppCompatActivity {
+    final int PERMISSION_SMS = 00000001;
     //   final String DBRoot = "SMSDrive/";
     public HashMap<String, ArrayList<HashMap<String, String>>> iThread;
     DatabaseReference SMSBackupDB;
     DatabaseReference UserDB;
-
     String TAG = "SMS Drive";
     String UserUID;
     String UserName;
     String UserEmail;
-    String UserAge;
     //   HashMap<String, ArrayList<HashMap<String, String>>> SmsList = new HashMap<>();
-
+    String UserAge;
     RecyclerView recyclerView;
     RecyclerView.LayoutManager layoutManager;
     FirebaseDatabase database;
@@ -60,12 +62,13 @@ public class MainActivity extends AppCompatActivity {
     boolean isSubscribed;
     ProgressBar loadingCircle;
     private FirebaseAuth mAuth;
-    final int PERMISSION_SMS=00000001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Fabric.with(this, new Crashlytics());
+
         isSubscribed = true;
         mAuth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance();
@@ -77,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
+            Crashlytics.setUserIdentifier(user.getUid());
+
             UserUID = user.getPhoneNumber().replace("+", "x");
             SMSBackupDB = database.getReference("/users/" + UserUID + "/sms");
 
@@ -88,15 +93,16 @@ public class MainActivity extends AppCompatActivity {
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.READ_SMS},
                         PERMISSION_SMS);
-        }else {
-                 // Permission has already been granted
-                }
+            } else {
+                // Permission has already been granted
+            }
             AppStart();
 
         }
 
 
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String[] permissions, int[] grantResults) {
@@ -526,7 +532,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.w(TAG, "Failed to read value.", error.toException());
             }
         });
-
 
 
     }

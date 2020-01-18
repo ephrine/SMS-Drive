@@ -15,16 +15,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import io.fabric.sdk.android.Fabric;
 
 public class SettingsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_activity);
+        Fabric.with(this, new Crashlytics());
+
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.settings, new SettingsFragment())
@@ -43,11 +48,12 @@ public class SettingsActivity extends AppCompatActivity {
         boolean SMSAutoBackup;
         DatabaseReference UserDB;
         String UserUID;
-DatabaseReference DeleteDB;
+        DatabaseReference DeleteDB;
 
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
+            Fabric.with(getActivity(), new Crashlytics());
 
             sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(getActivity() /* Activity context */);
             SMSAutoBackup = sharedPrefAutoBackup.getBoolean(getResources().getString(R.string.settings_sync), false);
@@ -255,10 +261,6 @@ DatabaseReference DeleteDB;
             });
 
 
-
-
-
-
         }
 
         @Override
@@ -331,7 +333,7 @@ DatabaseReference DeleteDB;
             }
         }
 
-        void DeleteBackup(){
+        void DeleteBackup() {
             Toast.makeText(getContext(), "Delete SMS Backup: Deleting...", Toast.LENGTH_SHORT).show();
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if (user != null) {
@@ -344,7 +346,6 @@ DatabaseReference DeleteDB;
 
 
         }
-
 
 
     }

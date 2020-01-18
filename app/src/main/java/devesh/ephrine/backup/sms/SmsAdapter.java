@@ -19,8 +19,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-import devesh.ephrine.backup.sms.ThreadSmsActivity;
-
 
 public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.MyViewHolder> {
     public static final String EXTRA_MESSAGE = "ReadFileID";

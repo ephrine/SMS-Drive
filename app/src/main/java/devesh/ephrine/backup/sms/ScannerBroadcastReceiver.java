@@ -6,10 +6,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.database.DatabaseReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import io.fabric.sdk.android.Fabric;
 
 public class ScannerBroadcastReceiver extends BroadcastReceiver {
     // final String DBRoot = "SMSDrive/";
@@ -30,6 +33,7 @@ public class ScannerBroadcastReceiver extends BroadcastReceiver {
         iThread = new HashMap<>();
         sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(mContext /* Activity context */);
         SMSAutoBackup = sharedPrefAutoBackup.getBoolean(mContext.getResources().getString(R.string.settings_sync), false);
+        Fabric.with(mContext, new Crashlytics());
 
         smsscan = new SMSScan(mContext);
         smsscan.ScanNow();
