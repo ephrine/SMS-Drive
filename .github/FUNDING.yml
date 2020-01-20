@@ -1,4 +1,5 @@
 # These are supported funding model platforms
 
-github: [DeveshRx]# Replace with up to 4 GitHub Sponsors-enabled usernames e.g., [user1, user2]
-custom: ['https://www.paypal.com/paypalme2/deveshchaudhari']# Replace with up to 4 custom sponsorship URLs e.g., ['link1', 'link2']
+github: [DeveshRx] # Replace with up to 4 GitHub Sponsors-enabled usernames e.g., [user1, user2]
+patreon: ephrine
+custom: ['https://www.paypal.com/deveshchaudhari'] # Replace with up to 4 custom sponsorship URLs e.g., ['link1', 'link2']
