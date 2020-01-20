@@ -18,7 +18,7 @@ Step 3: Add following environmental variables into your <code>local.properties</
 >sign.key.alias=YOUR_ALIAS <br>
 >sign.key.path=C:\\YOUR_KEY_PATH <br>
 >google.services.json=https:\\www.YOUR-WEBSITE.com\KEY <br>
->g.license.key=YOUR_LICENSE_KEY <br>
+>g.license.key=YOUR_GOOGLE_LICENSE_KEY_FROM_PLAY_STORE_CONSOLE <br>
 
 Step 4: Build & Run
 
