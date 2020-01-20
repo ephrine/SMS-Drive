@@ -15,8 +15,7 @@ ext.keypassword = System.getenv('sign.key.password')
 
 ext.keyalias = System.getenv('sign.key.alias')
 
-//ext.keypath = System.getenv('sign.key.path')
-def keypath
+ext.keypath = System.getenv('sign.key.path')
 
 ext.gplaylicensekey = System.getenv('g.license.key')
 
@@ -31,7 +30,7 @@ if (!f.exists()) {
 } else {
     project.logger.info('google-services.json already exists')
 }
-
+/*
 def kk = new File('key')
 if (!kk.exists()) {
     new URL(System.getenv('key.url')).withInputStream { i ->
@@ -41,14 +40,14 @@ if (!kk.exists()) {
     }
     project.logger.info('Downloaded key')
 keypath=kk
-} 
+} */
 
 android {
 
 
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
-   signingConfigs {
+   /*signingConfigs {
                   release {
                       storeFile keypath
                       storePassword keypassword
@@ -56,6 +55,7 @@ android {
                       keyPassword keypassword
                   }
               }
+              */
 
     defaultConfig {
 
@@ -77,7 +77,7 @@ android {
         resValue "string", "AppVersionCode", "\"" + versionCode + "\""
 
         resValue "string", "AppVersionName", "\"" + versionName + "\""
-          signingConfig signingConfigs.release
+      //    signingConfig signingConfigs.release
 
 
     }
@@ -88,7 +88,7 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-signingConfig signingConfigs.release
+//signingConfig signingConfigs.release
 
         }
     }
