@@ -14,15 +14,11 @@ Step 2: Download <i>google-dervices.json</i> file from console and add it into p
 Step 3: Add following environmental variables into your <i>local.properties</i> file of Android Studio
 
 
-<code>sign.key.password=YOUR_PASSWORD</code>
-
-<code>sign.key.alias=YOUR_ALIAS</code>
-
-<code>sign.key.path=C:\\YOUR_KEY_PATH</code>
-
-<code>google.services.json=https:\\www.YOUR-WEBSITE.com\KEY</code>
-
-<code>g.license.key=YOUR_LICENSE_KEY</code]>
+'sign.key.password=YOUR_PASSWORD
+sign.key.alias=YOUR_ALIAS
+sign.key.path=C:\\YOUR_KEY_PATH
+google.services.json=https:\\www.YOUR-WEBSITE.com\KEY
+g.license.key=YOUR_LICENSE_KEY'
 
 Step 4: Build & Run
 
