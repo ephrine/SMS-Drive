@@ -3,12 +3,16 @@ package devesh.ephrine.backup.sms;
 import android.Manifest;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.provider.Telephony;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -72,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
         isSubscribed = true;
         mAuth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance();
+        SavsSMS();
 
         loadingCircle = findViewById(R.id.progressBar1);
 
@@ -128,6 +133,75 @@ public class MainActivity extends AppCompatActivity {
             // permissions this app might request.
         }
     }
+
+@Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    final String myPackageName = getPackageName();
+                    if (Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
+
+                        //Write to the default sms app
+                       // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
+                    }
+                }
+            }
+        }
+        super.onActivityResult(requestCode, resultCode,data);
+    }
+
+
+    void SavsSMS(){
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            final String myPackageName = getPackageName();
+            if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
+
+                Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
+                intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, myPackageName);
+                startActivityForResult(intent, 1);
+            }else {
+             //   saveSms("+918898611485", "mmmmssssggggg", "0", "1570452313914", "inbox");
+            }
+        }else {
+          //  saveSms("+918898611485", "mmmmssssggggg", "0", "1570452313914", "inbox");
+        }
+    }
+
+
+    public boolean saveSms(String phoneNumber, String message, String readState, String time, String folderName) {
+        boolean ret = false;
+        try {
+            ContentValues values = new ContentValues();
+            values.put("address", phoneNumber);
+            values.put("body", message);
+            values.put("read", readState); //"0" for have not read sms and "1" for have read sms
+            values.put("date", time);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                Uri uri = Telephony.Sms.Sent.CONTENT_URI;
+                if(folderName.equals("inbox")){
+                    uri = Telephony.Sms.Inbox.CONTENT_URI;
+                }
+                getContentResolver().insert(uri, values);
+            }
+            else {
+                /* folderName  could be inbox or sent */
+                getContentResolver().insert(Uri.parse("content://sms/" + folderName), values);
+            }
+
+            ret = true;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            ret = false;
+        }
+        return ret;
+    }
+
+
 
     @Override
     public void onStart() {
