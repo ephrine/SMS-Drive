@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Space;
 import android.widget.TextView;
 
 import androidx.cardview.widget.CardView;
@@ -72,27 +73,35 @@ public class ThreadSmsAdapter extends RecyclerView.Adapter<ThreadSmsAdapter.MyVi
         //  holder.SmsTimeTx.setText(SmsThreadHashMap.get(position).get("time"));
         Log.d(TAG, "onBindViewHolder: Get MSG: " + SmsThreadHashMap.get(position).toString());
 
+        HashMap<String, String> song = new HashMap<String, String>();
+        song = SmsThreadHashMap.get(position);
 
-        if (SmsThreadHashMap.get(position).get("folder").equals("inbox")) {
+        //1 =Inbox
+        // 0=Outbox
+        if (SmsThreadHashMap.get(position).get(Function.KEY_TYPE).equals("1")) {
 
             holder.InboxMSGCard.setVisibility(View.VISIBLE);
             holder.OutboxMSGCard.setVisibility(View.GONE);
 
-            holder.SmsMsgTx.setText(SmsThreadHashMap.get(position).get("msg"));
-            holder.SmsTimeTx.setText(SmsThreadHashMap.get(position).get("time"));
+            holder.SmsMsgTx.setText(song.get(Function.KEY_MSG));
+            holder.SmsTimeTx.setText(song.get(Function.KEY_TIME));
         } else {
 
             holder.InboxMSGCard.setVisibility(View.GONE);
             holder.OutboxMSGCard.setVisibility(View.VISIBLE);
 
-            holder.SmsOutBoxMsgTx.setText(SmsThreadHashMap.get(position).get("msg"));
-            holder.SmsOutBoxTimeTx.setText(SmsThreadHashMap.get(position).get("time"));
+            holder.SmsOutBoxMsgTx.setText(song.get(Function.KEY_MSG));
+            holder.SmsOutBoxTimeTx.setText(song.get(Function.KEY_TIME));
 
         }
 
-        Log.d(TAG, "onBindViewHolder: " + SmsThreadHashMap.get(position).get("msg") + "\n" + SmsThreadHashMap.get(position).get("time"));
+        Log.d(TAG, "onBindViewHolder: " + song.get(Function.KEY_MSG));
 
-    /*    holder.LLSmsItem.setOnClickListener(new View.OnClickListener() {
+      /*  if(position==getItemCount()-1){
+holder.bottomSpace.setVisibility(View.VISIBLE);
+            Log.d(TAG, "onBindViewHolder: at END ____");
+        }
+        holder.LLSmsItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //view.getTag();
@@ -125,6 +134,14 @@ public class ThreadSmsAdapter extends RecyclerView.Adapter<ThreadSmsAdapter.MyVi
 
     }
 
+    public Object getItem(int position) {
+        return position;
+    }
+
+    public long getItemId(int position) {
+        return position;
+    }
+
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
@@ -140,6 +157,7 @@ public class ThreadSmsAdapter extends RecyclerView.Adapter<ThreadSmsAdapter.MyVi
         TextView SmsOutBoxMsgTx;
         TextView SmsOutBoxTimeTx;
 
+      //  Space bottomSpace;
 
         public MyViewHolder(View v) {
             super(v);
@@ -155,8 +173,7 @@ public class ThreadSmsAdapter extends RecyclerView.Adapter<ThreadSmsAdapter.MyVi
             SmsOutBoxMsgTx = v.findViewById(R.id.textViewSmsMSGOutbox);
             SmsOutBoxTimeTx = v.findViewById(R.id.textView2SmsDateTime1Outbox);
 
+          //  bottomSpace=v.findViewById(R.id.threadBottomSpace);
         }
     }
-
-
 }

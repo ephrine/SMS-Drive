@@ -19,12 +19,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.lifeofcoding.cacheutlislibrary.CacheUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -45,7 +48,10 @@ public class SMSScan {
     SharedPreferences sharedPrefAutoBackup;
     boolean SMSAutoBackup;
     boolean isSubscribed;
-
+    ArrayList<HashMap<String, String>> smsList = new ArrayList<>();
+    ArrayList<HashMap<String, String>> customList = new ArrayList<HashMap<String, String>>();
+    ArrayList<HashMap<String, String>> tmpList = new ArrayList<HashMap<String, String>>();
+    String name;
 
     public SMSScan(Context context) {
         mContext = context;
@@ -70,10 +76,86 @@ public class SMSScan {
                 == PackageManager.PERMISSION_GRANTED) {
             if (user != null && isSubscribed) {
                 UserUID = user.getPhoneNumber().replace("+", "x");
-
                 //Download Full Backup First to Prevent DataLoss
-                SMSBackupDB = database.getReference("/users/" + UserUID + "/sms");
-                SMSBackupDB.addListenerForSingleValueEvent(new ValueEventListener() {
+                SMSBackupDB = database.getReference("/users/" + UserUID + "/sms/backup");
+                //SMSScanDevice();
+
+                try {
+
+                    tmpList.clear();
+                    tmpList = (ArrayList<HashMap<String, String>>) Function.readCachedFile(mContext, "orgsms");
+
+                } catch (Exception e) {       }
+
+  /*              SMSBackupDB.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        // This method is called once with the initial value and again
+                        // whenever data at this location is updated.
+                        //String value = dataSnapshot.getValue(String.class);
+                        // Log.d(TAG, "Value is: " + value);
+
+                        if (dataSnapshot.exists() && isSubscribed) {
+
+                            long total = dataSnapshot.getChildrenCount();
+                            long i;
+                            i = 0;
+                            for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                // TODO: handle the post
+                                i = i + 1;
+                                HashMap<String, String> msgg = new HashMap<>();
+
+                                msgg.put(Function._ID, postSnapshot.child(Function._ID).getValue(String.class));
+                                msgg.put(Function.KEY_THREAD_ID, postSnapshot.child(Function.KEY_THREAD_ID).getValue(String.class));
+                                msgg.put(Function.KEY_NAME, postSnapshot.child(Function.KEY_NAME).getValue(String.class));
+                                msgg.put(Function.KEY_PHONE, postSnapshot.child(Function.KEY_PHONE).getValue(String.class));
+                                msgg.put(Function.KEY_MSG, postSnapshot.child(Function.KEY_MSG).getValue(String.class));
+                                msgg.put(Function.KEY_TYPE, postSnapshot.child(Function.KEY_TYPE).getValue(String.class));
+                                msgg.put(Function.KEY_TIMESTAMP, postSnapshot.child(Function.KEY_TIMESTAMP).getValue(String.class));
+                                msgg.put(Function.KEY_TIME, postSnapshot.child(Function.KEY_TIME).getValue(String.class));
+
+                                tmpList.add(msgg);
+
+                                Log.d(TAG, "i:" + i + "\n Total:" + total);
+                                if (i == total) {
+
+                                    //      sms1();
+
+                                    Collections.sort(tmpList, new MapComparator(Function.KEY_PHONE, "dsc")); // Arranging sms by timestamp decending
+                                 //   ArrayList<HashMap<String, String>> purified = Function.removeDuplicates(tmpList); // Removing duplicates from inbox & sent
+                                 //   tmpList.clear();
+                                  //  tmpList = purified;
+                                    backupNow();
+
+                                }
+
+                            }
+
+                        } else {
+                            if (isSubscribed) {
+                                //    sms1();
+
+                                Collections.sort(tmpList, new MapComparator(Function.KEY_PHONE, "dsc")); // Arranging sms by timestamp decending
+                             //   ArrayList<HashMap<String, String>> purified = Function.removeDuplicates(tmpList); // Removing duplicates from inbox & sent
+                               // tmpList.clear();
+                               // tmpList = purified;
+                                backupNow();
+
+                            }
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        // Failed to read value
+                        Log.w(TAG, "Failed to read value.", error.toException());
+                    }
+                });
+
+*/
+
+              SMSBackupDB.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         // This method is called once with the initial value and again
@@ -125,43 +207,56 @@ public class SMSScan {
 
     }
 
-
     void GetThread(DataSnapshot postSnapshot, String threadName) {
 
         for (DataSnapshot DS : postSnapshot.getChildren()) {
+
+            Log.d(TAG, "GetThread: DS : "+DS.getChildren().toString());
 
             //   String msg = DS.getKey();
             // String MsgBody = DS.child("body").getValue().toString();
 
             //---
 
+  /*
             //String formattedDate = new SimpleDateFormat("MM/dd/yyyy").format(date);
             String MsgText = DS.child("body").getValue().toString();
             String folder = DS.child("folder").getValue().toString();
-
-  /*          SMS.put("msg", MsgText);
+          SMS.put("msg", MsgText);
             SMS.put("time", formattedDate);
             SMS.put("folder", folder);
 */
             //  Log.d(TAG, "onDataChange: msg:" + msg + "\nMSG: " + MsgBody);
             Log.d(TAG, "onDataChange: msg:");
 
-            String MsgTime = DS.child("date").getValue().toString();
-            Date date = new Date(Long.parseLong(MsgTime));
-            String formattedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+//            String MsgTime = DS.child("date").getValue().toString();
+            String phone = DS.child(Function.KEY_PHONE).getValue(String.class);
+
+            String name = DS.child(Function.KEY_NAME).getValue(String.class);
+            String _id=DS.child(Function._ID).getValue(String.class);
+            String thread_id=DS.child(Function.KEY_THREAD_ID).getValue(String.class);
+            String msg=DS.child(Function.KEY_MSG).getValue(String.class);
+            String type=DS.child(Function.KEY_TYPE).getValue(String.class);
+            String timestamp=DS.child(Function.KEY_TIMESTAMP).getValue(String.class);
+            String time=DS.child(Function.KEY_TIME).getValue(String.class);
+
+
+
+        //    Date date = new Date(Long.parseLong(MsgTime));
+          //  String formattedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
 
             HashMap<String, String> SMS = new HashMap<>();
-            SMS.put("date", DS.child("date").getValue().toString());
-            SMS.put("Formatdate", formattedDate);
-            SMS.put("body", DS.child("body").getValue().toString());
-            SMS.put("address", DS.child("address").getValue().toString());
-            SMS.put("folder", DS.child("folder").getValue().toString());
-            SMS.put("dd", new SimpleDateFormat("dd").format(date));
-            SMS.put("mm", new SimpleDateFormat("MM").format(date));
-            SMS.put("yyyy", new SimpleDateFormat("yyyy").format(date));
-            SMS.put("hh", new SimpleDateFormat("hh").format(date));
-            SMS.put("min", new SimpleDateFormat("mm").format(date));
+            SMS.put(Function._ID, _id);
+            SMS.put(Function.KEY_THREAD_ID, thread_id);
+            SMS.put(Function.KEY_PHONE,phone);
+            SMS.put(Function.KEY_MSG, msg);
+            SMS.put(Function.KEY_TYPE,type);
+            SMS.put(Function.KEY_TIMESTAMP,timestamp);
+            SMS.put(Function.KEY_TIME, time);
+            SMS.put(Function.KEY_NAME,name);
 
+
+            smsList.add(SMS);
 
             if (iThread.containsKey(threadName)) {
                 iThread.get(threadName).add(SMS);
@@ -174,6 +269,8 @@ public class SMSScan {
         }
 
     }
+
+    //New Code to get SMS
 
     //SMS Scan
     void getSMS() {
@@ -228,6 +325,40 @@ public class SMSScan {
             String address = cursor.getString(cursor.getColumnIndex("address"));
             String xdate = cursor.getString(cursor.getColumnIndex("date"));
 
+            String name = null;
+            String phone = "";
+            String _id = cursor.getString(cursor.getColumnIndexOrThrow("_id"));
+            String thread_id = cursor.getString(cursor.getColumnIndexOrThrow("thread_id"));
+            String msg = cursor.getString(cursor.getColumnIndexOrThrow("body"));
+            String type = cursor.getString(cursor.getColumnIndexOrThrow("type"));
+            String timestamp = cursor.getString(cursor.getColumnIndexOrThrow("date"));
+            phone = cursor.getString(cursor.getColumnIndexOrThrow("address"));
+
+            name = CacheUtils.readFile(thread_id);
+            if (name == null) {
+                name = Function.getContactbyPhoneNumber(mContext.getApplicationContext(), cursor.getString(cursor.getColumnIndexOrThrow("address")));
+                CacheUtils.writeFile(thread_id, name);
+            }
+
+
+            HashMap<String, String> msgg = new HashMap<>();
+
+            msgg.put(Function._ID, _id);
+            msgg.put(Function.KEY_THREAD_ID, thread_id);
+            msgg.put(Function.KEY_PHONE,phone);
+            msgg.put(Function.KEY_MSG, msg);
+            msgg.put(Function.KEY_TYPE,type);
+            msgg.put(Function.KEY_TIMESTAMP,timestamp);
+            msgg.put(Function.KEY_TIME, Function.converToTime(timestamp));
+            msgg.put(Function.KEY_NAME,name);
+
+
+
+            smsList.add(msgg);
+
+
+
+            address = address.replace("+", "x");
             //  xdate=xdate.replace(".","");
             Date date = new Date(cursor.getLong(cursor.getColumnIndex("date")));
             //String formattedDate = new SimpleDateFormat("MM/dd/yyyy").format(date);
@@ -252,6 +383,7 @@ public class SMSScan {
                 temp1.add(sms);
                 iThread.put(address, temp1);
             }
+
 
             //       SMSBackupDB.child(address).child(xdate).setValue(body);
 
@@ -311,7 +443,7 @@ public class SMSScan {
             String body = cursor.getString(cursor.getColumnIndex("body"));
             String address = cursor.getString(cursor.getColumnIndex("address"));
             String xdate = cursor.getString(cursor.getColumnIndex("date"));
-
+            address = address.replace("+", "x");
             //  xdate=xdate.replace(".","");
             Date date = new Date(cursor.getLong(cursor.getColumnIndex("date")));
             //String formattedDate = new SimpleDateFormat("MM/dd/yyyy").format(date);
@@ -324,10 +456,45 @@ public class SMSScan {
             sms.put("address", address);
             sms.put("folder", "outbox");
 
+
+            String name = null;
+            String phone = "";
+            String _id = cursor.getString(cursor.getColumnIndexOrThrow("_id"));
+            String thread_id = cursor.getString(cursor.getColumnIndexOrThrow("thread_id"));
+            String msg = cursor.getString(cursor.getColumnIndexOrThrow("body"));
+            String type = cursor.getString(cursor.getColumnIndexOrThrow("type"));
+            String timestamp = cursor.getString(cursor.getColumnIndexOrThrow("date"));
+            phone = cursor.getString(cursor.getColumnIndexOrThrow("address"));
+
+            name = CacheUtils.readFile(thread_id);
+            if (name == null) {
+                name = Function.getContactbyPhoneNumber(mContext.getApplicationContext(), cursor.getString(cursor.getColumnIndexOrThrow("address")));
+                CacheUtils.writeFile(thread_id, name);
+            }
+
+
+            HashMap<String, String> msgg = new HashMap<>();
+
+            msgg.put(Function._ID, _id);
+            msgg.put(Function.KEY_THREAD_ID, thread_id);
+            msgg.put(Function.KEY_PHONE,phone);
+            msgg.put(Function.KEY_MSG, msg);
+            msgg.put(Function.KEY_TYPE,type);
+            msgg.put(Function.KEY_TIMESTAMP,timestamp);
+            msgg.put(Function.KEY_TIME, Function.converToTime(timestamp));
+            msgg.put(Function.KEY_NAME,name);
+
+
+            smsList.add(msgg);
+
+
+
             if (SMSAutoBackup) {
                 // SMSBackupDB.setValue(iThread);
                 //          SMSDB = database.getReference(DBRoot + "/users/" + UserUID + "/sms/"+address+"/").push();
                 //        SMSDB.setValue(sms);
+
+
 
             }
 
@@ -351,14 +518,27 @@ public class SMSScan {
             if (ii == i) {
                 Log.d(TAG, "sms1 sent: END ---------" + ii + "\n SMS: ");
                 if (SMSAutoBackup) {
-                    SMSBackupDB.setValue(iThread);
-                    Log.d(TAG, "sms1 sent: END ---------" + ii + "\n SMS:Backup ");
+                    SMSBackupDB = database.getReference("/users/" + UserUID + "/sms/");
+
+                    Map<String, Object> jj = new HashMap<>();
+                    jj.put("backup", smsList);
+                     SMSBackupDB.setValue(jj);
+                    Log.d(TAG, "sms1 sent: END ---------" + ii + "\n SMS:Backup DONE  ");
                     // SMSDB = database.getReference(DBRoot + "/users/" + UserUID + "/sms/"+address+"/");
                     //  SMSDB.setValue(sms);
 
                 }
             }
         }
+    }
+
+
+    void backupNow() {
+        Map<String, Object> lst = new HashMap<>();
+        lst.put("backup", tmpList);
+        SMSBackupDB = database.getReference("/users/" + UserUID + "/sms/");
+        SMSBackupDB.setValue(lst);
+
     }
 
 

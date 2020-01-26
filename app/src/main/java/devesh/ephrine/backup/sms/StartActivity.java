@@ -1,7 +1,10 @@
 package devesh.ephrine.backup.sms;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,16 +23,60 @@ import io.fabric.sdk.android.Fabric;
 public class StartActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 123;
     private FirebaseAuth mAuth;
-
+    FirebaseUser currentUser;
+    final String TAG="StartActivity ";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
 
         setContentView(R.layout.activity_start);
+        getSupportActionBar().hide();
         mAuth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
+
+        Thread background = new Thread() {
+            public void run() {
+
+                try {
+                    // Thread will sleep for 5 seconds
+                    sleep(2 * 1000);
+
+
+                    if (currentUser != null) {
+
+                        Crashlytics.setUserIdentifier(currentUser.getUid());
+
+                        Intent intent = new Intent(StartActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        StartActivity.this.finish();
+
+                    }else{
+                        runOnUiThread(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                setContentView(R.layout.activity_login);
+
+                                // Stuff that updates the UI
+
+                            }
+                        });
+
+                    }
+
+                } catch (Exception e) {
+                    Log.d(TAG, "run: ERROR \n"+e);
+                }
+            }
+        };
+
+        background.start();
+
+
+
+/*
         if (currentUser != null) {
             Crashlytics.setUserIdentifier(currentUser.getUid());
 
@@ -47,8 +94,6 @@ public class StartActivity extends AppCompatActivity {
                     //  new AuthUI.IdpConfig.FacebookBuilder().build(),
                     //        new AuthUI.IdpConfig.TwitterBuilder().build()
             );
-
-// Create and launch sign-in intent
             startActivityForResult(
                     AuthUI.getInstance()
                             .createSignInIntentBuilder()
@@ -56,15 +101,18 @@ public class StartActivity extends AppCompatActivity {
                             .build(),
                     RC_SIGN_IN);
         }
+*/
 
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
 
-        //  updateUI(currentUser);
+    }
+
+    void appstart(){
+
     }
 
     @Override
@@ -109,5 +157,12 @@ public class StartActivity extends AppCompatActivity {
                         .setAvailableProviders(providers)
                         .build(),
                 RC_SIGN_IN);
+    }
+
+    public void privacyClick(View v){
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse("https://www.ephrine.in/privacy-policy"));
+        startActivity(intent);
+
     }
 }

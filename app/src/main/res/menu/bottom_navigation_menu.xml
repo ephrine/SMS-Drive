@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/NavDevieMenu"
+        android:title="Device"
+        android:icon="@drawable/ic_phone_iphone_white_50dp" />
+
+    <item
+        android:id="@+id/NavCloudMenu"
+        android:title="Cloud"
+        android:icon="@drawable/ic_cloud_circle_white_50dp"/>
+
+    <item
+        android:id="@+id/NavToolsMenu"
+        android:title="Tools"
+        android:visible="false"
+        android:icon="@drawable/ic_build_black_50dp"/>
+</menu>

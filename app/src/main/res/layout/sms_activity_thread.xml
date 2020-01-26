@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -7,7 +8,84 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/SmsThreadRecycleView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:layout_above="@id/msgTextBoxView">
 
     </androidx.recyclerview.widget.RecyclerView>
-</LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/msgTextBoxView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/white"
+        android:orientation="vertical"
+        android:weightSum="1">
+
+        <!--<Button
+            android:id="@+id/send_message"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="#3F51B5"
+            android:textColor="@color/white"
+            android:text="SEND" />-->
+
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:cardBackgroundColor="@color/material_green_trans"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="0dp"
+            app:cardPreventCornerOverlap="true"
+            app:cardUseCompatPadding="true"
+            app:contentPadding="3dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/newTextBox"
+
+                    style="@style/Widget.MaterialComponents.TextInputEditText.OutlinedBox.Dense"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="write message....."
+                    android:paddingLeft="6dp"
+                    android:paddingRight="6dp"
+                    android:textColor="#666666" />
+
+                <ImageButton
+                    style="@android:style/Widget.Material.Button.Colored"
+                    android:layout_width="60dp"
+                    android:layout_height="wrap_content"
+                    android:drawableRight="@android:drawable/ic_menu_send"
+                    android:onClick="SendMSG"
+
+                    android:src="@android:drawable/ic_menu_send"
+                    android:textAllCaps="true"
+                    android:textColor="@android:color/white" />
+
+                <!--             <ImageButton
+                                 android:id="@+id/send_message"
+                                 android:layout_width="80dp"
+                                 android:layout_height="match_parent"
+                                 android:layout_weight="1"
+                                 android:visibility="gone"
+                                 android:background="#3F51B5"
+                                 android:src="@android:drawable/ic_menu_send" />
+             -->
+
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+
+</RelativeLayout>

@@ -81,4 +81,5 @@
                 android:textStyle="italic" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
+
 </LinearLayout>

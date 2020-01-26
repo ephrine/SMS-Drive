@@ -3,7 +3,10 @@
     package="devesh.ephrine.backup.sms">
 
     <uses-permission android:name="android.permission.READ_SMS" />
- <!--   <uses-permission android:name="android.permission.WRITE_SMS" />-->
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
     <uses-permission android:name="com.android.vending.BILLING" />
 
     <application
@@ -13,17 +16,24 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".NewMessageActivity"
+            android:label="New Message"></activity>
+
         <service
             android:name=".HeadlessSmsSendService"
             android:exported="true"
             android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE">
             <intent-filter>
                 <action android:name="android.intent.action.RESPOND_VIA_MESSAGE" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:scheme="sms" />
                 <data android:scheme="smsto" />
+                <!--
                 <data android:scheme="mms" />
                 <data android:scheme="mmsto" />
+                -->
             </intent-filter>
         </service>
 
@@ -34,10 +44,10 @@
             android:permission="android.permission.BROADCAST_WAP_PUSH">
             <intent-filter>
                 <action android:name="android.provider.Telephony.WAP_PUSH_DELIVER" />
+
                 <data android:mimeType="application/vnd.wap.mms-message" />
             </intent-filter>
         </receiver>
-
         <receiver
             android:name=".SmsReceiver"
             android:enabled="true"
@@ -78,16 +88,35 @@
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SENDTO" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data android:scheme="sms" />
                 <data android:scheme="smsto" />
+                <!--
                 <data android:scheme="mms" />
                 <data android:scheme="mmsto" />
+                -->
+
+
+                <!--
+               <action android:name="android.intent.action.VIEW" />
+                    <category android:name="android.intent.category.DEFAULT" />
+                    <category android:name="android.intent.category.BROWSABLE" />
+               Accepts URIs that begin with "http://www.example.com/gizmos”
+                <data android:scheme="https"
+                    android:host="www.ephrine.in"
+                    android:pathPrefix="/sms-drive" />
+                -->
+                <!-- note that the leading "/" is required for pathPrefix -->
+                <!--
+                Accepts URIs that begin with "example://gizmos”
+                <data android:scheme="ephrine"
+                    android:host="smsdrive" />
+                -->
             </intent-filter>
         </activity>
         <activity

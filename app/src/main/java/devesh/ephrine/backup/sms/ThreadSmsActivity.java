@@ -1,8 +1,22 @@
 package devesh.ephrine.backup.sms;
 
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.MergeCursor;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.provider.Telephony;
 import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -10,16 +24,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collections;
 import java.util.HashMap;
+
 
 public class ThreadSmsActivity extends AppCompatActivity {
     //  final String DBRoot = "SMSDrive/";
@@ -35,17 +45,46 @@ public class ThreadSmsActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     RecyclerView.LayoutManager layoutManager;
 
+
+    String name;
+    String address;
+    EditText new_message;
+    ImageButton send_message;
+    int thread_id_main;
+    Thread t;
+    ArrayList<HashMap<String, String>> smsList = new ArrayList<HashMap<String, String>>();
+    ArrayList<HashMap<String, String>> customList = new ArrayList<HashMap<String, String>>();
+    ArrayList<HashMap<String, String>> tmpList = new ArrayList<HashMap<String, String>>();
+    LoadSms loadsmsTask;
+    private Handler handler = new Handler();
+
+    String storage;
+    LinearLayout NewMsgBoxLL;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
+setContentView(R.layout.sms_activity_thread);
         //      SmsThreadHashMap = (HashMap<String, DataSnapshot>)intent.getSerializableExtra("smsthread");
         //  SmsThreadHashMap = Parcels.unwrap(getIntent().getParcelableExtra("mylist"))(HashMap<String, DataSnapshot>)intent.getBundleExtra("smsthread");
-        id = intent.getStringExtra("smsthreadid");
+        //  id = intent.getStringExtra("smsthreadid");
+        name = intent.getStringExtra("name");
+        address = intent.getStringExtra("address");
+        thread_id_main = Integer.parseInt(intent.getStringExtra("thread_id"));
+        storage = intent.getStringExtra("storage");
+
+        //  listView = (ListView) findViewById(R.id.listView);
+        new_message = (EditText) findViewById(R.id.newTextBox);
+//        send_message = (ImageButton) findViewById(R.id.send_message);
+
+        NewMsgBoxLL=(LinearLayout) findViewById(R.id.msgTextBoxView);
 
         setContentView(R.layout.sms_activity_thread);
-        getSupportActionBar().setTitle(id);
+        getSupportActionBar().setTitle(name);
+
+        recyclerView = findViewById(R.id.SmsThreadRecycleView);
 
         //   DataSnapshot g=SmsThreadHashMap.get(id);
         // Log.d(TAG, "onCreate: Datasnapshot: "+g.toString());
@@ -58,8 +97,19 @@ public class ThreadSmsActivity extends AppCompatActivity {
 
             UserUID = user.getPhoneNumber().replace("+", "x");
             Log.d(TAG, "onStart: User UID:" + UserUID);
+           if(storage.equals("D")){
+               startLoadingDeviceSms();
+               NewMsgBoxLL=(LinearLayout) findViewById(R.id.msgTextBoxView);
 
-            DownloadThread();
+               NewMsgBoxLL.setVisibility(View.VISIBLE);
+           }else {
+               startLoadingCloudSms();
+               NewMsgBoxLL=(LinearLayout) findViewById(R.id.msgTextBoxView);
+
+               NewMsgBoxLL.setVisibility(View.GONE);
+           }
+
+            //  DownloadThread();
         } else {
             Intent intent1 = new Intent(this, StartActivity.class);
 
@@ -67,10 +117,286 @@ public class ThreadSmsActivity extends AppCompatActivity {
             //intent.putExtra(EXTRA_MESSAGE, message);
             startActivity(intent1);
         }
-    }
-    //HashMap<String,DataSnapshot> SmsThreadHashMap=new HashMap<>();
 
-    void DownloadThread() {
+        if(!isDefaultApp()){
+            NewMsgBoxLL.setVisibility(View.GONE);
+        }else {
+            NewMsgBoxLL.setVisibility(View.VISIBLE);
+        }
+
+    }
+
+    public void startLoadingDeviceSms() {
+        final Runnable r = new Runnable() {
+            public void run() {
+
+                loadsmsTask = new LoadSms();
+                loadsmsTask.execute();
+
+                handler.postDelayed(this, 5000);
+            }
+        };
+        handler.postDelayed(r, 0);
+    }
+    ArrayList<HashMap<String, String>> CloudSMS;
+    ArrayList<HashMap<String, String>> SortSMS=new ArrayList<>();
+
+    public void startLoadingCloudSms(){
+        Toast.makeText(this, "Loading....", Toast.LENGTH_SHORT).show();
+        try {
+
+            CloudSMS = (ArrayList<HashMap<String, String>>) Function.readCachedFile(this, getString(R.string.file_cloud_sms));
+            int t=CloudSMS.size();
+
+            int end=t-1;
+            Log.d(TAG, "startLoadingCloudSms: Sorting SMS Started \n"+ "Total:"+t+"\n End:"+end);
+
+            for(int i=0;i<t;i++){
+            //    Log.d(TAG, "startLoadingCloudSms: Sorting SMS...");
+
+                if(CloudSMS.get(i).get(Function.KEY_PHONE).equals(address)){
+
+                    if(SortSMS.contains(CloudSMS.get(i))){
+
+                    }else {
+
+                        SortSMS.add(CloudSMS.get(i));
+                    }
+                    Log.d(TAG, "startLoadingCloudSms: Cloud MSG: "+ CloudSMS.get(i));
+
+                    if(i==end){
+                        Collections.sort(SortSMS, new MapComparator(Function.KEY_TIMESTAMP, "asc"));
+
+                        Log.d(TAG, "startLoadingCloudSms: END OF SORTING---------");
+
+
+                    }
+
+                }else{
+                }
+
+            }
+            Collections.sort(SortSMS, new MapComparator(Function.KEY_TIMESTAMP, "asc"));
+
+            layoutManager = new LinearLayoutManager(ThreadSmsActivity.this);
+
+            recyclerView.removeAllViews();
+            //                      recyclerView.removeAllViewsInLayout();
+            recyclerView.setHasFixedSize(true);
+
+            // use a linear layout manager
+            recyclerView.setLayoutManager(layoutManager);
+            // specify an adapter (see also next example)
+
+            ThreadSmsAdapter mAdapter = new ThreadSmsAdapter(ThreadSmsActivity.this, SortSMS);
+
+            recyclerView.setAdapter(mAdapter);
+            layoutManager.scrollToPosition(smsList.size() - 1); // yourList is the ArrayList that you are passing to your RecyclerView Adapter.
+
+        }catch (Exception e){
+            Log.d(TAG, "startLoadingCloudSms: ERROR #65 \n"+e);
+        }
+
+
+
+    }
+
+    class LoadSms extends AsyncTask<String, Void, String> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            tmpList.clear();
+        }
+
+        protected String doInBackground(String... args) {
+            String xml = "";
+
+            try {
+                Uri uriInbox = Uri.parse("content://sms/inbox");
+                Cursor inbox = getContentResolver().query(uriInbox, null, "thread_id=" + thread_id_main, null, null);
+                Uri uriSent = Uri.parse("content://sms/sent");
+                Cursor sent = getContentResolver().query(uriSent, null, "thread_id=" + thread_id_main, null, null);
+                Cursor c = new MergeCursor(new Cursor[]{inbox, sent}); // Attaching inbox and sent sms
+
+
+                if (c.moveToFirst()) {
+                    for (int i = 0; i < c.getCount(); i++) {
+                        String phone = "";
+                        String _id = c.getString(c.getColumnIndexOrThrow("_id"));
+                        String thread_id = c.getString(c.getColumnIndexOrThrow("thread_id"));
+                        String msg = c.getString(c.getColumnIndexOrThrow("body"));
+                        String type = c.getString(c.getColumnIndexOrThrow("type"));
+                        String timestamp = c.getString(c.getColumnIndexOrThrow("date"));
+                        phone = c.getString(c.getColumnIndexOrThrow("address"));
+
+                       // markMessageRead(ThreadSmsActivity.this,phone,msg);
+                        ContentValues values = new ContentValues();
+                        values.put("read", "1");
+                        getContentResolver().update(Uri.parse("content://sms/inbox"), values, "_id=" + _id, null);
+
+                        tmpList.add(Function.mappingInbox(_id, thread_id, name, phone, msg, type, timestamp, Function.converToTime(timestamp),"1"));
+                        c.moveToNext();
+                    }
+                }
+                c.close();
+
+            } catch (IllegalArgumentException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            Collections.sort(tmpList, new MapComparator(Function.KEY_TIMESTAMP, "asc"));
+
+            return xml;
+        }
+
+        @Override
+        protected void onPostExecute(String xml) {
+
+            if (!tmpList.equals(smsList)) {
+                smsList.clear();
+                smsList.addAll(tmpList);
+                //    adapter = new ChatAdapter(Chat.this, smsList);
+                //  listView.setAdapter(adapter);
+
+                layoutManager = new LinearLayoutManager(ThreadSmsActivity.this);
+
+                recyclerView.removeAllViews();
+                //                      recyclerView.removeAllViewsInLayout();
+                recyclerView.setHasFixedSize(true);
+
+                // use a linear layout manager
+                recyclerView.setLayoutManager(layoutManager);
+                // specify an adapter (see also next example)
+
+                ThreadSmsAdapter mAdapter = new ThreadSmsAdapter(ThreadSmsActivity.this, smsList);
+
+                recyclerView.setAdapter(mAdapter);
+                layoutManager.scrollToPosition(smsList.size() - 1); // yourList is the ArrayList that you are passing to your RecyclerView Adapter.
+
+
+
+
+            }
+
+
+        }
+    }
+
+public void SendMSG(View v){
+
+    new_message = (EditText) findViewById(R.id.newTextBox);
+
+    String msgtext = new_message.getText().toString();
+
+    if(msgtext.length()>0) {
+        String tmp_msg = msgtext;
+        new_message.setText("Sending....");
+        new_message.setEnabled(false);
+
+        if(Function.sendSMS(address, tmp_msg))
+        {
+            new_message.setText("");
+            new_message.setEnabled(true);
+            // Creating a custom list for newly added sms
+            customList.clear();
+            customList.addAll(smsList);
+            customList.add(Function.mappingInbox(null, null, null, null, tmp_msg, "2", null, "Sending...","1"));
+            long smsReceiveTime = System.currentTimeMillis();
+
+            saveSms(address,tmp_msg,"1",String.valueOf(smsReceiveTime),"outbox");
+            startLoadingDeviceSms();
+        }else{
+            new_message.setText(tmp_msg);
+            new_message.setEnabled(true);
+            Log.d(TAG, "SendMSG: ERROR !!");
+        }
+
+
+    }else{
+        Log.d(TAG, "SendMSG: MSG text too short");
+    }
+
+}
+
+
+    public boolean saveSms(String phoneNumber, String message, String readState, String time, String folderName) {
+        boolean ret = false;
+        try {
+            ContentValues values = new ContentValues();
+            values.put("address", phoneNumber);
+            values.put("body", message);
+            values.put("read", readState); //"0" for have not read sms and "1" for have read sms
+            values.put("date", time);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                Uri uri = Telephony.Sms.Sent.CONTENT_URI;
+                if (folderName.equals("inbox")) {
+                    uri = Telephony.Sms.Inbox.CONTENT_URI;
+                }
+                getContentResolver().insert(uri, values);
+            } else {
+                getContentResolver().insert(Uri.parse("content://sms/" + folderName), values);
+            }
+
+            ret = true;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            ret = false;
+        }
+        return ret;
+    }
+
+    private void markMessageRead(Context context, String number, String body) {
+
+        Uri uri = Uri.parse("content://sms/inbox");
+        Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+        try{
+
+            while (cursor.moveToNext()) {
+                if ((cursor.getString(cursor.getColumnIndex("address")).equals(number)) && (cursor.getInt(cursor.getColumnIndex("read")) == 0)) {
+                    if (cursor.getString(cursor.getColumnIndex("body")).startsWith(body)) {
+                        String SmsMessageId = cursor.getString(cursor.getColumnIndex("_id"));
+                        ContentValues values = new ContentValues();
+                        values.put("read", "1");
+                        context.getContentResolver().update(Uri.parse("content://sms/inbox"), values, "_id=" + SmsMessageId, null);
+                        return;
+                    }
+                }
+            }
+        }catch(Exception e)
+        {
+            Log.e("Mark Read", "Error in Read: "+e.toString());
+        }
+    }
+
+
+    boolean isDefaultApp(){
+        boolean a;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            final String myPackageName = getPackageName();
+            if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
+
+                a=false;
+
+
+            }else {
+                a=true;
+            }
+
+        } else {
+            a=true;
+            // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
+        }
+        return a;
+    }
+}
+
+
+
+
+//HashMap<String,DataSnapshot> SmsThreadHashMap=new HashMap<>();
+
+  /*  void DownloadThread() {
 
         recyclerView = findViewById(R.id.SmsThreadRecycleView);
         layoutManager = new LinearLayoutManager(this);
@@ -137,7 +463,7 @@ public class ThreadSmsActivity extends AppCompatActivity {
         });
 */
 
-        GetSMS.addListenerForSingleValueEvent(new ValueEventListener() {
+  /*      GetSMS.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
@@ -206,6 +532,6 @@ public class ThreadSmsActivity extends AppCompatActivity {
 
 
     }
+*/
 
 
-}

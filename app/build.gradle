@@ -47,15 +47,15 @@ android {
 
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
-   /*signingConfigs {
-                  release {
-                      storeFile keypath
-                      storePassword keypassword
-                      keyAlias = keyalias
-                      keyPassword keypassword
-                  }
-              }
-              */
+    /*signingConfigs {
+                   release {
+                       storeFile keypath
+                       storePassword keypassword
+                       keyAlias = keyalias
+                       keyPassword keypassword
+                   }
+               }
+               */
 
     defaultConfig {
 
@@ -63,11 +63,11 @@ android {
         applicationId "devesh.ephrine.backup.sms"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 4
+        versionCode 6
         versionName "0.0.1 Beta Version"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-           
-      
+
+
         vectorDrawables.useSupportLibrary = true
 
         buildConfigField "String", "GLicenseKey", "\"" + gplaylicensekey + "\""
@@ -77,7 +77,7 @@ android {
         resValue "string", "AppVersionCode", "\"" + versionCode + "\""
 
         resValue "string", "AppVersionName", "\"" + versionName + "\""
-      //    signingConfig signingConfigs.release
+        //    signingConfig signingConfigs.release
 
 
     }
@@ -120,6 +120,18 @@ dependencies {
     //  implementation 'com.google.code.gson:gson:2.8.6'
 
     implementation 'com.anjlab.android.iab.v3:library:+'
+
+    implementation 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
+    implementation 'com.lifeofcoding:cacheutilslibrary:1.1.0@aar'
+    implementation 'com.google.code.gson:gson:2.2.2'
+    implementation 'commons-io:commons-io:2.4'
+    implementation 'com.google.android.material:material:1.0.0'
+
+    //Runtime Permissions
+    //implementation 'com.karumi:dexter:+'
+    implementation 'com.nabinbhandari.android:permissions:3.8'
+
+    implementation "com.airbnb.android:lottie:+"
 
 
 }

@@ -49,4 +49,10 @@
 
     <string name="delete_books_summary">Erase all your Messages on Backup Drive</string>
 
+    <string name="file_cloud_sms">file_cloud_sms</string>
+    <string name="file_cloud_thread">file_cloud_thread</string>
+    <string name="file_contact_list">file_contact_list</string>
+    <string name="default_sms_app_notice">Would you like to set SMS Drive as your Default Messaging App ?</string>
+
+    <string name="app_desc_short">Keep your Messages Safe and backup at ease</string>
 </resources>

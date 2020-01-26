@@ -1,0 +1,52 @@
+<resources>
+    <string name="app_name">SMS Drive</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <string name="settings_sync">settings_sync</string>
+    <string name="settings_pref_userphno">pref_userphno</string>
+    <string name="settings_pref_username">pref_username</string>
+    <string name="settings_pref_useremail">pref_useremail</string>
+    <string name="settings_pref_userage">pref_userage</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+    <string name="setings_title">Settings</string>
+
+    <string name="user_name">User Name</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails</string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="settings_sync_interval">settings_sync_interval</string>
+
+    <string name="sync_interval">Sync Interval</string>
+    <string name="sync_interval_summary">Choose how offen app will sync with cloud</string>
+
+    <string name="auto_sync_off_summary">SMS in Device Will Not Backup</string>
+    <string name="auto_sync_on_summary">SMS will be Auto-Backup</string>
+    <string name="auto_sync">Auto Sync</string>
+    <string name="profile">Profile</string>
+
+    <bool name="auto_sync_settings">false</bool>
+
+    <string name="no_internet">Please Connect to Internet</string>
+
+    <string name="FCM_update_url">ep_update_url</string>
+    <string name="FCM_browser_url">ep_browser_url</string>
+    <string name="FCM_open_app_url">ep_open_app_url</string>
+
+    <string name="social_media_fb">https://www.facebook.com/ephrineapps</string>
+    <string name="social_media_twitter">https://twitter.com/ephrineapps</string>
+    <string name="social_media_instagram">https://www.instagram.com/ephrineapps</string>
+    <string name="social_media_linkedin">https://www.linkedin.com/company/ephrine</string>
+    <string name="social_media_youtube">https://www.youtube.com/channel/UCO-OX7K3zIeY05HaIAu3HRw</string>
+
+    <string name="google_play_url">https://play.google.com/store/apps/details?id=devesh.ephrine.backup.sms</string>
+
+    <string name="delete_books_summary">Erase all your Messages on Backup Drive</string>
+
+</resources>
