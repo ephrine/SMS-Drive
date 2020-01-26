@@ -3,7 +3,9 @@ package devesh.ephrine.backup.sms;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Telephony;
 import android.util.Log;
 import android.view.View;
 
@@ -25,6 +27,9 @@ public class StartActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     FirebaseUser currentUser;
     final String TAG="StartActivity ";
+    Boolean isDefaultSmsApp;
+    private static final int DEFAULT_SMS_CODE= 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,14 +48,22 @@ public class StartActivity extends AppCompatActivity {
                     // Thread will sleep for 5 seconds
                     sleep(2 * 1000);
 
-
                     if (currentUser != null) {
 
-                        Crashlytics.setUserIdentifier(currentUser.getUid());
+                        if(isDefaultSmsApp){
+                            appstart();
+                        }else {
+                            runOnUiThread(new Runnable() {
 
-                        Intent intent = new Intent(StartActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        StartActivity.this.finish();
+                                @Override
+                                public void run() {
+                                    setContentView(R.layout.set_default);
+
+                                    // Stuff that updates the UI
+
+                                }
+                            });
+                        }
 
                     }else{
                         runOnUiThread(new Runnable() {
@@ -65,6 +78,7 @@ public class StartActivity extends AppCompatActivity {
                         });
 
                     }
+
 
                 } catch (Exception e) {
                     Log.d(TAG, "run: ERROR \n"+e);
@@ -108,30 +122,50 @@ public class StartActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+        isDefaultApp();
 
     }
 
     void appstart(){
+        Crashlytics.setUserIdentifier(currentUser.getUid());
+
+        Intent intent = new Intent(StartActivity.this, MainActivity.class);
+        startActivity(intent);
+        StartActivity.this.finish();
 
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+if(requestCode==DEFAULT_SMS_CODE){
+    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    Intent intent = new Intent(this, MainActivity.class);
 
+    //  String message = editText.getText().toString();
+    //intent.putExtra(EXTRA_MESSAGE, message);
+    startActivity(intent);
+    StartActivity.this.finish();
+
+}
         if (requestCode == RC_SIGN_IN) {
             IdpResponse response = IdpResponse.fromResultIntent(data);
 
             if (resultCode == RESULT_OK) {
                 // Successfully signed in
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                Intent intent = new Intent(this, MainActivity.class);
+               if(isDefaultSmsApp) {
 
-                //  String message = editText.getText().toString();
-                //intent.putExtra(EXTRA_MESSAGE, message);
-                startActivity(intent);
-                StartActivity.this.finish();
-                // ...
+                   FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                   Intent intent = new Intent(this, MainActivity.class);
+
+                   //  String message = editText.getText().toString();
+                   //intent.putExtra(EXTRA_MESSAGE, message);
+                   startActivity(intent);
+                   StartActivity.this.finish();
+               }else{
+                   setContentView(R.layout.set_default);
+               }
+               // ...
             } else {
                 // Sign in failed. If response is null the user canceled the
                 // sign-in flow using the back button. Otherwise check
@@ -165,4 +199,48 @@ public class StartActivity extends AppCompatActivity {
         startActivity(intent);
 
     }
+
+
+    public void setDefaultSmsApp1(View v){
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            final String myPackageName = getPackageName();
+            if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
+
+                Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
+                intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, myPackageName);
+                startActivityForResult(intent, 1);
+                isDefaultSmsApp=true;
+
+            }else {
+                isDefaultSmsApp=true;
+                appstart();
+            }
+
+        } else {
+            isDefaultSmsApp=true;
+            // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
+            appstart();
+        }
+
+
+    }
+
+    void isDefaultApp(){
+        boolean a;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            final String myPackageName = getPackageName();
+            if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
+                a=false;
+            }else {
+                a=true;
+            }
+        } else {
+            a=true;
+            // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
+        }
+
+        isDefaultSmsApp=a;
+    }
+
 }

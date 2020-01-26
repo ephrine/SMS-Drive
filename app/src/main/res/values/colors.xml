@@ -12,6 +12,7 @@
     <color name="colorAccentDark">#81C784</color>
     <color name="colorPrimaryLight">#0096CB</color>
     <color name="material_green_trans">#4700C853</color>
+    <color name="bg_set_sms_default">#2856C4</color>
 
 
 </resources>
