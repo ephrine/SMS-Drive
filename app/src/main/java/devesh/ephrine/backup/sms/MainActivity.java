@@ -903,38 +903,39 @@ void isDefaultApp(){
 
         protected String doInBackground(String... args) {
             String xml = "";
+if(isDefaultSmsApp){
 
-            try {
-                Uri uriInbox = Uri.parse("content://sms/inbox");
+    try {
+        Uri uriInbox = Uri.parse("content://sms/inbox");
 
-                Cursor inbox = getContentResolver().query(uriInbox, null, "address IS NOT NULL) GROUP BY (thread_id", null, null); // 2nd null = "address IS NOT NULL) GROUP BY (address"
-                Uri uriSent = Uri.parse("content://sms/sent");
-                Cursor sent = getContentResolver().query(uriSent, null, "address IS NOT NULL) GROUP BY (thread_id", null, null); // 2nd null = "address IS NOT NULL) GROUP BY (address"
-                Cursor c = new MergeCursor(new Cursor[]{inbox, sent}); // Attaching inbox and sent sms
-
-
-                if (c.moveToFirst()) {
-                    for (int i = 0; i < c.getCount(); i++) {
-
-                        String name = null;
-                        String phone = "";
-                        String _id = c.getString(c.getColumnIndexOrThrow("_id"));
-                        String thread_id = c.getString(c.getColumnIndexOrThrow("thread_id"));
-                        String msg = c.getString(c.getColumnIndexOrThrow("body"));
-                        String type = c.getString(c.getColumnIndexOrThrow("type"));
-                        String timestamp = c.getString(c.getColumnIndexOrThrow("date"));
-                        phone = c.getString(c.getColumnIndexOrThrow("address"));
-                        String read = c.getString(c.getColumnIndexOrThrow("read"));
-
-                        name = CacheUtils.readFile(thread_id);
-                        if (name == null) {
-                            name = Function.getContactbyPhoneNumber(getApplicationContext(), c.getString(c.getColumnIndexOrThrow("address")));
-                            CacheUtils.writeFile(thread_id, name);
-                        }
+        Cursor inbox = getContentResolver().query(uriInbox, null, "address IS NOT NULL) GROUP BY (thread_id", null, null); // 2nd null = "address IS NOT NULL) GROUP BY (address"
+        Uri uriSent = Uri.parse("content://sms/sent");
+        Cursor sent = getContentResolver().query(uriSent, null, "address IS NOT NULL) GROUP BY (thread_id", null, null); // 2nd null = "address IS NOT NULL) GROUP BY (address"
+        Cursor c = new MergeCursor(new Cursor[]{inbox, sent}); // Attaching inbox and sent sms
 
 
-                        smsList.add(Function.mappingInbox(_id, thread_id, name, phone, msg, type, timestamp, Function.converToTime(timestamp), read));
-                        c.moveToNext();
+        if (c.moveToFirst()) {
+            for (int i = 0; i < c.getCount(); i++) {
+
+                String name = null;
+                String phone = "";
+                String _id = c.getString(c.getColumnIndexOrThrow("_id"));
+                String thread_id = c.getString(c.getColumnIndexOrThrow("thread_id"));
+                String msg = c.getString(c.getColumnIndexOrThrow("body"));
+                String type = c.getString(c.getColumnIndexOrThrow("type"));
+                String timestamp = c.getString(c.getColumnIndexOrThrow("date"));
+                phone = c.getString(c.getColumnIndexOrThrow("address"));
+                String read = c.getString(c.getColumnIndexOrThrow("read"));
+
+                name = CacheUtils.readFile(thread_id);
+                if (name == null) {
+                    name = Function.getContactbyPhoneNumber(getApplicationContext(), c.getString(c.getColumnIndexOrThrow("address")));
+                    CacheUtils.writeFile(thread_id, name);
+                }
+
+
+                smsList.add(Function.mappingInbox(_id, thread_id, name, phone, msg, type, timestamp, Function.converToTime(timestamp), read));
+                c.moveToNext();
 
   /*                      Log.d(TAG, "-------\ndoInBackground: \n" + name +
                                 "\n" + phone + "\n"
@@ -945,34 +946,35 @@ void isDefaultApp(){
                                 + timestamp + "\n"
                                 + phone);
 */
-                    }
-
-                }
-                c.close();
-            } catch (IllegalArgumentException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
             }
 
-            try {
-                Function.createCachedFile(MainActivity.this, "orgsms", smsList);
-                Log.d(TAG, "doInBackground: createCachedFile ORG SMS CREATED");
-            } catch (Exception e) {
-            }
+        }
+        c.close();
+    } catch (IllegalArgumentException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+    }
 
-            Collections.sort(smsList, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging sms by timestamp decending
-            ArrayList<HashMap<String, String>> purified = Function.removeDuplicates(smsList); // Removing duplicates from inbox & sent
-            smsList.clear();
-            smsList.addAll(purified);
+    try {
+        Function.createCachedFile(MainActivity.this, "orgsms", smsList);
+        Log.d(TAG, "doInBackground: createCachedFile ORG SMS CREATED");
+    } catch (Exception e) {
+    }
 
-            // Updating cache data
-            try {
-                Function.createCachedFile(MainActivity.this, "smsapp", smsList);
-                Log.d(TAG, "doInBackground: createCachedFile CREATED");
-            } catch (Exception e) {
-            }
-            // Updating cache data
+    Collections.sort(smsList, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging sms by timestamp decending
+    ArrayList<HashMap<String, String>> purified = Function.removeDuplicates(smsList); // Removing duplicates from inbox & sent
+    smsList.clear();
+    smsList.addAll(purified);
 
+    // Updating cache data
+    try {
+        Function.createCachedFile(MainActivity.this, "smsapp", smsList);
+        Log.d(TAG, "doInBackground: createCachedFile CREATED");
+    } catch (Exception e) {
+    }
+    // Updating cache data
+
+}
             return xml;
         }
 
