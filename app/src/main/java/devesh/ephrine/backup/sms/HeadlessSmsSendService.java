@@ -11,6 +11,7 @@ import android.util.Log;
  * <p>
  * TODO: Customize class - update intent actions and extra parameters.
  */
+/*
 public class HeadlessSmsSendService extends IntentService {
 final String TAG="HeadlessSmsSendService ";
     public HeadlessSmsSendService() {
@@ -27,3 +28,4 @@ final String TAG="HeadlessSmsSendService ";
 
 
 }
+*/
