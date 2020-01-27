@@ -26,6 +26,7 @@ import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ProgressBar;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -93,12 +94,12 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView CloudRecycleView;
     ArrayList<HashMap<String, String>> contactMap = new ArrayList<>();
 
-    Boolean isDefaultSmsApp;
+    final Boolean isDefaultSmsApp=true;
 
     private FirebaseAuth mAuth;
 
     CardView defaultSMSAppCardViewWarning;
-
+    TextView textView5CloudEmpty;
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
@@ -160,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-isDefaultSmsApp=false;
+//isDefaultSmsApp=false;
         setContentView(R.layout.activity_main_home);
         Fabric.with(this, new Crashlytics());
         onceOpen = 0;
@@ -172,10 +173,11 @@ isDefaultSmsApp=false;
         LayoutCloud = findViewById(R.id.layoutCloud);
 
         defaultSMSAppCardViewWarning=findViewById(R.id.defaultSMSAppCardViewWarning);
+        mySwipeRefreshLayout = findViewById(R.id.swipeRefresh);
 
         loadingCircle = findViewById(R.id.progressBar1);
         iThread = new HashMap<>();
-
+ textView5CloudEmpty=findViewById(R.id.textView5CloudEmpty);
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
@@ -214,17 +216,17 @@ isDefaultSmsApp=false;
             final String myPackageName = getPackageName();
             if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
 
-                isDefaultSmsApp=false;
+         //       isDefaultSmsApp=false;
            //     Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
              //   intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, myPackageName);
                // startActivityForResult(intent, 1);
 
             }else {
-                isDefaultSmsApp=true;
+           //     isDefaultSmsApp=true;
             }
 
         } else {
-            isDefaultSmsApp=true;
+     //       isDefaultSmsApp=true;
             // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
         }
 
@@ -499,8 +501,8 @@ isDefaultSmsApp=false;
     }
 
     public void AppStart() {
-        loadingCircle.setVisibility(View.GONE);
-
+      //  loadingCircle.setVisibility(View.GONE);
+        mySwipeRefreshLayout.setRefreshing(false);
         if (isSubscribed) {
 
 
@@ -596,7 +598,6 @@ isDefaultSmsApp=false;
         });
         if (findViewById(R.id.swipeRefresh) != null) {
 
-            mySwipeRefreshLayout = findViewById(R.id.swipeRefresh);
             mySwipeRefreshLayout.setOnRefreshListener(
                     new SwipeRefreshLayout.OnRefreshListener() {
                         @Override
@@ -608,6 +609,7 @@ isDefaultSmsApp=false;
                             loadsmsTask = new LoadSms();
                             loadsmsTask.execute();
                             LoadRecycleView();
+                            downloadCloudSMS();
                             Log.d(TAG, "onRefresh: Swipe Down ! Refreshing..");
                         }
                     }
@@ -617,7 +619,7 @@ isDefaultSmsApp=false;
         }
 
         downloadCloudSMS();
-        getContacts();
+    //    getContacts();
 
         isDefaultApp();
 
@@ -750,8 +752,17 @@ isDefaultSmsApp=false;
                         i++;
 
                     }
+                    textView5CloudEmpty.setVisibility(View.GONE);
+
                 } else {
                     Log.d(TAG, "onDataChange: Backup not Exists !! #021");
+                    textView5CloudEmpty.setVisibility(View.VISIBLE);
+                    try {
+                        Function.createCachedFile(MainActivity.this, getString(R.string.file_cloud_thread), CloudSms);
+                        Log.d(TAG, "onDataChange: createCachedFile file_cloud_thread ");
+                    } catch (Exception e) {
+                        Log.d(TAG, "onDataChange: ERROR #5600 : " + e);
+                    }
                 }
 
 
@@ -767,7 +778,7 @@ isDefaultSmsApp=false;
 
     }
 
-    void getContacts() {
+  /*  void getContacts() {
         try {
             contactMap = (ArrayList<HashMap<String, String>>) Function.readCachedFile(MainActivity.this, getString(R.string.file_contact_list));
             if (contactMap == null) {
@@ -838,9 +849,9 @@ isDefaultSmsApp=false;
 
 
     }
-
+*/
 public void setDefaultSmsApp(View v){
-
+/*
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
         final String myPackageName = getPackageName();
         if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
@@ -858,12 +869,12 @@ public void setDefaultSmsApp(View v){
         isDefaultSmsApp=true;
         // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
     }
-
+*/
 
 }
 
 void isDefaultApp(){
-        boolean a;
+  /*      boolean a;
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
         final String myPackageName = getPackageName();
         if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
@@ -875,8 +886,8 @@ void isDefaultApp(){
         a=true;
         // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
     }
-
-         isDefaultSmsApp=a;
+*/
+       //  isDefaultSmsApp=a;
 }
 
     //---------------- LoadSms Async Task
@@ -897,8 +908,8 @@ void isDefaultApp(){
         protected void onPreExecute() {
             super.onPreExecute();
             smsList.clear();
-            // loadingCircle.setVisibility(View.VISIBLE);
-
+          //   loadingCircle.setVisibility(View.VISIBLE);
+            mySwipeRefreshLayout.setRefreshing(true);
         }
 
         protected String doInBackground(String... args) {
@@ -980,6 +991,7 @@ if(isDefaultSmsApp){
 
         @Override
         protected void onPostExecute(String xml) {
+            loadingCircle.setVisibility(View.GONE);
 
             if (!tmpList.equals(smsList)) {
                 /*

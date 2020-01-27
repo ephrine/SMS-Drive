@@ -27,7 +27,7 @@ public class StartActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     FirebaseUser currentUser;
     final String TAG="StartActivity ";
-    Boolean isDefaultSmsApp;
+    final Boolean isDefaultSmsApp=true;
     private static final int DEFAULT_SMS_CODE= 1;
 
     @Override
@@ -207,18 +207,18 @@ if(requestCode==DEFAULT_SMS_CODE){
             final String myPackageName = getPackageName();
             if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
 
-                Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
-                intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, myPackageName);
-                startActivityForResult(intent, 1);
-                isDefaultSmsApp=true;
+      //          Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
+        //        intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, myPackageName);
+          //      startActivityForResult(intent, 1);
+          //      isDefaultSmsApp=true;
 
             }else {
-                isDefaultSmsApp=true;
+          //      isDefaultSmsApp=true;
                 appstart();
             }
 
         } else {
-            isDefaultSmsApp=true;
+      //      isDefaultSmsApp=true;
             // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
             appstart();
         }
@@ -240,7 +240,7 @@ if(requestCode==DEFAULT_SMS_CODE){
             // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
         }
 
-        isDefaultSmsApp=a;
+     //   isDefaultSmsApp=a;
     }
 
 }

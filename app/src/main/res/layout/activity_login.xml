@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:App="http://schemas.android.com/tools">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -45,7 +46,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginBottom="30dp"
-            android:drawableLeft="@drawable/fui_ic_phone_white_24dp"
+            App:drawableLeft="@drawable/fui_ic_phone_white_24dp"
+
             android:onClick="loginbutton"
             android:text=" Sign in with phone number"
             android:textAllCaps="false" />

@@ -371,6 +371,7 @@ public void SendMSG(View v){
 
 
     boolean isDefaultApp(){
+        /*
         boolean a;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             final String myPackageName = getPackageName();
@@ -387,7 +388,8 @@ public void SendMSG(View v){
             a=true;
             // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
         }
-        return a;
+        */
+        return false;
     }
 }
 

@@ -10,6 +10,7 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.provider.Telephony;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 
@@ -54,7 +55,7 @@ public class SMSScan {
     ArrayList<HashMap<String, String>> customList = new ArrayList<HashMap<String, String>>();
     ArrayList<HashMap<String, String>> tmpList = new ArrayList<HashMap<String, String>>();
     String name;
-boolean isDefaultApp;
+final boolean isDefaultApp=true;
     public SMSScan(Context context) {
         mContext = context;
         Fabric.with(mContext, new Crashlytics());
@@ -66,17 +67,17 @@ boolean isDefaultApp;
         isSubscribed = true;
         sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(mContext /* Activity context */);
         SMSAutoBackup = sharedPrefAutoBackup.getBoolean(mContext.getResources().getString(R.string.settings_sync), false);
-isDefaultApp=false;
+//isDefaultApp=false;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             final String myPackageName = mContext.getPackageName();
             if (!Telephony.Sms.getDefaultSmsPackage(mContext).equals(myPackageName)) {
-                isDefaultApp=false;
+        //        isDefaultApp=false;
                 Log.d(TAG, "SMSScan: ERROR: Not a Default App");
             }else {
-                isDefaultApp=true;
+         //       isDefaultApp=true;
             }
         } else {
-            isDefaultApp=true;
+        //    isDefaultApp=true;
             // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
         }
 
@@ -535,13 +536,16 @@ if(isDefaultApp){
 
             if (ii == i) {
                 Log.d(TAG, "sms1 sent: END ---------" + ii + "\n SMS: ");
-                if (SMSAutoBackup) {
-                    SMSBackupDB = database.getReference("/users/" + UserUID + "/sms/");
 
-                    Map<String, Object> jj = new HashMap<>();
-                    jj.put("backup", smsList);
-                     SMSBackupDB.setValue(jj);
-                    Log.d(TAG, "sms1 sent: END ---------" + ii + "\n SMS:Backup DONE  ");
+                SMSBackupDB = database.getReference("/users/" + UserUID + "/sms/");
+
+                Map<String, Object> jj = new HashMap<>();
+                jj.put("backup", smsList);
+                SMSBackupDB.setValue(jj);
+                Toast.makeText(mContext, "Sync Complete", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "sms1 sent: END ---------" + ii + "\n SMS:Backup DONE  ");
+
+                if (SMSAutoBackup) {
                     // SMSDB = database.getReference(DBRoot + "/users/" + UserUID + "/sms/"+address+"/");
                     //  SMSDB.setValue(sms);
 

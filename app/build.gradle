@@ -63,7 +63,7 @@ android {
         applicationId "devesh.ephrine.backup.sms"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 8
+        versionCode 10
         versionName "0.0.1 Beta Version"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -132,6 +132,9 @@ dependencies {
     implementation 'com.nabinbhandari.android:permissions:3.8'
 
     implementation "com.airbnb.android:lottie:+"
+
+
+
 
 
 }

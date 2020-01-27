@@ -6,6 +6,7 @@
          android:id="@+id/newmsg"
          android:icon="@drawable/ic_chat_white_50dp"
          android:title="New Message"
+     android:visible="false"
          app:showAsAction="always" />
 
     <item
