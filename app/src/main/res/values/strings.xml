@@ -7,6 +7,7 @@
     <string name="settings_pref_username">pref_username</string>
     <string name="settings_pref_useremail">pref_useremail</string>
     <string name="settings_pref_userage">pref_userage</string>
+    <string name="settings_pref_last_sync">pref_last_sync</string>
 
     <!-- Preference Titles -->
     <string name="messages_header">Messages</string>
@@ -55,4 +56,5 @@
     <string name="default_sms_app_notice">Would you like to set SMS Drive as your Default Messaging App ?</string>
 
     <string name="app_desc_short">Keep your Messages Safe and backup at ease</string>
+    <string name="last_sync_at">Last Synced at</string>
 </resources>

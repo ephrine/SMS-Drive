@@ -544,6 +544,15 @@ if(isDefaultApp){
                 SMSBackupDB.setValue(jj);
                 Toast.makeText(mContext, "Sync Complete", Toast.LENGTH_SHORT).show();
                 Log.d(TAG, "sms1 sent: END ---------" + ii + "\n SMS:Backup DONE  ");
+                long smsReceiveTime = System.currentTimeMillis();
+                Date date1 = new Date(smsReceiveTime);
+                //String formattedDate = new SimpleDateFormat("MM/dd/yyyy").format(date);
+                String formattedDate1 = new SimpleDateFormat("dd/MM/yyyy hh:mm").format(date1);
+
+                sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(mContext /* Activity context */);
+                SharedPreferences.Editor editor = sharedPrefAutoBackup.edit();
+                editor.putString(mContext.getResources().getString(R.string.settings_pref_last_sync), formattedDate1);
+                editor.apply();
 
                 if (SMSAutoBackup) {
                     // SMSDB = database.getReference(DBRoot + "/users/" + UserUID + "/sms/"+address+"/");

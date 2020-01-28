@@ -13,6 +13,8 @@
         android:id="@+id/syncnow"
         android:icon="@drawable/ic_sync_white_50dp"
         android:title="Sync Now"
+        android:visible="false"
+
         app:showAsAction="always" />
 
 

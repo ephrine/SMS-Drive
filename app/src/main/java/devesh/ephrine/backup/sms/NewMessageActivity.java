@@ -1,5 +1,5 @@
 package devesh.ephrine.backup.sms;
-
+/*
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -195,7 +195,7 @@ public class NewMessageActivity extends AppCompatActivity {
                 customList.addAll(smsList);
                 customList.add(Function.mappingInbox(null, null, null, null, tmp_msg, "2", null, "Sending...","1"));
               */
-                long smsReceiveTime = System.currentTimeMillis();
+   /*             long smsReceiveTime = System.currentTimeMillis();
 
                 saveSms(sendTo,tmp_msg,"1",String.valueOf(smsReceiveTime),"outbox");
                 // startLoadingDeviceSms();
@@ -341,7 +341,7 @@ showContactCard(selected);
         });  */
 
 
-        }
+  /*      }
 
         // Return the size of your dataset (invoked by the layout manager)
         @Override
@@ -392,3 +392,4 @@ showContactCard(selected);
 
 
 }
+*/

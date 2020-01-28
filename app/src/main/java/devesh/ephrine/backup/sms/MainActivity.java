@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
         LayoutHome = findViewById(R.id.layoutHome);
         LayoutCloud = findViewById(R.id.layoutCloud);
 
-        defaultSMSAppCardViewWarning=findViewById(R.id.defaultSMSAppCardViewWarning);
+       // defaultSMSAppCardViewWarning=findViewById(R.id.defaultSMSAppCardViewWarning);
         mySwipeRefreshLayout = findViewById(R.id.swipeRefresh);
 
         loadingCircle = findViewById(R.id.progressBar1);
@@ -305,12 +305,13 @@ public class MainActivity extends AppCompatActivity {
             }
 
             isDefaultApp();
-            if(isDefaultSmsApp){
+           /* if(isDefaultSmsApp){
                 defaultSMSAppCardViewWarning.setVisibility(View.GONE);
             }else {
                 defaultSMSAppCardViewWarning.setVisibility(View.VISIBLE);
 
             }
+            */
 
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -371,8 +372,8 @@ public class MainActivity extends AppCompatActivity {
             case R.id.newmsg:
                 if(isDefaultSmsApp){
 
-                    Intent intent1 = new Intent(this, NewMessageActivity.class);
-                    startActivity(intent1);
+             //       Intent intent1 = new Intent(this, NewMessageActivity.class);
+               //     startActivity(intent1);
 
                 }else {
                     Toast.makeText(this, "Please set SMS Drive as your Default Messenger to send new message", Toast.LENGTH_SHORT).show();
@@ -610,6 +611,7 @@ public class MainActivity extends AppCompatActivity {
                             loadsmsTask.execute();
                             LoadRecycleView();
                             downloadCloudSMS();
+                            refreshLastSync();
                             Log.d(TAG, "onRefresh: Swipe Down ! Refreshing..");
                         }
                     }
@@ -623,20 +625,39 @@ public class MainActivity extends AppCompatActivity {
 
         isDefaultApp();
 
-        if(isDefaultSmsApp){
+       /* if(isDefaultSmsApp){
             defaultSMSAppCardViewWarning.setVisibility(View.GONE);
         }else {
             defaultSMSAppCardViewWarning.setVisibility(View.VISIBLE);
 
         }
+        */
+        refreshLastSync();
+
     }
 
-    void SyncMessages() {
+    void refreshLastSync(){
 
-        if (SMSAutoBackup) {
-            SMSBackupDB.setValue(iThread);
-            Log.d(TAG, "Sync COMPLETE: Auto Sync Enabled");
+        String LastSyncDateSTR=sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_pref_last_sync), null);
+        TextView LastSyncTextView=findViewById(R.id.textView2LastSyncDate);
+        if(LastSyncDateSTR!=null){
+            LastSyncTextView.setText(getString(R.string.last_sync_at)+" "+LastSyncDateSTR);
+        }else {
+            LastSyncTextView.setText(getString(R.string.last_sync_at)+" --");
         }
+
+    }
+
+    public void syncNow(View v) {
+
+        if (isSubscribed) {
+            SMSScan s = new SMSScan(this);
+            s.ScanNow();
+            Toast.makeText(this, "Syncing...", Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, "Please Subscribe before Sync", Toast.LENGTH_LONG).show();
+        }
+
     }
 
     public void FileAutoBackUpBroadCast() {
