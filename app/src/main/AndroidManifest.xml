@@ -2,15 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="devesh.ephrine.backup.sms">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
-   <!-- <uses-permission android:name="android.permission.SEND_SMS" />
+ <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
-  -->
+
     <uses-permission android:name="com.android.vending.BILLING" />
 
     <application
@@ -20,10 +19,14 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".NewMessageActivity"
-            android:label="New Message"></activity>
+        <activity android:name=".RestoreWizardActivity"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
 
-   <!--     <service
+       <!-- <activity
+            android:name=".NewMessageActivity"
+            android:label="New Message" />
+    -->
+     <service
             android:name=".HeadlessSmsSendService"
             android:exported="true"
             android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE">
@@ -34,10 +37,10 @@
 
                 <data android:scheme="sms" />
                 <data android:scheme="smsto" />
-                <!-
+                <!--
                 <data android:scheme="mms" />
                 <data android:scheme="mmsto" />
-              ->
+              -->
             </intent-filter>
         </service>
 
@@ -61,7 +64,7 @@
                 <action android:name="android.provider.Telephony.SMS_DELIVER" />
             </intent-filter>
         </receiver>
-        -->
+
         <activity android:name=".SubscriptionActivity" />
 
         <meta-data
@@ -92,18 +95,19 @@
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <!--        <action android:name="android.intent.action.SEND" />
-          <!-       <action android:name="android.intent.action.SENDTO" />
+
+          <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SENDTO" />
 
                       <category android:name="android.intent.category.DEFAULT" />
                       <category android:name="android.intent.category.BROWSABLE" />
 
                       <data android:scheme="sms" />
-                      <data android:scsmsto" />
-                      <!-
+                <data android:scheme="smsto" />
+
                       <data android:scheme="mms" />
                       <data android:scheme="mmsto" />
-                      -->
+
 
 
                 <!--

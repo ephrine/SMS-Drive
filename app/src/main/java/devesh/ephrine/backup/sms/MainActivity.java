@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -39,6 +40,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -47,6 +50,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.lifeofcoding.cacheutlislibrary.CacheUtils;
 
 import java.util.ArrayList;
@@ -91,6 +95,8 @@ public class MainActivity extends AppCompatActivity {
     DatabaseReference CloudSMSDB;
     ArrayList<HashMap<String, String>> CloudSms = new ArrayList<>();
     ArrayList<HashMap<String, String>> CloudThreadSms = new ArrayList<>();
+    ArrayList<HashMap<String, String>> DeviceSMS = new ArrayList<>();
+
     RecyclerView CloudRecycleView;
     ArrayList<HashMap<String, String>> contactMap = new ArrayList<>();
 
@@ -100,6 +106,9 @@ public class MainActivity extends AppCompatActivity {
 
     CardView defaultSMSAppCardViewWarning;
     TextView textView5CloudEmpty;
+
+    FirebaseRemoteConfig mFirebaseRemoteConfig;
+
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
@@ -253,7 +262,32 @@ public class MainActivity extends AppCompatActivity {
         navigation = findViewById(R.id.bottom_navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
+        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+        mFirebaseRemoteConfig.setDefaults(R.xml.remote_config);
+        mFirebaseRemoteConfig.fetch(10)
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                       //     Toast.makeText(MainActivity.this, "Fetch Succeeded",
+                         //           Toast.LENGTH_SHORT).show();
 
+                            // After config data is successfully fetched, it must be activated before newly fetched
+                            // values are returned.
+                            mFirebaseRemoteConfig.activateFetched();
+                            boolean isFreeAccess = mFirebaseRemoteConfig.getBoolean("SMSDrive_free_access");
+                            if(isFreeAccess){
+                                Log.d(TAG, "onComplete: USER HAS FREE ACCESS OFFER !!!");
+                            }else {
+                                Toast.makeText(MainActivity.this, "Please Update App from https://www.ephrine.in", Toast.LENGTH_LONG).show();
+                            }
+                        } else {
+                   //         Toast.makeText(MainActivity.this, "Fetch Failed",
+                     //               Toast.LENGTH_SHORT).show();
+                        }
+                      //  displayWelcomeMessage();
+                    }
+                });
     }
 
 
@@ -516,7 +550,7 @@ public class MainActivity extends AppCompatActivity {
         sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
         SMSAutoBackup = sharedPrefAutoBackup.getBoolean(getResources().getString(R.string.settings_sync), false);
 
-        Switch SyncSwitch = findViewById(R.id.switch1);
+  /*      Switch SyncSwitch = findViewById(R.id.switch1);
 
         if (SMSAutoBackup && isSubscribed) {
             SyncSwitch.setChecked(true);
@@ -546,7 +580,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
+*/
 
         UserDB = database.getReference("/users/" + UserUID + "/profile");
         UserDB.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -911,6 +945,87 @@ void isDefaultApp(){
        //  isDefaultSmsApp=a;
 }
 
+public void saveMSGtoDevice(View v){
+Intent intent = new Intent(this, RestoreWizardActivity.class);
+
+      //  String message = editText.getText().toString();
+        //intent.putExtra(EXTRA_MESSAGE, message);
+        startActivity(intent);
+    /*
+    ArrayList<HashMap<String, String>> cSMS=new ArrayList<>();
+
+    try {
+        cSMS= (ArrayList<HashMap<String, String>>) Function.readCachedFile(MainActivity.this, getString(R.string.file_cloud_sms));
+        DeviceSMS= (ArrayList<HashMap<String, String>>) Function.readCachedFile(MainActivity.this, getString(R.string.file_device_sms));
+        sortCloudSMS(cSMS,DeviceSMS);
+
+    }catch (Exception e){
+        Log.d(TAG, "saveMSGtoDvice: ERROR #5643 "+e.toString());
+    }
+    */
+}
+
+void sortCloudSMS(ArrayList<HashMap<String, String>> c, ArrayList<HashMap<String, String>> d){
+
+     int t=d.size()-1;
+     int tc=c.size()-1;
+    Log.d(TAG, "sortCloudSMS: Data: Device:"+t+"\nCloud:"+tc+"\n\ndevice sms:"+d);
+    int saved;
+    saved=0;
+    for(int i=0;i<=tc;i++){
+        String msg=c.get(i).get(Function.KEY_MSG);
+        String phone=c.get(i).get(Function.KEY_PHONE);
+        String timestamp=c.get(i).get(Function.KEY_TIMESTAMP);
+
+        Log.d(TAG, "sortCloudSMS: Sorting MSG "+i);
+        for(int x=0;x<=t;x++){
+
+            if(msg.equals(d.get(x).get(Function.KEY_MSG))
+                    && phone.equals(d.get(x).get(Function.KEY_PHONE))
+                    && timestamp.equals(d.get(x).get(Function.KEY_TIMESTAMP))){
+                Log.d(TAG, "sortCloudSMS: Identical Messages: "+ c.get(x).get(Function.KEY_PHONE)+"\n t:"+c.get(x).get(Function.KEY_TIMESTAMP));
+            }else {
+                saved=saved+1;
+                // Save into Device
+                Log.d(TAG, "sortCloudSMS: Saving on Device: "+c.get(x).get(Function.KEY_PHONE)+"\n t:"+c.get(x).get(Function.KEY_TIMESTAMP)+"\n saved:"+saved);
+            }
+
+        }
+
+    }
+
+
+}
+
+    public boolean saveSms(String phoneNumber, String message, String readState, String time, String folderName) {
+        boolean ret = false;
+        try {
+            ContentValues values = new ContentValues();
+            values.put("address", phoneNumber);
+            values.put("body", message);
+            values.put("read", readState); //"0" for have not read sms and "1" for have read sms
+            values.put("date", time);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                Uri uri = Telephony.Sms.Sent.CONTENT_URI;
+                if (folderName.equals("inbox")) {
+                    uri = Telephony.Sms.Inbox.CONTENT_URI;
+                }
+                getContentResolver().insert(uri, values);
+            } else {
+                getContentResolver().insert(Uri.parse("content://sms/" + folderName), values);
+            }
+
+            ret = true;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            ret = false;
+        }
+        return ret;
+    }
+
+
+
     //---------------- LoadSms Async Task
     class LoadSms extends AsyncTask<String, Void, String> {
         final String TAG = "LoadSms | ";
@@ -967,6 +1082,7 @@ if(isDefaultSmsApp){
 
 
                 smsList.add(Function.mappingInbox(_id, thread_id, name, phone, msg, type, timestamp, Function.converToTime(timestamp), read));
+                DeviceSMS.add(Function.mappingInbox(_id, thread_id, name, phone, msg, type, timestamp, Function.converToTime(timestamp), read));
                 c.moveToNext();
 
   /*                      Log.d(TAG, "-------\ndoInBackground: \n" + name +
@@ -989,6 +1105,8 @@ if(isDefaultSmsApp){
 
     try {
         Function.createCachedFile(MainActivity.this, "orgsms", smsList);
+        Function.createCachedFile(MainActivity.this, getString(R.string.file_device_sms), DeviceSMS);
+
         Log.d(TAG, "doInBackground: createCachedFile ORG SMS CREATED");
     } catch (Exception e) {
     }

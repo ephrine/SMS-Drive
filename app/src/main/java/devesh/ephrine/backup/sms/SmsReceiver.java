@@ -1,6 +1,6 @@
 package devesh.ephrine.backup.sms;
 
-/*
+
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -49,11 +49,11 @@ Context mContext;
 
             }
             //---display the new SMS message---
-            Toast.makeText(context, str, Toast.LENGTH_SHORT).show();
+        //    Toast.makeText(context, str, Toast.LENGTH_SHORT).show();
             Log.d(TAG, "onReceive: SMS Received \n"+str+"\n--------");
             long smsReceiveTime = System.currentTimeMillis();
             saveSms(address,msg,"0",String.valueOf(smsReceiveTime),"inbox");
-CreateNotification(Function.getContactbyPhoneNumber(mContext,address),msg);
+//CreateNotification(Function.getContactbyPhoneNumber(mContext,address),msg);
 
         }
 
@@ -135,6 +135,5 @@ CreateNotification(Function.getContactbyPhoneNumber(mContext,address),msg);
      //   throw new UnsupportedOperationException("Not yet implemented");
     }
     */
-    /*
+
 }
-*/

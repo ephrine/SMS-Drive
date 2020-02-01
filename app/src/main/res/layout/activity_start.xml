@@ -13,11 +13,10 @@
         android:orientation="vertical">
 
         <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/animation_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:lottie_autoPlay="true"
-            app:lottie_fileName="splash.json"
+            app:lottie_fileName="splash.zip"
             app:lottie_imageAssetsFolder="images"
 
             app:lottie_loop="false" />

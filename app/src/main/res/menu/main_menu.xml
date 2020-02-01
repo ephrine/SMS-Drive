@@ -20,8 +20,8 @@
 
     <item
         android:id="@+id/tutorial"
-        android:title="Tutorial" />
-
+        android:title="Tutorial"
+        android:visible="false"/>
 
     <item
         android:id="@+id/settings"
