@@ -40,6 +40,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -50,12 +51,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.functions.FirebaseFunctions;
+import com.google.firebase.functions.HttpsCallableResult;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.lifeofcoding.cacheutlislibrary.CacheUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -288,6 +292,9 @@ public class MainActivity extends AppCompatActivity {
                       //  displayWelcomeMessage();
                     }
                 });
+
+        fbFunction();
+
     }
 
 
@@ -1162,5 +1169,37 @@ final int position, long id) {
 
         }
     }
+    private FirebaseFunctions mFunctions;
+
+    void fbFunction(){
+        mFunctions = FirebaseFunctions.getInstance();
+//addMessage("dd");
+    }
+
+    private Task<String> addMessage(String text) {
+        // Create the arguments to the callable function.
+        Map<String, Object> data = new HashMap<>();
+        data.put("date", "date");
+        data.put("purchaseid", "purchaseid");
+        data.put("expirydate", "expirydate");
+        data.put("fdate", "fdate");
+        data.put("fexpdate", "fexpdate");
+
+        return mFunctions
+                .getHttpsCallable("smsDrivePurchaseSave")
+                .call(data)
+                .continueWith(new Continuation<HttpsCallableResult, String>() {
+                    @Override
+                    public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
+                        // This continuation runs on either success or failure, but if the task
+                        // has failed then getResult() will throw an Exception which will be
+                        // propagated down.
+                        String result = (String) task.getResult().getData();
+                        Log.d(TAG, "FUNCTIONS then: resut:" +result);
+                        return result;
+                    }
+                });
+    }
+
 
 }

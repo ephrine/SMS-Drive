@@ -21,6 +21,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import devesh.ephrine.backup.sms.payment.CheckOutActivity;
 import io.fabric.sdk.android.Fabric;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -118,6 +119,20 @@ public class SettingsActivity extends AppCompatActivity {
                     AlertDialog dialog = builder.create();
                     dialog.show();
 
+
+                    return true;
+                }
+            });
+
+            Preference PrefManageSubscription = findPreference("sub");
+            PrefManageSubscription.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                public boolean onPreferenceClick(Preference preference) {
+
+                    Intent intent = new Intent(getActivity(), CheckOutActivity.class);
+
+                          //  String message = editText.getText().toString();
+                            //intent.putExtra(EXTRA_MESSAGE, message);
+                            startActivity(intent);
 
                     return true;
                 }

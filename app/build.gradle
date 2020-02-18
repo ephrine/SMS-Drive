@@ -5,9 +5,28 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'io.fabric'
 
-//Properties properties = new Properties()
-//properties.load(project.rootProject.file('local.properties').newDataInputStream())
+def paymentserverurl
 
+Properties properties = new Properties()
+
+def lp = new File('local.properties')
+if (!lp.exists()) {
+    new URL(System.getenv('local.properties.url')).withInputStream { i ->
+        lp.withOutputStream {
+            it << i
+        }
+    }
+    project.logger.info('Downloaded local.properties file')
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    paymentserverurl = properties.getProperty('paymentserverurl')
+
+} else {
+    project.logger.info('Located local.properties file')
+
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    paymentserverurl = properties.getProperty('paymentserverurl')
+
+}
 //def keypassword = properties.getProperty('sign.key.password')
 
 
@@ -18,6 +37,8 @@ ext.keyalias = System.getenv('sign.key.alias')
 ext.keypath = System.getenv('sign.key.path')
 
 ext.gplaylicensekey = System.getenv('g.license.key')
+
+//ext.paymentserverurl = System.getenv('paymentserverurl')
 
 def f = new File('app/google-services.json')
 if (!f.exists()) {
@@ -73,6 +94,8 @@ android {
 
         buildConfigField "String", "GLicenseKey", "\"" + gplaylicensekey + "\""
 
+        buildConfigField "String", "Heroku_Server_URL", "\"" + paymentserverurl + "\""
+
         //  resValue "string", "AdMob_AppId", "\"" + "none" + "\""
 
         resValue "string", "AppVersionCode", "\"" + versionCode + "\""
@@ -112,8 +135,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-config:+'
 
 
-    //  implementation 'com.google.firebase:firebase-functions:+'
     implementation 'androidx.preference:preference:+'
+
+    implementation 'com.google.firebase:firebase-functions:16.1.3'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:+'
     androidTestImplementation 'androidx.test.espresso:espresso-core:+'
@@ -137,6 +161,12 @@ dependencies {
 
     implementation 'androidx.multidex:multidex:+'
 
+    // Stripe Android SDK
+    implementation 'com.stripe:stripe-android:+'
+
+    // OkHttp & GSON
+    implementation 'com.squareup.okhttp3:okhttp:+'
+    implementation 'com.google.code.gson:gson:+'
 
 
 }
