@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -73,40 +72,40 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
         lottieSyncing.setVisibility(View.GONE);
 
-        LLDefaultSmsAppStep1=findViewById(R.id.LLDefaultSmsAppStep1);
+        LLDefaultSmsAppStep1 = findViewById(R.id.LLDefaultSmsAppStep1);
 
         smsbotIMG = findViewById(R.id.imageView3SMSBot);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             final String myPackageName = getPackageName();
-            OldDefaultSMSApp=Telephony.Sms.getDefaultSmsPackage(this);
+            OldDefaultSMSApp = Telephony.Sms.getDefaultSmsPackage(this);
 
             if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
-            //    isDefaultSmsApp = false;
+                //    isDefaultSmsApp = false;
                 lottieAnimationView1.setVisibility(View.VISIBLE);
                 lottieAnimationView2.setVisibility(View.INVISIBLE);
             } else {
-              //  isDefaultSmsApp = true;
+                //  isDefaultSmsApp = true;
                 lottieAnimationView1.setVisibility(View.INVISIBLE);
                 lottieAnimationView2.setVisibility(View.VISIBLE);
                 smsbotIMG.setVisibility(View.VISIBLE);
                 LLDefaultSmsAppStep1.setVisibility(View.GONE);
             }
         } else {
-           // isDefaultSmsApp = true;
+            // isDefaultSmsApp = true;
             lottieAnimationView1.setVisibility(View.INVISIBLE);
             lottieAnimationView2.setVisibility(View.VISIBLE);
             smsbotIMG.setVisibility(View.VISIBLE);
             LLDefaultSmsAppStep1.setVisibility(View.GONE);
             // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
         }
-        Log.d(TAG, "onCreate: isDefault SMS Handler: "+isDefaultSmsApp());
+        Log.d(TAG, "onCreate: isDefault SMS Handler: " + isDefaultSmsApp());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             smsbotIMG.setVisibility(View.GONE);
             LLDefaultSmsAppStep1.setVisibility(View.VISIBLE);
 
-        }else {
+        } else {
             smsbotIMG.setVisibility(View.VISIBLE);
             LLDefaultSmsAppStep1.setVisibility(View.GONE);
 
@@ -153,7 +152,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 final String myPackageName = getPackageName();
                 if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
-                  //  isDefaultSmsApp = false;
+                    //  isDefaultSmsApp = false;
                     lottieAnimationView1.setVisibility(View.VISIBLE);
                     lottieAnimationView2.setVisibility(View.INVISIBLE);
                 } else {
@@ -162,58 +161,13 @@ public class RestoreWizardActivity extends AppCompatActivity {
                     lottieAnimationView2.setVisibility(View.VISIBLE);
                 }
             } else {
-               // isDefaultSmsApp = true;
+                // isDefaultSmsApp = true;
                 lottieAnimationView1.setVisibility(View.INVISIBLE);
                 lottieAnimationView2.setVisibility(View.VISIBLE);
                 // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
             }
 
         }
-
-    }
-
-    public void setDefaultSmsApp(View v) {
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            final String myPackageName = getPackageName();
-            if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
-  /*              Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
-                intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, getPackageName());
-                startActivity(intent);
-*/
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    Intent intent = new Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS);
-                    startActivity(intent);
-
-                }else {
-                    Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
-                    intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, getPackageName());
-                    startActivity(intent);
-                }
-
-                /*Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
-            intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, myPackageName);
-            startActivityForResult(intent, 1);  */
-             //   isDefaultSmsApp = true;
-                //    lottieAnimationView1.setVisibility(View.INVISIBLE);
-                //    lottieAnimationView2.setVisibility(View.VISIBLE);
-                Log.d(TAG, "setDefaultSmsApp: setting default SMS handler");
-            } else {
-            //    isDefaultSmsApp = true;
-                //    lottieAnimationView1.setVisibility(View.INVISIBLE);
-                //      lottieAnimationView2.setVisibility(View.VISIBLE);
-
-            }
-
-        } else {
-          //  isDefaultSmsApp = true;
-            // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
-            //   lottieAnimationView1.setVisibility(View.INVISIBLE);
-//        lottieAnimationView2.setVisibility(View.VISIBLE);
-
-        }
-
 
     }
 
@@ -227,7 +181,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
                 }
             }).start();
-          //  new RestoreTask().execute("url1", "url2", "url3");
+            //  new RestoreTask().execute("url1", "url2", "url3");
 
             lottieSyncing.setVisibility(View.VISIBLE);
             lottieAnimationView2.setVisibility(View.INVISIBLE);
@@ -238,7 +192,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
         }
     }
 
-public boolean saveSms(String phoneNumber, String message, String readState, String time, String folderName) {
+    public boolean saveSms(String phoneNumber, String message, String readState, String time, String folderName) {
         boolean ret = false;
         try {
             ContentValues values = new ContentValues();
@@ -265,7 +219,6 @@ public boolean saveSms(String phoneNumber, String message, String readState, Str
         return ret;
     }
 
-
     //SMS Scan
     void getSMS() {
         // getSMSOutbox();
@@ -287,7 +240,7 @@ public boolean saveSms(String phoneNumber, String message, String readState, Str
             // empty box, no SMS
         }
 
-    //    sms1();
+        //    sms1();
 
 
         // public static final String INBOX = "content://sms/inbox";
@@ -296,7 +249,6 @@ public boolean saveSms(String phoneNumber, String message, String readState, Str
 
 
     }
-
 
     void DownloadCloud() {
 
@@ -473,7 +425,6 @@ public boolean saveSms(String phoneNumber, String message, String readState, Str
         }
     }
 
-
     void getSMSOutbox() {
   /*      Log.d(TAG, "getSMS Sent: SMSBackup: ");
         Cursor cursor = getContentResolver().query(Uri.parse("content://sms/sent"), null, null, null, null);
@@ -620,7 +571,6 @@ public boolean saveSms(String phoneNumber, String message, String readState, Str
 
     }
 
-
     void sortCloudSMS(ArrayList<HashMap<String, String>> c, ArrayList<HashMap<String, String>> d) {
         ArrayList<HashMap<String, String>> cloudsms = new ArrayList<>();
         cloudsms = c;
@@ -706,7 +656,6 @@ public boolean saveSms(String phoneNumber, String message, String readState, Str
 
     }
 
-
     void GetThread(DataSnapshot postSnapshot, String threadName) {
 
         for (DataSnapshot DS : postSnapshot.getChildren()) {
@@ -770,27 +719,72 @@ public boolean saveSms(String phoneNumber, String message, String readState, Str
 
     }
 
-    boolean isDefaultSmsApp(){
-boolean s=false;
+    boolean isDefaultSmsApp() {
+        boolean s = false;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             final String myPackageName = getPackageName();
             if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
-             s = false;
+                s = false;
                 lottieAnimationView1.setVisibility(View.VISIBLE);
                 lottieAnimationView2.setVisibility(View.INVISIBLE);
             } else {
-               s = true;
+                s = true;
                 lottieAnimationView1.setVisibility(View.INVISIBLE);
                 lottieAnimationView2.setVisibility(View.VISIBLE);
             }
         } else {
-           s = true;
+            s = true;
             lottieAnimationView1.setVisibility(View.INVISIBLE);
             lottieAnimationView2.setVisibility(View.VISIBLE);
             // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
         }
 
         return s;
+    }
+
+    public void setDefaultSmsApp(View v) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            final String myPackageName = getPackageName();
+            if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
+  /*              Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
+                intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, getPackageName());
+                startActivity(intent);
+*/
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS);
+                    startActivity(intent);
+
+                } else {
+                    Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
+                    intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, getPackageName());
+                    startActivity(intent);
+                }
+
+                /*Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
+            intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, myPackageName);
+            startActivityForResult(intent, 1);  */
+                //   isDefaultSmsApp = true;
+                //    lottieAnimationView1.setVisibility(View.INVISIBLE);
+                //    lottieAnimationView2.setVisibility(View.VISIBLE);
+                Log.d(TAG, "setDefaultSmsApp: setting default SMS handler");
+            } else {
+                //    isDefaultSmsApp = true;
+                //    lottieAnimationView1.setVisibility(View.INVISIBLE);
+                //      lottieAnimationView2.setVisibility(View.VISIBLE);
+
+            }
+
+        } else {
+            //  isDefaultSmsApp = true;
+            // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
+            //   lottieAnimationView1.setVisibility(View.INVISIBLE);
+//        lottieAnimationView2.setVisibility(View.VISIBLE);
+
+        }
+
+
     }
 
 

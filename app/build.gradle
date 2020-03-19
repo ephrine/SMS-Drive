@@ -67,7 +67,7 @@ android {
 
 
     compileSdkVersion 29
-    buildToolsVersion "29.0.2"
+    buildToolsVersion "29.0.3"
     /*signingConfigs {
                    release {
                        storeFile keypath
@@ -133,6 +133,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging:+'
     implementation 'com.crashlytics.sdk.android:crashlytics:+'
     implementation 'com.google.firebase:firebase-config:+'
+    implementation "androidx.work:work-runtime:+"
 
 
     implementation 'androidx.preference:preference:+'
@@ -148,11 +149,11 @@ dependencies {
     implementation 'com.anjlab.android.iab.v3:library:+'
 
     implementation 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
-   
+
     implementation 'com.lifeofcoding:cacheutilslibrary:1.1.0@aar'
     implementation 'com.google.code.gson:gson:+'
     implementation 'commons-io:commons-io:+'
-   
+
     implementation 'com.google.android.material:material:1.0.0'
 
     //Runtime Permissions

@@ -30,16 +30,16 @@ import java.util.HashMap;
 public class Function {
 
 
-    static final String _ID = "_id";
-    static final String KEY_THREAD_ID = "thread_id";
-    static final String KEY_NAME = "name";
-    static final String KEY_PHONE = "phone";
-    static final String KEY_MSG = "msg";
-    static final String KEY_TYPE = "type";
-    static final String KEY_TIMESTAMP = "timestamp";
-    static final String KEY_TIME = "time";
-    static final String KEY_READ = "read";
-    static final String TAG = "Function:";
+    static public final String _ID = "_id";
+    static public final String KEY_THREAD_ID = "thread_id";
+    static public final String KEY_NAME = "name";
+    static public final String KEY_PHONE = "phone";
+    static public final String KEY_MSG = "msg";
+    static public final String KEY_TYPE = "type";
+    static public final String KEY_TIMESTAMP = "timestamp";
+    static public final String KEY_TIME = "time";
+    static public final String KEY_READ = "read";
+    static public final String TAG = "Function:";
 
 
     public static boolean hasPermissions(Context context, String... permissions) {

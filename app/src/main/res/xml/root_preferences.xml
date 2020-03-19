@@ -87,6 +87,10 @@
             app:key="version"
             app:summary="@string/AppVersionName"
             app:title="Version" />
+        <Preference
+            app:key="versionCode"
+            app:summary="@string/AppVersionCode"
+            app:title="Version Code" />
 
         <Preference
             android:summary="For Feedback, Complaints and Compliments "

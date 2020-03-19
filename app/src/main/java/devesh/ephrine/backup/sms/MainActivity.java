@@ -140,19 +140,19 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
     };
-/*
-    @Override
-    protected void onResume() {
-        super.onResume();
+    /*
+        @Override
+        protected void onResume() {
+            super.onResume();
 
-        if (!hasPermissions(this, PERMISSIONS)) {
-            ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
-        }else{
-            AppStart();
+            if (!hasPermissions(this, PERMISSIONS)) {
+                ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
+            }else{
+                AppStart();
 
+            }
         }
-    }
-    */
+        */
     private FirebaseFunctions mFunctions;
 
     public static boolean hasPermissions(Context context, String... permissions) {
@@ -668,6 +668,8 @@ public class MainActivity extends AppCompatActivity {
         }
         */
         refreshLastSync();
+        FileAutoBackUpBroadCast();
+
 
     }
 
@@ -686,8 +688,21 @@ public class MainActivity extends AppCompatActivity {
     public void syncNow(View v) {
 
         if (isSubscribed) {
-            SMSScan s = new SMSScan(this);
-            s.ScanNow();
+
+            new Thread(new Runnable() {
+                public void run() {
+                    // a potentially time consuming task
+                    SMSScan s = new SMSScan(MainActivity.this);
+                    s.ScanNow();
+
+                }
+            }).start();
+
+
+            /*
+            OneTimeWorkRequest syncWorkRequest = new OneTimeWorkRequest.Builder(SyncWorkManager.class)
+                    .build();
+            WorkManager.getInstance(this).enqueue(syncWorkRequest);*/
             Toast.makeText(this, "Syncing...", Toast.LENGTH_LONG).show();
         } else {
             Toast.makeText(this, "Please Subscribe before Sync", Toast.LENGTH_LONG).show();
@@ -698,57 +713,83 @@ public class MainActivity extends AppCompatActivity {
     public void FileAutoBackUpBroadCast() {
         Log.d(TAG, "BroadCast");
 
-        int i = 10;
-        Intent intent = new Intent(this, ScannerBroadcastReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                this.getApplicationContext(), 234324243, intent, 0);
-        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        boolean alarmUp = (PendingIntent.getBroadcast(this, 234324243,
+                new Intent(this, ScannerBroadcastReceiver.class),
+                PendingIntent.FLAG_NO_CREATE) != null);
 
-        //  alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
-        //        + (i * 1000), pendingIntent);
+        if (alarmUp) {
+            Log.d("myTag", "#657456 Alarm is already active");
+            if (!SMSAutoBackup) {
+                Intent intent = new Intent(this, ScannerBroadcastReceiver.class);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                        this.getApplicationContext(), 234324243, intent, 0);
+                AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                alarmManager.cancel(pendingIntent);
+                Log.d(TAG, "FileAutoBackUpBroadCast: #657456 AlarmCancled: Auto Sync OFF");
 
-        Log.d(TAG, "FileAutoBackUpBroadCast: FileSyncIntervals: " + sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_sync_interval), null));
-        String syncinterval = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_sync_interval), null);
-        String[] syncintervalArray = getResources().getStringArray(R.array.auto_sync_intervals);
-        if (syncinterval == null) {
-            syncinterval = syncintervalArray[4];
-        }
-
-        if (syncinterval.equals(syncintervalArray[0])) {
-            // 24 Hrs Sync
-            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_DAY,
-                    AlarmManager.INTERVAL_DAY, pendingIntent);
-
-        } else if (syncinterval.equals(syncintervalArray[1])) {
-            // 12 Hrs Sync
-            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HALF_DAY,
-                    AlarmManager.INTERVAL_HALF_DAY, pendingIntent);
-
-        } else if (syncinterval.equals(syncintervalArray[2])) {
-            // 1 Hrs Sync
-            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HOUR,
-                    AlarmManager.INTERVAL_HOUR, pendingIntent);
-
-        } else if (syncinterval.equals(syncintervalArray[3])) {
-            // half Hrs Sync
-            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HALF_HOUR,
-                    AlarmManager.INTERVAL_HALF_HOUR, pendingIntent);
-
-        } else if (syncinterval.equals(syncintervalArray[4])) {
-            // 15 min Sync
-            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_FIFTEEN_MINUTES,
-                    AlarmManager.INTERVAL_FIFTEEN_MINUTES, pendingIntent);
-
+            }
         } else {
-            // 15 min Sync
-            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_FIFTEEN_MINUTES,
-                    AlarmManager.INTERVAL_FIFTEEN_MINUTES, pendingIntent);
+            Log.d("myTag", "#657456 Alarm is not active");
+
+            int i = 10;
+            Intent intent = new Intent(this, ScannerBroadcastReceiver.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                    this.getApplicationContext(), 234324243, intent, 0);
+            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+            //  alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
+            //        + (i * 1000), pendingIntent);
+            if (SMSAutoBackup) {
+
+                Log.d(TAG, "FileAutoBackUpBroadCast: FileSyncIntervals: " + sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_sync_interval), null));
+                String syncinterval = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_sync_interval), null);
+                String[] syncintervalArray = getResources().getStringArray(R.array.auto_sync_intervals);
+                if (syncinterval == null) {
+                    syncinterval = syncintervalArray[4];
+                }
+
+                if (syncinterval.equals(syncintervalArray[0])) {
+                    // 24 Hrs Sync
+                    alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                            SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_DAY,
+                            AlarmManager.INTERVAL_DAY, pendingIntent);
+
+                } else if (syncinterval.equals(syncintervalArray[1])) {
+                    // 12 Hrs Sync
+                    alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                            SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HALF_DAY,
+                            AlarmManager.INTERVAL_HALF_DAY, pendingIntent);
+
+                } else if (syncinterval.equals(syncintervalArray[2])) {
+                    // 1 Hrs Sync
+                    alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                            SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HOUR,
+                            AlarmManager.INTERVAL_HOUR, pendingIntent);
+
+                } else if (syncinterval.equals(syncintervalArray[3])) {
+                    // half Hrs Sync
+                    alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                            SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HALF_HOUR,
+                            AlarmManager.INTERVAL_HALF_HOUR, pendingIntent);
+
+                } else if (syncinterval.equals(syncintervalArray[4])) {
+                    // 15 min Sync
+                    alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                            SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_FIFTEEN_MINUTES,
+                            AlarmManager.INTERVAL_FIFTEEN_MINUTES, pendingIntent);
+
+                } else {
+                    // 15 min Sync
+                    alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                            SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_FIFTEEN_MINUTES,
+                            AlarmManager.INTERVAL_FIFTEEN_MINUTES, pendingIntent);
+
+                }
+
+            } else {
+                Log.d(TAG, "FileAutoBackUpBroadCast: #657456 AlarmCancled: Auto Sync OFF");
+                alarmManager.cancel(pendingIntent);
+            }
 
         }
 

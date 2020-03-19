@@ -21,7 +21,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import devesh.ephrine.backup.sms.payment.CheckOutActivity;
 import io.fabric.sdk.android.Fabric;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -159,6 +158,16 @@ public class SettingsActivity extends AppCompatActivity {
                     Intent intent = new Intent(Intent.ACTION_VIEW);
                     intent.setData(Uri.parse("https://www.ephrine.in/privacy-policy"));
                     startActivity(intent);
+
+                    return true;
+                }
+            });
+
+            Preference PrefOpenSource = findPreference("osl");
+            PrefOpenSource.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                public boolean onPreferenceClick(Preference preference) {
+                    //open browser or intent here
+
 
                     return true;
                 }
