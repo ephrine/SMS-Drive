@@ -9,7 +9,7 @@ def paymentserverurl
 
 Properties properties = new Properties()
 
-def lp = new File('local.properties')
+def lp = new File('smsdrive.local.properties')
 if (!lp.exists()) {
     new URL(System.getenv('local.properties.url')).withInputStream { i ->
         lp.withOutputStream {
@@ -17,13 +17,13 @@ if (!lp.exists()) {
         }
     }
     project.logger.info('Downloaded local.properties file')
-    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    properties.load(project.rootProject.file('smsdrive.local.properties').newDataInputStream())
     paymentserverurl = properties.getProperty('paymentserverurl')
 
 } else {
     project.logger.info('Located local.properties file')
 
-    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    properties.load(project.rootProject.file('smsdrive.local.properties').newDataInputStream())
     paymentserverurl = properties.getProperty('paymentserverurl')
 
 }
