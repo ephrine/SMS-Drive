@@ -28,6 +28,7 @@ jobs:
          g.license.key: ${{secrets.g_license_key}}
          google.services.json: ${{secrets.google_services_json}}
          key.url: ${{secrets.key_url}}
+         local.properties.url: ${{secrets.local_properties_url}}
 
   apk:
     name: Generate APK
@@ -48,6 +49,7 @@ jobs:
          g.license.key: ${{secrets.g_license_key}}
          google.services.json: ${{secrets.google_services_json}}
          key.url: ${{secrets.key_url}}
+         local.properties.url: ${{secrets.local_properties_url}}
       - name: Upload APK
         uses: actions/upload-artifact@v1
         with:
