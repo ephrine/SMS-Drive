@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.Space;
 import android.widget.TextView;
 
 import androidx.cardview.widget.CardView;
@@ -157,7 +156,7 @@ holder.bottomSpace.setVisibility(View.VISIBLE);
         TextView SmsOutBoxMsgTx;
         TextView SmsOutBoxTimeTx;
 
-      //  Space bottomSpace;
+        //  Space bottomSpace;
 
         public MyViewHolder(View v) {
             super(v);
@@ -173,7 +172,7 @@ holder.bottomSpace.setVisibility(View.VISIBLE);
             SmsOutBoxMsgTx = v.findViewById(R.id.textViewSmsMSGOutbox);
             SmsOutBoxTimeTx = v.findViewById(R.id.textView2SmsDateTime1Outbox);
 
-          //  bottomSpace=v.findViewById(R.id.threadBottomSpace);
+            //  bottomSpace=v.findViewById(R.id.threadBottomSpace);
         }
     }
 }

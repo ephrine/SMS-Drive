@@ -25,11 +25,11 @@ import io.fabric.sdk.android.Fabric;
 
 public class StartActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 123;
-    private FirebaseAuth mAuth;
+    private static final int DEFAULT_SMS_CODE = 1;
+    final String TAG = "StartActivity ";
+    final Boolean isDefaultSmsApp = true;
     FirebaseUser currentUser;
-    final String TAG="StartActivity ";
-    final Boolean isDefaultSmsApp=true;
-    private static final int DEFAULT_SMS_CODE= 1;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,9 +51,9 @@ public class StartActivity extends AppCompatActivity {
 
                     if (currentUser != null) {
 
-                        if(isDefaultSmsApp){
+                        if (isDefaultSmsApp) {
                             appstart();
-                        }else {
+                        } else {
                             runOnUiThread(new Runnable() {
 
                                 @Override
@@ -66,7 +66,7 @@ public class StartActivity extends AppCompatActivity {
                             });
                         }
 
-                    }else{
+                    } else {
                         runOnUiThread(new Runnable() {
 
                             @Override
@@ -82,7 +82,7 @@ public class StartActivity extends AppCompatActivity {
 
 
                 } catch (Exception e) {
-                    Log.d(TAG, "run: ERROR \n"+e);
+                    Log.d(TAG, "run: ERROR \n" + e);
                 }
             }
         };
@@ -127,7 +127,7 @@ public class StartActivity extends AppCompatActivity {
 
     }
 
-    void appstart(){
+    void appstart() {
         Crashlytics.setUserIdentifier(currentUser.getUid());
 
         Intent intent = new Intent(StartActivity.this, MainActivity.class);
@@ -139,34 +139,34 @@ public class StartActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-if(requestCode==DEFAULT_SMS_CODE){
-    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-    Intent intent = new Intent(this, MainActivity.class);
+        if (requestCode == DEFAULT_SMS_CODE) {
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            Intent intent = new Intent(this, MainActivity.class);
 
-    //  String message = editText.getText().toString();
-    //intent.putExtra(EXTRA_MESSAGE, message);
-    startActivity(intent);
-    StartActivity.this.finish();
+            //  String message = editText.getText().toString();
+            //intent.putExtra(EXTRA_MESSAGE, message);
+            startActivity(intent);
+            StartActivity.this.finish();
 
-}
+        }
         if (requestCode == RC_SIGN_IN) {
             IdpResponse response = IdpResponse.fromResultIntent(data);
 
             if (resultCode == RESULT_OK) {
                 // Successfully signed in
-               if(isDefaultSmsApp) {
+                if (isDefaultSmsApp) {
 
-                   FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                   Intent intent = new Intent(this, MainActivity.class);
+                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                    Intent intent = new Intent(this, MainActivity.class);
 
-                   //  String message = editText.getText().toString();
-                   //intent.putExtra(EXTRA_MESSAGE, message);
-                   startActivity(intent);
-                   StartActivity.this.finish();
-               }else{
-                   setContentView(R.layout.set_default);
-               }
-               // ...
+                    //  String message = editText.getText().toString();
+                    //intent.putExtra(EXTRA_MESSAGE, message);
+                    startActivity(intent);
+                    StartActivity.this.finish();
+                } else {
+                    setContentView(R.layout.set_default);
+                }
+                // ...
             } else {
                 // Sign in failed. If response is null the user canceled the
                 // sign-in flow using the back button. Otherwise check
@@ -194,7 +194,7 @@ if(requestCode==DEFAULT_SMS_CODE){
                 RC_SIGN_IN);
     }
 
-    public void privacyClick(View v){
+    public void privacyClick(View v) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(Uri.parse("https://www.ephrine.in/privacy-policy"));
         startActivity(intent);
@@ -202,24 +202,24 @@ if(requestCode==DEFAULT_SMS_CODE){
     }
 
 
-    public void setDefaultSmsApp1(View v){
+    public void setDefaultSmsApp1(View v) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             final String myPackageName = getPackageName();
             if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
 
-      //          Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
-        //        intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, myPackageName);
-          //      startActivityForResult(intent, 1);
-          //      isDefaultSmsApp=true;
+                //          Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
+                //        intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, myPackageName);
+                //      startActivityForResult(intent, 1);
+                //      isDefaultSmsApp=true;
 
-            }else {
-          //      isDefaultSmsApp=true;
+            } else {
+                //      isDefaultSmsApp=true;
                 appstart();
             }
 
         } else {
-      //      isDefaultSmsApp=true;
+            //      isDefaultSmsApp=true;
             // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
             appstart();
         }
@@ -227,21 +227,21 @@ if(requestCode==DEFAULT_SMS_CODE){
 
     }
 
-    void isDefaultApp(){
+    void isDefaultApp() {
         boolean a;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             final String myPackageName = getPackageName();
             if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
-                a=false;
-            }else {
-                a=true;
+                a = false;
+            } else {
+                a = true;
             }
         } else {
-            a=true;
+            a = true;
             // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
         }
 
-     //   isDefaultSmsApp=a;
+        //   isDefaultSmsApp=a;
     }
 
     @Override

@@ -1,11 +1,5 @@
 package devesh.ephrine.backup.sms.payment;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.multidex.MultiDex;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,13 +8,17 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.multidex.MultiDex;
+
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.HttpsCallableResult;
 import com.google.gson.Gson;
@@ -40,11 +38,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Type;
-import java.security.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -63,24 +56,20 @@ import okhttp3.Response;
 public class CheckOutActivity extends AppCompatActivity {
 
     private static final String BACKEND_URL = BuildConfig.Heroku_Server_URL;
+    public String CardHolderNameSTR, BillingAddressSTR, EmailIdSTR, MoneyAmount, Currency, PostalCode;
+    public String UserUID, PurchaseDate, ExpiryDate, PurchaseId;
     String TAG = "CheckOutActivity ";
     CardInputWidget cardInputWidget;
     EditText CardHolderNameET,
             BillingAddressET,
             EmailIdET;
-
-    public String CardHolderNameSTR, BillingAddressSTR, EmailIdSTR, MoneyAmount, Currency,PostalCode;
-
-    public String UserUID, PurchaseDate, ExpiryDate,PurchaseId;
-
     OkHttpClient httpClient;
+    String PaymentDesc;
+    FirebaseDatabase database;
+    String amount;
+    String created;
     private String paymentIntentClientSecret;
     private Stripe stripe;
-
-    String PaymentDesc;
-
-    FirebaseDatabase database;
-
     private FirebaseFunctions mFunctions;
 
     @Override
@@ -95,9 +84,9 @@ public class CheckOutActivity extends AppCompatActivity {
                 .readTimeout(60, TimeUnit.SECONDS)
                 .build();
 
-        PurchaseDate="";
-        ExpiryDate="";
-        PurchaseId="";
+        PurchaseDate = "";
+        ExpiryDate = "";
+        PurchaseId = "";
 
         database = FirebaseDatabase.getInstance();
 
@@ -109,12 +98,11 @@ public class CheckOutActivity extends AppCompatActivity {
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
-        UserUID=user.getPhoneNumber().replace("+","x");
+            UserUID = user.getPhoneNumber().replace("+", "x");
         }
-            //startCheckout();
+        //startCheckout();
 
     }
-
 
     public void pay(View v) {
 
@@ -150,9 +138,9 @@ public class CheckOutActivity extends AppCompatActivity {
     }
 
     private void startCheckout() {
-        PaymentDesc="SMS Drive Subscription of Mr. ABC Person";
-MoneyAmount="100";
-Currency="inr";
+        PaymentDesc = "SMS Drive Subscription of Mr. ABC Person";
+        MoneyAmount = "100";
+        Currency = "inr";
 
 
         //   CardHolderNameSTR="Mr Demo";
@@ -161,22 +149,21 @@ Currency="inr";
         MediaType mediaType = MediaType.get("application/json; charset=utf-8");
         String json = "{"
                 + "\"currency\":\"inr\","
-                + "\"description\":\""+PaymentDesc+"\","
-                + "\"name\":\""+CardHolderNameSTR+"\","
-                + "\"address\":\""+BillingAddressSTR+"\","
-                + "\"amount\":\""+MoneyAmount+"\","
-                + "\"currency\":\""+Currency+"\","
+                + "\"description\":\"" + PaymentDesc + "\","
+                + "\"name\":\"" + CardHolderNameSTR + "\","
+                + "\"address\":\"" + BillingAddressSTR + "\","
+                + "\"amount\":\"" + MoneyAmount + "\","
+                + "\"currency\":\"" + Currency + "\","
                 + "\"items\":["
                 + "{\"id\":\"sms_drive_subscription\"}"
                 + "]"
                 + "}";
-        Log.d(TAG, "startCheckout: JSON Prep:\n\n"+json+"\n\n");
+        Log.d(TAG, "startCheckout: JSON Prep:\n\n" + json + "\n\n");
         RequestBody body = RequestBody.create(json, mediaType);
         Request request = new Request.Builder()
                 .url(BACKEND_URL + "create-payment-intent")
                 .post(body)
                 .build();
-
 
 
         httpClient.newCall(request)
@@ -188,8 +175,6 @@ Currency="inr";
 
 
     }
-
-
 
     private void displayAlert(@NonNull String title,
                               @Nullable String message,
@@ -250,7 +235,7 @@ Currency="inr";
         MultiDex.install(this);
     }
 
-    public void initPayment(){
+    public void initPayment() {
         PaymentMethodCreateParams params = cardInputWidget.getPaymentMethodCreateParams();
         if (params != null) {
             ConfirmPaymentIntentParams confirmParams = ConfirmPaymentIntentParams
@@ -259,6 +244,78 @@ Currency="inr";
         } else {
             Toast.makeText(this, "Please Enter Card Number for Payment", Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void saveResult(String g) {
+        try {
+            // get JSONObject from JSON file
+            JSONObject obj = new JSONObject(g);
+            // fetch JSONObject named employee
+            //  JSONObject employee = obj.getJSONObject("employee");
+            // get employee name and salary
+            //    name = employee.getString("name");
+            //    salary = employee.getString("salary");
+            // set employee name and salary in TextView's
+            //   employeeName.setText("Name: "+name);
+            //  employeeSalary.setText("Salary: "+salary);
+
+            PurchaseDate = obj.getString("created");
+            PurchaseId = obj.getString("id");
+            //  Log.d(TAG, "saveResult: \nPurhcase Date:"+PurchaseDate+"\nPurchase ID:"+PurchaseId);
+            SavePurchase();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e(TAG, "saveResult: ERROR: \n" + e.toString());
+        }
+
+    }
+
+    private Task<String> SavePurchase() {
+
+        ExpiryDate = "x";
+        java.util.Date time = new java.util.Date((long) Long.parseLong(PurchaseDate) * 1000);
+
+        // Calendar cal = Calendar.getInstance();
+        // cal.setTime(time);
+        // add 12 months
+        //  cal.add(Calendar.YEAR, 1);
+        //  ExpiryDate=String.valueOf(cal.getTime());
+
+        // java.util.Date exptime=new java.util.Date((long)Long.parseLong(ExpiryDate)*1000);
+        Long epochTimeExp = Long.parseLong(PurchaseDate) + 31556926;// Add 1 Year='31556926' seconds
+        ExpiryDate = String.valueOf(epochTimeExp);
+        java.util.Date Exptime = new java.util.Date((long) Long.parseLong(ExpiryDate) * 1000);
+
+        Map<String, String> data = new HashMap<>();
+        data.put("userid", UserUID);
+        data.put("date", PurchaseDate);
+        data.put("purchaseid", PurchaseId);
+        data.put("expirydate", ExpiryDate);
+        data.put("fdate", String.valueOf(time));
+        data.put("fexpdate", String.valueOf(Exptime));
+
+        Log.d(TAG, "SavePurchase: " + data);
+
+        //     DatabaseReference UpdateSubscription = database.getReference("/users/" + UserUID + "/payments/smsdrive");
+        //   UpdateSubscription.setValue(data);
+
+        return mFunctions
+                .getHttpsCallable("smsDrivePurchaseSave")
+                .call(data)
+                .continueWith(new Continuation<HttpsCallableResult, String>() {
+                    @Override
+                    public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
+                        // This continuation runs on either success or failure, but if the task
+                        // has failed then getResult() will throw an Exception which will be
+                        // propagated down.
+                        String result = (String) task.getResult().getData();
+                        Log.d(TAG, "FUNCTIONS then: resut:" + result);
+                        return result;
+                    }
+                });
+
+
     }
 
     private static final class PayCallback implements Callback {
@@ -325,7 +382,7 @@ Currency="inr";
                         true
                 );
 
-                Log.d("STRIPE ", "onSuccess:\n\n "+gson.toJson(paymentIntent));
+                Log.d("STRIPE ", "onSuccess:\n\n " + gson.toJson(paymentIntent));
                 activity.saveResult(gson.toJson(paymentIntent));
 
             } else if (status == PaymentIntent.Status.RequiresPaymentMethod) {
@@ -349,82 +406,6 @@ Currency="inr";
             activity.displayAlert("Error", e.toString(), false);
         }
     }
-
-    String amount;
-    String created;
-    private void saveResult(String g){
-        try {
-            // get JSONObject from JSON file
-            JSONObject obj = new JSONObject(g);
-            // fetch JSONObject named employee
-          //  JSONObject employee = obj.getJSONObject("employee");
-            // get employee name and salary
-        //    name = employee.getString("name");
-        //    salary = employee.getString("salary");
-            // set employee name and salary in TextView's
-         //   employeeName.setText("Name: "+name);
-          //  employeeSalary.setText("Salary: "+salary);
-
-            PurchaseDate=obj.getString("created");
-            PurchaseId=obj.getString("id");
-          //  Log.d(TAG, "saveResult: \nPurhcase Date:"+PurchaseDate+"\nPurchase ID:"+PurchaseId);
-            SavePurchase();
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Log.e(TAG, "saveResult: ERROR: \n"+e.toString() );
-        }
-
-    }
-
-
-    private Task<String> SavePurchase() {
-
-        ExpiryDate="x";
-        java.util.Date time=new java.util.Date((long)Long.parseLong(PurchaseDate)*1000);
-
-       // Calendar cal = Calendar.getInstance();
-       // cal.setTime(time);
-        // add 12 months
-      //  cal.add(Calendar.YEAR, 1);
-      //  ExpiryDate=String.valueOf(cal.getTime());
-
-       // java.util.Date exptime=new java.util.Date((long)Long.parseLong(ExpiryDate)*1000);
-        Long epochTimeExp=Long.parseLong(PurchaseDate)+31556926;// Add 1 Year='31556926' seconds
-        ExpiryDate=String.valueOf(epochTimeExp);
-        java.util.Date Exptime=new java.util.Date((long)Long.parseLong(ExpiryDate)*1000);
-
-        Map<String, String> data = new HashMap<>();
-        data.put("userid", UserUID);
-        data.put("date", PurchaseDate);
-        data.put("purchaseid", PurchaseId);
-        data.put("expirydate", ExpiryDate);
-        data.put("fdate", String.valueOf(time));
-        data.put("fexpdate", String.valueOf(Exptime));
-
-        Log.d(TAG, "SavePurchase: "+data);
-
-   //     DatabaseReference UpdateSubscription = database.getReference("/users/" + UserUID + "/payments/smsdrive");
-     //   UpdateSubscription.setValue(data);
-
-        return mFunctions
-                .getHttpsCallable("smsDrivePurchaseSave")
-                .call(data)
-                .continueWith(new Continuation<HttpsCallableResult, String>() {
-                    @Override
-                    public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
-                        // This continuation runs on either success or failure, but if the task
-                        // has failed then getResult() will throw an Exception which will be
-                        // propagated down.
-                        String result = (String) task.getResult().getData();
-                        Log.d(TAG, "FUNCTIONS then: resut:" +result);
-                        return result;
-                    }
-                });
-
-
-    }
-
 
 
 }

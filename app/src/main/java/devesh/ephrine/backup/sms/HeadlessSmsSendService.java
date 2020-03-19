@@ -13,7 +13,8 @@ import android.util.Log;
  */
 
 public class HeadlessSmsSendService extends IntentService {
-final String TAG="HeadlessSmsSendService ";
+    final String TAG = "HeadlessSmsSendService ";
+
     public HeadlessSmsSendService() {
 
         super(HeadlessSmsSendService.class.getName());
@@ -23,7 +24,7 @@ final String TAG="HeadlessSmsSendService ";
     @Override
     protected void onHandleIntent(Intent intent) {
         Log.d(TAG, "onHandleIntent: ");
-      //  throw new UnsupportedOperationException("HeadlessSmsSendService");
+        //  throw new UnsupportedOperationException("HeadlessSmsSendService");
     }
 
 

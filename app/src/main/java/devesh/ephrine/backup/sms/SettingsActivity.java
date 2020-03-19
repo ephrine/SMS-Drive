@@ -128,12 +128,12 @@ public class SettingsActivity extends AppCompatActivity {
             PrefManageSubscription.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 public boolean onPreferenceClick(Preference preference) {
 
-                    Intent intent = new Intent(getActivity(), CheckOutActivity.class);
+  /*                  Intent intent = new Intent(getActivity(), CheckOutActivity.class);
 
-                          //  String message = editText.getText().toString();
-                            //intent.putExtra(EXTRA_MESSAGE, message);
-                            startActivity(intent);
-
+                    //  String message = editText.getText().toString();
+                    //intent.putExtra(EXTRA_MESSAGE, message);
+                    startActivity(intent);
+*/
                     return true;
                 }
             });

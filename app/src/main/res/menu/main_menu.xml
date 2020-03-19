@@ -2,12 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
- <item
-         android:id="@+id/newmsg"
-         android:icon="@drawable/ic_chat_white_50dp"
-         android:title="New Message"
-     android:visible="false"
-         app:showAsAction="always" />
+    <item
+        android:id="@+id/newmsg"
+        android:icon="@drawable/ic_chat_white_50dp"
+        android:title="New Message"
+        android:visible="false"
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/syncnow"
@@ -21,7 +21,7 @@
     <item
         android:id="@+id/tutorial"
         android:title="Tutorial"
-        android:visible="false"/>
+        android:visible="false" />
 
     <item
         android:id="@+id/settings"

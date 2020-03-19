@@ -56,17 +56,18 @@ public class ThreadSmsActivity extends AppCompatActivity {
     ArrayList<HashMap<String, String>> customList = new ArrayList<HashMap<String, String>>();
     ArrayList<HashMap<String, String>> tmpList = new ArrayList<HashMap<String, String>>();
     LoadSms loadsmsTask;
-    private Handler handler = new Handler();
-
     String storage;
     LinearLayout NewMsgBoxLL;
+    ArrayList<HashMap<String, String>> CloudSMS;
+    ArrayList<HashMap<String, String>> SortSMS = new ArrayList<>();
+    private Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
-setContentView(R.layout.sms_activity_thread);
+        setContentView(R.layout.sms_activity_thread);
         //      SmsThreadHashMap = (HashMap<String, DataSnapshot>)intent.getSerializableExtra("smsthread");
         //  SmsThreadHashMap = Parcels.unwrap(getIntent().getParcelableExtra("mylist"))(HashMap<String, DataSnapshot>)intent.getBundleExtra("smsthread");
         //  id = intent.getStringExtra("smsthreadid");
@@ -79,7 +80,7 @@ setContentView(R.layout.sms_activity_thread);
         new_message = (EditText) findViewById(R.id.newTextBox);
 //        send_message = (ImageButton) findViewById(R.id.send_message);
 
-        NewMsgBoxLL=(LinearLayout) findViewById(R.id.msgTextBoxView);
+        NewMsgBoxLL = (LinearLayout) findViewById(R.id.msgTextBoxView);
 
         setContentView(R.layout.sms_activity_thread);
         getSupportActionBar().setTitle(name);
@@ -97,17 +98,17 @@ setContentView(R.layout.sms_activity_thread);
 
             UserUID = user.getPhoneNumber().replace("+", "x");
             Log.d(TAG, "onStart: User UID:" + UserUID);
-           if(storage.equals("D")){
-               startLoadingDeviceSms();
-               NewMsgBoxLL=(LinearLayout) findViewById(R.id.msgTextBoxView);
+            if (storage.equals("D")) {
+                startLoadingDeviceSms();
+                NewMsgBoxLL = (LinearLayout) findViewById(R.id.msgTextBoxView);
 
-               NewMsgBoxLL.setVisibility(View.VISIBLE);
-           }else {
-               startLoadingCloudSms();
-               NewMsgBoxLL=(LinearLayout) findViewById(R.id.msgTextBoxView);
+                NewMsgBoxLL.setVisibility(View.VISIBLE);
+            } else {
+                startLoadingCloudSms();
+                NewMsgBoxLL = (LinearLayout) findViewById(R.id.msgTextBoxView);
 
-               NewMsgBoxLL.setVisibility(View.GONE);
-           }
+                NewMsgBoxLL.setVisibility(View.GONE);
+            }
 
             //  DownloadThread();
         } else {
@@ -118,9 +119,9 @@ setContentView(R.layout.sms_activity_thread);
             startActivity(intent1);
         }
 
-        if(!isDefaultApp()){
+        if (!isDefaultApp()) {
             NewMsgBoxLL.setVisibility(View.GONE);
-        }else {
+        } else {
             NewMsgBoxLL.setVisibility(View.VISIBLE);
         }
 
@@ -138,33 +139,31 @@ setContentView(R.layout.sms_activity_thread);
         };
         handler.postDelayed(r, 0);
     }
-    ArrayList<HashMap<String, String>> CloudSMS;
-    ArrayList<HashMap<String, String>> SortSMS=new ArrayList<>();
 
-    public void startLoadingCloudSms(){
+    public void startLoadingCloudSms() {
         Toast.makeText(this, "Loading....", Toast.LENGTH_SHORT).show();
         try {
 
             CloudSMS = (ArrayList<HashMap<String, String>>) Function.readCachedFile(this, getString(R.string.file_cloud_sms));
-            int t=CloudSMS.size();
+            int t = CloudSMS.size();
 
-            int end=t-1;
-            Log.d(TAG, "startLoadingCloudSms: Sorting SMS Started \n"+ "Total:"+t+"\n End:"+end);
+            int end = t - 1;
+            Log.d(TAG, "startLoadingCloudSms: Sorting SMS Started \n" + "Total:" + t + "\n End:" + end);
 
-            for(int i=0;i<t;i++){
-            //    Log.d(TAG, "startLoadingCloudSms: Sorting SMS...");
+            for (int i = 0; i < t; i++) {
+                //    Log.d(TAG, "startLoadingCloudSms: Sorting SMS...");
 
-                if(CloudSMS.get(i).get(Function.KEY_PHONE).equals(address)){
+                if (CloudSMS.get(i).get(Function.KEY_PHONE).equals(address)) {
 
-                    if(SortSMS.contains(CloudSMS.get(i))){
+                    if (SortSMS.contains(CloudSMS.get(i))) {
 
-                    }else {
+                    } else {
 
                         SortSMS.add(CloudSMS.get(i));
                     }
-                    Log.d(TAG, "startLoadingCloudSms: Cloud MSG: "+ CloudSMS.get(i));
+                    Log.d(TAG, "startLoadingCloudSms: Cloud MSG: " + CloudSMS.get(i));
 
-                    if(i==end){
+                    if (i == end) {
                         Collections.sort(SortSMS, new MapComparator(Function.KEY_TIMESTAMP, "asc"));
 
                         Log.d(TAG, "startLoadingCloudSms: END OF SORTING---------");
@@ -172,7 +171,7 @@ setContentView(R.layout.sms_activity_thread);
 
                     }
 
-                }else{
+                } else {
                 }
 
             }
@@ -193,12 +192,117 @@ setContentView(R.layout.sms_activity_thread);
             recyclerView.setAdapter(mAdapter);
             layoutManager.scrollToPosition(smsList.size() - 1); // yourList is the ArrayList that you are passing to your RecyclerView Adapter.
 
-        }catch (Exception e){
-            Log.d(TAG, "startLoadingCloudSms: ERROR #65 \n"+e);
+        } catch (Exception e) {
+            Log.d(TAG, "startLoadingCloudSms: ERROR #65 \n" + e);
         }
 
 
+    }
 
+    public void SendMSG(View v) {
+
+        new_message = (EditText) findViewById(R.id.newTextBox);
+
+        String msgtext = new_message.getText().toString();
+
+        if (msgtext.length() > 0) {
+            String tmp_msg = msgtext;
+            new_message.setText("Sending....");
+            new_message.setEnabled(false);
+
+            if (Function.sendSMS(address, tmp_msg)) {
+                new_message.setText("");
+                new_message.setEnabled(true);
+                // Creating a custom list for newly added sms
+                customList.clear();
+                customList.addAll(smsList);
+                customList.add(Function.mappingInbox(null, null, null, null, tmp_msg, "2", null, "Sending...", "1"));
+                long smsReceiveTime = System.currentTimeMillis();
+
+                saveSms(address, tmp_msg, "1", String.valueOf(smsReceiveTime), "outbox");
+                startLoadingDeviceSms();
+            } else {
+                new_message.setText(tmp_msg);
+                new_message.setEnabled(true);
+                Log.d(TAG, "SendMSG: ERROR !!");
+            }
+
+
+        } else {
+            Log.d(TAG, "SendMSG: MSG text too short");
+        }
+
+    }
+
+    public boolean saveSms(String phoneNumber, String message, String readState, String time, String folderName) {
+        boolean ret = false;
+        try {
+            ContentValues values = new ContentValues();
+            values.put("address", phoneNumber);
+            values.put("body", message);
+            values.put("read", readState); //"0" for have not read sms and "1" for have read sms
+            values.put("date", time);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                Uri uri = Telephony.Sms.Sent.CONTENT_URI;
+                if (folderName.equals("inbox")) {
+                    uri = Telephony.Sms.Inbox.CONTENT_URI;
+                }
+                getContentResolver().insert(uri, values);
+            } else {
+                getContentResolver().insert(Uri.parse("content://sms/" + folderName), values);
+            }
+
+            ret = true;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            ret = false;
+        }
+        return ret;
+    }
+
+    private void markMessageRead(Context context, String number, String body) {
+
+        Uri uri = Uri.parse("content://sms/inbox");
+        Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+        try {
+
+            while (cursor.moveToNext()) {
+                if ((cursor.getString(cursor.getColumnIndex("address")).equals(number)) && (cursor.getInt(cursor.getColumnIndex("read")) == 0)) {
+                    if (cursor.getString(cursor.getColumnIndex("body")).startsWith(body)) {
+                        String SmsMessageId = cursor.getString(cursor.getColumnIndex("_id"));
+                        ContentValues values = new ContentValues();
+                        values.put("read", "1");
+                        context.getContentResolver().update(Uri.parse("content://sms/inbox"), values, "_id=" + SmsMessageId, null);
+                        return;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e("Mark Read", "Error in Read: " + e.toString());
+        }
+    }
+
+    boolean isDefaultApp() {
+        /*
+        boolean a;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            final String myPackageName = getPackageName();
+            if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
+
+                a=false;
+
+
+            }else {
+                a=true;
+            }
+
+        } else {
+            a=true;
+            // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
+        }
+        */
+        return false;
     }
 
     class LoadSms extends AsyncTask<String, Void, String> {
@@ -229,12 +333,12 @@ setContentView(R.layout.sms_activity_thread);
                         String timestamp = c.getString(c.getColumnIndexOrThrow("date"));
                         phone = c.getString(c.getColumnIndexOrThrow("address"));
 
-                       // markMessageRead(ThreadSmsActivity.this,phone,msg);
+                        // markMessageRead(ThreadSmsActivity.this,phone,msg);
                         ContentValues values = new ContentValues();
                         values.put("read", "1");
                         getContentResolver().update(Uri.parse("content://sms/inbox"), values, "_id=" + _id, null);
 
-                        tmpList.add(Function.mappingInbox(_id, thread_id, name, phone, msg, type, timestamp, Function.converToTime(timestamp),"1"));
+                        tmpList.add(Function.mappingInbox(_id, thread_id, name, phone, msg, type, timestamp, Function.converToTime(timestamp), "1"));
                         c.moveToNext();
                     }
                 }
@@ -274,126 +378,12 @@ setContentView(R.layout.sms_activity_thread);
                 layoutManager.scrollToPosition(smsList.size() - 1); // yourList is the ArrayList that you are passing to your RecyclerView Adapter.
 
 
-
-
             }
 
 
         }
-    }
-
-public void SendMSG(View v){
-
-    new_message = (EditText) findViewById(R.id.newTextBox);
-
-    String msgtext = new_message.getText().toString();
-
-    if(msgtext.length()>0) {
-        String tmp_msg = msgtext;
-        new_message.setText("Sending....");
-        new_message.setEnabled(false);
-
-        if(Function.sendSMS(address, tmp_msg))
-        {
-            new_message.setText("");
-            new_message.setEnabled(true);
-            // Creating a custom list for newly added sms
-            customList.clear();
-            customList.addAll(smsList);
-            customList.add(Function.mappingInbox(null, null, null, null, tmp_msg, "2", null, "Sending...","1"));
-            long smsReceiveTime = System.currentTimeMillis();
-
-            saveSms(address,tmp_msg,"1",String.valueOf(smsReceiveTime),"outbox");
-            startLoadingDeviceSms();
-        }else{
-            new_message.setText(tmp_msg);
-            new_message.setEnabled(true);
-            Log.d(TAG, "SendMSG: ERROR !!");
-        }
-
-
-    }else{
-        Log.d(TAG, "SendMSG: MSG text too short");
-    }
-
-}
-
-
-    public boolean saveSms(String phoneNumber, String message, String readState, String time, String folderName) {
-        boolean ret = false;
-        try {
-            ContentValues values = new ContentValues();
-            values.put("address", phoneNumber);
-            values.put("body", message);
-            values.put("read", readState); //"0" for have not read sms and "1" for have read sms
-            values.put("date", time);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                Uri uri = Telephony.Sms.Sent.CONTENT_URI;
-                if (folderName.equals("inbox")) {
-                    uri = Telephony.Sms.Inbox.CONTENT_URI;
-                }
-                getContentResolver().insert(uri, values);
-            } else {
-                getContentResolver().insert(Uri.parse("content://sms/" + folderName), values);
-            }
-
-            ret = true;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            ret = false;
-        }
-        return ret;
-    }
-
-    private void markMessageRead(Context context, String number, String body) {
-
-        Uri uri = Uri.parse("content://sms/inbox");
-        Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
-        try{
-
-            while (cursor.moveToNext()) {
-                if ((cursor.getString(cursor.getColumnIndex("address")).equals(number)) && (cursor.getInt(cursor.getColumnIndex("read")) == 0)) {
-                    if (cursor.getString(cursor.getColumnIndex("body")).startsWith(body)) {
-                        String SmsMessageId = cursor.getString(cursor.getColumnIndex("_id"));
-                        ContentValues values = new ContentValues();
-                        values.put("read", "1");
-                        context.getContentResolver().update(Uri.parse("content://sms/inbox"), values, "_id=" + SmsMessageId, null);
-                        return;
-                    }
-                }
-            }
-        }catch(Exception e)
-        {
-            Log.e("Mark Read", "Error in Read: "+e.toString());
-        }
-    }
-
-
-    boolean isDefaultApp(){
-        /*
-        boolean a;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            final String myPackageName = getPackageName();
-            if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
-
-                a=false;
-
-
-            }else {
-                a=true;
-            }
-
-        } else {
-            a=true;
-            // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
-        }
-        */
-        return false;
     }
 }
-
-
 
 
 //HashMap<String,DataSnapshot> SmsThreadHashMap=new HashMap<>();

@@ -3,17 +3,17 @@
 
     <item
         android:id="@+id/NavDevieMenu"
-        android:title="Device"
-        android:icon="@drawable/ic_phone_iphone_white_50dp" />
+        android:icon="@drawable/ic_phone_iphone_white_50dp"
+        android:title="Device" />
 
     <item
         android:id="@+id/NavCloudMenu"
-        android:title="Cloud"
-        android:icon="@drawable/ic_cloud_circle_white_50dp"/>
+        android:icon="@drawable/ic_cloud_circle_white_50dp"
+        android:title="Cloud" />
 
     <item
         android:id="@+id/NavToolsMenu"
+        android:icon="@drawable/ic_build_black_50dp"
         android:title="Tools"
-        android:visible="false"
-        android:icon="@drawable/ic_build_black_50dp"/>
+        android:visible="false" />
 </menu>

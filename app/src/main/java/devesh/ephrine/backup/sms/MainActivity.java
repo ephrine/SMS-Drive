@@ -3,7 +3,6 @@ package devesh.ephrine.backup.sms;
 import android.Manifest;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -17,16 +16,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.provider.ContactsContract;
 import android.provider.Telephony;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.CompoundButton;
 import android.widget.ProgressBar;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -67,6 +63,7 @@ import io.fabric.sdk.android.Fabric;
 public class MainActivity extends AppCompatActivity {
     final int PERMISSION_ALL = 00000001;
     final int PERMISSION_CONTACT = 00000002;
+    final Boolean isDefaultSmsApp = true;
     //   final String DBRoot = "SMSDrive/";
     public HashMap<String, ArrayList<HashMap<String, String>>> iThread;
     DatabaseReference SMSBackupDB;
@@ -89,7 +86,11 @@ public class MainActivity extends AppCompatActivity {
     LoadSms loadsmsTask;
     String[] PERMISSIONS = {
             android.Manifest.permission.READ_CONTACTS,
-            android.Manifest.permission.READ_SMS
+            android.Manifest.permission.READ_SMS,
+
+            Manifest.permission.RECEIVE_SMS,
+            //Manifest.permission.SEND_SMS,
+            Manifest.permission.READ_PHONE_STATE
     };
     int onceOpen;
     BottomNavigationView navigation;
@@ -100,19 +101,12 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<HashMap<String, String>> CloudSms = new ArrayList<>();
     ArrayList<HashMap<String, String>> CloudThreadSms = new ArrayList<>();
     ArrayList<HashMap<String, String>> DeviceSMS = new ArrayList<>();
-
     RecyclerView CloudRecycleView;
     ArrayList<HashMap<String, String>> contactMap = new ArrayList<>();
-
-    final Boolean isDefaultSmsApp=true;
-
-    private FirebaseAuth mAuth;
-
     CardView defaultSMSAppCardViewWarning;
     TextView textView5CloudEmpty;
-
     FirebaseRemoteConfig mFirebaseRemoteConfig;
-
+    private FirebaseAuth mAuth;
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
@@ -159,6 +153,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     */
+    private FirebaseFunctions mFunctions;
 
     public static boolean hasPermissions(Context context, String... permissions) {
         if (context != null && permissions != null) {
@@ -185,12 +180,12 @@ public class MainActivity extends AppCompatActivity {
         LayoutHome = findViewById(R.id.layoutHome);
         LayoutCloud = findViewById(R.id.layoutCloud);
 
-       // defaultSMSAppCardViewWarning=findViewById(R.id.defaultSMSAppCardViewWarning);
+        // defaultSMSAppCardViewWarning=findViewById(R.id.defaultSMSAppCardViewWarning);
         mySwipeRefreshLayout = findViewById(R.id.swipeRefresh);
 
         loadingCircle = findViewById(R.id.progressBar1);
         iThread = new HashMap<>();
- textView5CloudEmpty=findViewById(R.id.textView5CloudEmpty);
+        textView5CloudEmpty = findViewById(R.id.textView5CloudEmpty);
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
@@ -229,17 +224,17 @@ public class MainActivity extends AppCompatActivity {
             final String myPackageName = getPackageName();
             if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
 
-         //       isDefaultSmsApp=false;
-           //     Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
-             //   intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, myPackageName);
-               // startActivityForResult(intent, 1);
+                //       isDefaultSmsApp=false;
+                //     Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
+                //   intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, myPackageName);
+                // startActivityForResult(intent, 1);
 
-            }else {
-           //     isDefaultSmsApp=true;
+            } else {
+                //     isDefaultSmsApp=true;
             }
 
         } else {
-     //       isDefaultSmsApp=true;
+            //       isDefaultSmsApp=true;
             // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
         }
 
@@ -273,30 +268,29 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                       //     Toast.makeText(MainActivity.this, "Fetch Succeeded",
-                         //           Toast.LENGTH_SHORT).show();
+                            //     Toast.makeText(MainActivity.this, "Fetch Succeeded",
+                            //           Toast.LENGTH_SHORT).show();
 
                             // After config data is successfully fetched, it must be activated before newly fetched
                             // values are returned.
                             mFirebaseRemoteConfig.activateFetched();
                             boolean isFreeAccess = mFirebaseRemoteConfig.getBoolean("SMSDrive_free_access");
-                            if(isFreeAccess){
+                            if (isFreeAccess) {
                                 Log.d(TAG, "onComplete: USER HAS FREE ACCESS OFFER !!!");
-                            }else {
+                            } else {
                                 Toast.makeText(MainActivity.this, "Please Update App from https://www.ephrine.in", Toast.LENGTH_LONG).show();
                             }
                         } else {
-                   //         Toast.makeText(MainActivity.this, "Fetch Failed",
-                     //               Toast.LENGTH_SHORT).show();
+                            //         Toast.makeText(MainActivity.this, "Fetch Failed",
+                            //               Toast.LENGTH_SHORT).show();
                         }
-                      //  displayWelcomeMessage();
+                        //  displayWelcomeMessage();
                     }
                 });
 
         fbFunction();
 
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -411,12 +405,12 @@ public class MainActivity extends AppCompatActivity {
                 return true;
 
             case R.id.newmsg:
-                if(isDefaultSmsApp){
+                if (isDefaultSmsApp) {
 
-             //       Intent intent1 = new Intent(this, NewMessageActivity.class);
-               //     startActivity(intent1);
+                    //       Intent intent1 = new Intent(this, NewMessageActivity.class);
+                    //     startActivity(intent1);
 
-                }else {
+                } else {
                     Toast.makeText(this, "Please set SMS Drive as your Default Messenger to send new message", Toast.LENGTH_SHORT).show();
                 }
                 Log.d(TAG, "onOptionsItemSelected: New Message Menu");
@@ -543,7 +537,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void AppStart() {
-      //  loadingCircle.setVisibility(View.GONE);
+        //  loadingCircle.setVisibility(View.GONE);
         mySwipeRefreshLayout.setRefreshing(false);
         if (isSubscribed) {
 
@@ -662,7 +656,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         downloadCloudSMS();
-    //    getContacts();
+        //    getContacts();
 
         isDefaultApp();
 
@@ -677,14 +671,14 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    void refreshLastSync(){
+    void refreshLastSync() {
 
-        String LastSyncDateSTR=sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_pref_last_sync), null);
-        TextView LastSyncTextView=findViewById(R.id.textView2LastSyncDate);
-        if(LastSyncDateSTR!=null){
-            LastSyncTextView.setText(getString(R.string.last_sync_at)+" "+LastSyncDateSTR);
-        }else {
-            LastSyncTextView.setText(getString(R.string.last_sync_at)+" --");
+        String LastSyncDateSTR = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_pref_last_sync), null);
+        TextView LastSyncTextView = findViewById(R.id.textView2LastSyncDate);
+        if (LastSyncDateSTR != null) {
+            LastSyncTextView.setText(getString(R.string.last_sync_at) + " " + LastSyncDateSTR);
+        } else {
+            LastSyncTextView.setText(getString(R.string.last_sync_at) + " --");
         }
 
     }
@@ -840,79 +834,79 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-  /*  void getContacts() {
-        try {
-            contactMap = (ArrayList<HashMap<String, String>>) Function.readCachedFile(MainActivity.this, getString(R.string.file_contact_list));
-            if (contactMap == null) {
-                getContactList();
-                Log.d(TAG, "getContacts: Getting Contacts List");
-            } else {
-                Log.d(TAG, "getContacts: Contact List Already present");
-            }
-        } catch (Exception e) {
-            Log.d(TAG, "getContacts: ERROR: #870" + e);
-            getContactList();
-        }
+    /*  void getContacts() {
+          try {
+              contactMap = (ArrayList<HashMap<String, String>>) Function.readCachedFile(MainActivity.this, getString(R.string.file_contact_list));
+              if (contactMap == null) {
+                  getContactList();
+                  Log.d(TAG, "getContacts: Getting Contacts List");
+              } else {
+                  Log.d(TAG, "getContacts: Contact List Already present");
+              }
+          } catch (Exception e) {
+              Log.d(TAG, "getContacts: ERROR: #870" + e);
+              getContactList();
+          }
 
-    }
+      }
 
-    private void getContactList() {
-
-
-        new Thread(new Runnable() {
-            public void run() {
-
-                ContentResolver cr = getContentResolver();
-                Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
-                        null, null, null, null);
-
-                if ((cur != null ? cur.getCount() : 0) > 0) {
-                    while (cur != null && cur.moveToNext()) {
-                        String id = cur.getString(
-                                cur.getColumnIndex(ContactsContract.Contacts._ID));
-                        String name = cur.getString(cur.getColumnIndex(
-                                ContactsContract.Contacts.DISPLAY_NAME));
-
-                        if (cur.getInt(cur.getColumnIndex(
-                                ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
-                            Cursor pCur = cr.query(
-                                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                                    null,
-                                    ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
-                                    new String[]{id}, null);
-                            while (pCur.moveToNext()) {
-                                String phoneNo = pCur.getString(pCur.getColumnIndex(
-                                        ContactsContract.CommonDataKinds.Phone.NUMBER));
-                                Log.i(TAG, "Name: " + name);
-                                Log.i(TAG, "Phone Number: " + phoneNo);
-                                HashMap<String, String> c = new HashMap<>();
-
-                                c.put("name", name);
-                                c.put("phone", phoneNo);
-                                contactMap.add(c);
-
-                                try {
-                                    Function.createCachedFile(MainActivity.this, getString(R.string.file_contact_list), contactMap);
-                                } catch (Exception e) {
-                                    Log.d(TAG, "getContactList: Error #564" + e);
-                                }
-
-                            }
-                            pCur.close();
-
-                        }
-                    }
-                }
-                if (cur != null) {
-                    cur.close();
-                }
-            }
-        }).start();
+      private void getContactList() {
 
 
-    }
-*/
-public void setDefaultSmsApp(View v){
+          new Thread(new Runnable() {
+              public void run() {
+
+                  ContentResolver cr = getContentResolver();
+                  Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
+                          null, null, null, null);
+
+                  if ((cur != null ? cur.getCount() : 0) > 0) {
+                      while (cur != null && cur.moveToNext()) {
+                          String id = cur.getString(
+                                  cur.getColumnIndex(ContactsContract.Contacts._ID));
+                          String name = cur.getString(cur.getColumnIndex(
+                                  ContactsContract.Contacts.DISPLAY_NAME));
+
+                          if (cur.getInt(cur.getColumnIndex(
+                                  ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
+                              Cursor pCur = cr.query(
+                                      ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                                      null,
+                                      ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
+                                      new String[]{id}, null);
+                              while (pCur.moveToNext()) {
+                                  String phoneNo = pCur.getString(pCur.getColumnIndex(
+                                          ContactsContract.CommonDataKinds.Phone.NUMBER));
+                                  Log.i(TAG, "Name: " + name);
+                                  Log.i(TAG, "Phone Number: " + phoneNo);
+                                  HashMap<String, String> c = new HashMap<>();
+
+                                  c.put("name", name);
+                                  c.put("phone", phoneNo);
+                                  contactMap.add(c);
+
+                                  try {
+                                      Function.createCachedFile(MainActivity.this, getString(R.string.file_contact_list), contactMap);
+                                  } catch (Exception e) {
+                                      Log.d(TAG, "getContactList: Error #564" + e);
+                                  }
+
+                              }
+                              pCur.close();
+
+                          }
+                      }
+                  }
+                  if (cur != null) {
+                      cur.close();
+                  }
+              }
+          }).start();
+
+
+      }
+  */
+    public void setDefaultSmsApp(View v) {
 /*
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
         final String myPackageName = getPackageName();
@@ -933,9 +927,9 @@ public void setDefaultSmsApp(View v){
     }
 */
 
-}
+    }
 
-void isDefaultApp(){
+    void isDefaultApp() {
   /*      boolean a;
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
         final String myPackageName = getPackageName();
@@ -949,13 +943,13 @@ void isDefaultApp(){
         // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
     }
 */
-       //  isDefaultSmsApp=a;
-}
+        //  isDefaultSmsApp=a;
+    }
 
-public void saveMSGtoDevice(View v){
-Intent intent = new Intent(this, RestoreWizardActivity.class);
+    public void saveMSGtoDevice(View v) {
+        Intent intent = new Intent(this, RestoreWizardActivity.class);
 
-      //  String message = editText.getText().toString();
+        //  String message = editText.getText().toString();
         //intent.putExtra(EXTRA_MESSAGE, message);
         startActivity(intent);
     /*
@@ -970,39 +964,39 @@ Intent intent = new Intent(this, RestoreWizardActivity.class);
         Log.d(TAG, "saveMSGtoDvice: ERROR #5643 "+e.toString());
     }
     */
-}
+    }
 
-void sortCloudSMS(ArrayList<HashMap<String, String>> c, ArrayList<HashMap<String, String>> d){
+    void sortCloudSMS(ArrayList<HashMap<String, String>> c, ArrayList<HashMap<String, String>> d) {
 
-     int t=d.size()-1;
-     int tc=c.size()-1;
-    Log.d(TAG, "sortCloudSMS: Data: Device:"+t+"\nCloud:"+tc+"\n\ndevice sms:"+d);
-    int saved;
-    saved=0;
-    for(int i=0;i<=tc;i++){
-        String msg=c.get(i).get(Function.KEY_MSG);
-        String phone=c.get(i).get(Function.KEY_PHONE);
-        String timestamp=c.get(i).get(Function.KEY_TIMESTAMP);
+        int t = d.size() - 1;
+        int tc = c.size() - 1;
+        Log.d(TAG, "sortCloudSMS: Data: Device:" + t + "\nCloud:" + tc + "\n\ndevice sms:" + d);
+        int saved;
+        saved = 0;
+        for (int i = 0; i <= tc; i++) {
+            String msg = c.get(i).get(Function.KEY_MSG);
+            String phone = c.get(i).get(Function.KEY_PHONE);
+            String timestamp = c.get(i).get(Function.KEY_TIMESTAMP);
 
-        Log.d(TAG, "sortCloudSMS: Sorting MSG "+i);
-        for(int x=0;x<=t;x++){
+            Log.d(TAG, "sortCloudSMS: Sorting MSG " + i);
+            for (int x = 0; x <= t; x++) {
 
-            if(msg.equals(d.get(x).get(Function.KEY_MSG))
-                    && phone.equals(d.get(x).get(Function.KEY_PHONE))
-                    && timestamp.equals(d.get(x).get(Function.KEY_TIMESTAMP))){
-                Log.d(TAG, "sortCloudSMS: Identical Messages: "+ c.get(x).get(Function.KEY_PHONE)+"\n t:"+c.get(x).get(Function.KEY_TIMESTAMP));
-            }else {
-                saved=saved+1;
-                // Save into Device
-                Log.d(TAG, "sortCloudSMS: Saving on Device: "+c.get(x).get(Function.KEY_PHONE)+"\n t:"+c.get(x).get(Function.KEY_TIMESTAMP)+"\n saved:"+saved);
+                if (msg.equals(d.get(x).get(Function.KEY_MSG))
+                        && phone.equals(d.get(x).get(Function.KEY_PHONE))
+                        && timestamp.equals(d.get(x).get(Function.KEY_TIMESTAMP))) {
+                    Log.d(TAG, "sortCloudSMS: Identical Messages: " + c.get(x).get(Function.KEY_PHONE) + "\n t:" + c.get(x).get(Function.KEY_TIMESTAMP));
+                } else {
+                    saved = saved + 1;
+                    // Save into Device
+                    Log.d(TAG, "sortCloudSMS: Saving on Device: " + c.get(x).get(Function.KEY_PHONE) + "\n t:" + c.get(x).get(Function.KEY_TIMESTAMP) + "\n saved:" + saved);
+                }
+
             }
 
         }
 
+
     }
-
-
-}
 
     public boolean saveSms(String phoneNumber, String message, String readState, String time, String folderName) {
         boolean ret = false;
@@ -1031,7 +1025,35 @@ void sortCloudSMS(ArrayList<HashMap<String, String>> c, ArrayList<HashMap<String
         return ret;
     }
 
+    void fbFunction() {
+        mFunctions = FirebaseFunctions.getInstance();
+//addMessage("dd");
+    }
 
+    private Task<String> addMessage(String text) {
+        // Create the arguments to the callable function.
+        Map<String, Object> data = new HashMap<>();
+        data.put("date", "date");
+        data.put("purchaseid", "purchaseid");
+        data.put("expirydate", "expirydate");
+        data.put("fdate", "fdate");
+        data.put("fexpdate", "fexpdate");
+
+        return mFunctions
+                .getHttpsCallable("smsDrivePurchaseSave")
+                .call(data)
+                .continueWith(new Continuation<HttpsCallableResult, String>() {
+                    @Override
+                    public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
+                        // This continuation runs on either success or failure, but if the task
+                        // has failed then getResult() will throw an Exception which will be
+                        // propagated down.
+                        String result = (String) task.getResult().getData();
+                        Log.d(TAG, "FUNCTIONS then: resut:" + result);
+                        return result;
+                    }
+                });
+    }
 
     //---------------- LoadSms Async Task
     class LoadSms extends AsyncTask<String, Void, String> {
@@ -1051,46 +1073,46 @@ void sortCloudSMS(ArrayList<HashMap<String, String>> c, ArrayList<HashMap<String
         protected void onPreExecute() {
             super.onPreExecute();
             smsList.clear();
-          //   loadingCircle.setVisibility(View.VISIBLE);
+            //   loadingCircle.setVisibility(View.VISIBLE);
             mySwipeRefreshLayout.setRefreshing(true);
         }
 
         protected String doInBackground(String... args) {
             String xml = "";
-if(isDefaultSmsApp){
+            if (isDefaultSmsApp) {
 
-    try {
-        Uri uriInbox = Uri.parse("content://sms/inbox");
+                try {
+                    Uri uriInbox = Uri.parse("content://sms/inbox");
 
-        Cursor inbox = getContentResolver().query(uriInbox, null, "address IS NOT NULL) GROUP BY (thread_id", null, null); // 2nd null = "address IS NOT NULL) GROUP BY (address"
-        Uri uriSent = Uri.parse("content://sms/sent");
-        Cursor sent = getContentResolver().query(uriSent, null, "address IS NOT NULL) GROUP BY (thread_id", null, null); // 2nd null = "address IS NOT NULL) GROUP BY (address"
-        Cursor c = new MergeCursor(new Cursor[]{inbox, sent}); // Attaching inbox and sent sms
-
-
-        if (c.moveToFirst()) {
-            for (int i = 0; i < c.getCount(); i++) {
-
-                String name = null;
-                String phone = "";
-                String _id = c.getString(c.getColumnIndexOrThrow("_id"));
-                String thread_id = c.getString(c.getColumnIndexOrThrow("thread_id"));
-                String msg = c.getString(c.getColumnIndexOrThrow("body"));
-                String type = c.getString(c.getColumnIndexOrThrow("type"));
-                String timestamp = c.getString(c.getColumnIndexOrThrow("date"));
-                phone = c.getString(c.getColumnIndexOrThrow("address"));
-                String read = c.getString(c.getColumnIndexOrThrow("read"));
-
-                name = CacheUtils.readFile(thread_id);
-                if (name == null) {
-                    name = Function.getContactbyPhoneNumber(getApplicationContext(), c.getString(c.getColumnIndexOrThrow("address")));
-                    CacheUtils.writeFile(thread_id, name);
-                }
+                    Cursor inbox = getContentResolver().query(uriInbox, null, "address IS NOT NULL) GROUP BY (thread_id", null, null); // 2nd null = "address IS NOT NULL) GROUP BY (address"
+                    Uri uriSent = Uri.parse("content://sms/sent");
+                    Cursor sent = getContentResolver().query(uriSent, null, "address IS NOT NULL) GROUP BY (thread_id", null, null); // 2nd null = "address IS NOT NULL) GROUP BY (address"
+                    Cursor c = new MergeCursor(new Cursor[]{inbox, sent}); // Attaching inbox and sent sms
 
 
-                smsList.add(Function.mappingInbox(_id, thread_id, name, phone, msg, type, timestamp, Function.converToTime(timestamp), read));
-                DeviceSMS.add(Function.mappingInbox(_id, thread_id, name, phone, msg, type, timestamp, Function.converToTime(timestamp), read));
-                c.moveToNext();
+                    if (c.moveToFirst()) {
+                        for (int i = 0; i < c.getCount(); i++) {
+
+                            String name = null;
+                            String phone = "";
+                            String _id = c.getString(c.getColumnIndexOrThrow("_id"));
+                            String thread_id = c.getString(c.getColumnIndexOrThrow("thread_id"));
+                            String msg = c.getString(c.getColumnIndexOrThrow("body"));
+                            String type = c.getString(c.getColumnIndexOrThrow("type"));
+                            String timestamp = c.getString(c.getColumnIndexOrThrow("date"));
+                            phone = c.getString(c.getColumnIndexOrThrow("address"));
+                            String read = c.getString(c.getColumnIndexOrThrow("read"));
+
+                            name = CacheUtils.readFile(thread_id);
+                            if (name == null) {
+                                name = Function.getContactbyPhoneNumber(getApplicationContext(), c.getString(c.getColumnIndexOrThrow("address")));
+                                CacheUtils.writeFile(thread_id, name);
+                            }
+
+
+                            smsList.add(Function.mappingInbox(_id, thread_id, name, phone, msg, type, timestamp, Function.converToTime(timestamp), read));
+                            DeviceSMS.add(Function.mappingInbox(_id, thread_id, name, phone, msg, type, timestamp, Function.converToTime(timestamp), read));
+                            c.moveToNext();
 
   /*                      Log.d(TAG, "-------\ndoInBackground: \n" + name +
                                 "\n" + phone + "\n"
@@ -1101,37 +1123,37 @@ if(isDefaultSmsApp){
                                 + timestamp + "\n"
                                 + phone);
 */
+                        }
+
+                    }
+                    c.close();
+                } catch (IllegalArgumentException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+                try {
+                    Function.createCachedFile(MainActivity.this, "orgsms", smsList);
+                    Function.createCachedFile(MainActivity.this, getString(R.string.file_device_sms), DeviceSMS);
+
+                    Log.d(TAG, "doInBackground: createCachedFile ORG SMS CREATED");
+                } catch (Exception e) {
+                }
+
+                Collections.sort(smsList, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging sms by timestamp decending
+                ArrayList<HashMap<String, String>> purified = Function.removeDuplicates(smsList); // Removing duplicates from inbox & sent
+                smsList.clear();
+                smsList.addAll(purified);
+
+                // Updating cache data
+                try {
+                    Function.createCachedFile(MainActivity.this, "smsapp", smsList);
+                    Log.d(TAG, "doInBackground: createCachedFile CREATED");
+                } catch (Exception e) {
+                }
+                // Updating cache data
+
             }
-
-        }
-        c.close();
-    } catch (IllegalArgumentException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-    }
-
-    try {
-        Function.createCachedFile(MainActivity.this, "orgsms", smsList);
-        Function.createCachedFile(MainActivity.this, getString(R.string.file_device_sms), DeviceSMS);
-
-        Log.d(TAG, "doInBackground: createCachedFile ORG SMS CREATED");
-    } catch (Exception e) {
-    }
-
-    Collections.sort(smsList, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging sms by timestamp decending
-    ArrayList<HashMap<String, String>> purified = Function.removeDuplicates(smsList); // Removing duplicates from inbox & sent
-    smsList.clear();
-    smsList.addAll(purified);
-
-    // Updating cache data
-    try {
-        Function.createCachedFile(MainActivity.this, "smsapp", smsList);
-        Log.d(TAG, "doInBackground: createCachedFile CREATED");
-    } catch (Exception e) {
-    }
-    // Updating cache data
-
-}
             return xml;
         }
 
@@ -1168,37 +1190,6 @@ final int position, long id) {
 
 
         }
-    }
-    private FirebaseFunctions mFunctions;
-
-    void fbFunction(){
-        mFunctions = FirebaseFunctions.getInstance();
-//addMessage("dd");
-    }
-
-    private Task<String> addMessage(String text) {
-        // Create the arguments to the callable function.
-        Map<String, Object> data = new HashMap<>();
-        data.put("date", "date");
-        data.put("purchaseid", "purchaseid");
-        data.put("expirydate", "expirydate");
-        data.put("fdate", "fdate");
-        data.put("fexpdate", "fexpdate");
-
-        return mFunctions
-                .getHttpsCallable("smsDrivePurchaseSave")
-                .call(data)
-                .continueWith(new Continuation<HttpsCallableResult, String>() {
-                    @Override
-                    public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
-                        // This continuation runs on either success or failure, but if the task
-                        // has failed then getResult() will throw an Exception which will be
-                        // propagated down.
-                        String result = (String) task.getResult().getData();
-                        Log.d(TAG, "FUNCTIONS then: resut:" +result);
-                        return result;
-                    }
-                });
     }
 
 

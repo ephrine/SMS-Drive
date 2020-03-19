@@ -84,7 +84,7 @@ android {
         applicationId "devesh.ephrine.backup.sms"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 12
+        versionCode 14
         versionName "0.0.1 Beta Version"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
@@ -148,9 +148,11 @@ dependencies {
     implementation 'com.anjlab.android.iab.v3:library:+'
 
     implementation 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
+   
     implementation 'com.lifeofcoding:cacheutilslibrary:1.1.0@aar'
     implementation 'com.google.code.gson:gson:+'
     implementation 'commons-io:commons-io:+'
+   
     implementation 'com.google.android.material:material:1.0.0'
 
     //Runtime Permissions

@@ -1,21 +1,22 @@
 package devesh.ephrine.backup.sms;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.ContentValues;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.provider.Telephony;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -32,13 +33,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class RestoreWizardActivity extends AppCompatActivity {
-boolean isDefaultSmsApp;
+    //boolean isDefaultSmsApp;
     String UserUID;
 
-    String TAG="RestoreWizardActivity ";
+    String TAG = "RestoreWizardActivity ";
 
     DatabaseReference SMSBackupDB;
     FirebaseUser user;
@@ -54,6 +54,10 @@ boolean isDefaultSmsApp;
 
     ImageView smsbotIMG;
 
+    LinearLayout LLDefaultSmsAppStep1;
+
+    String OldDefaultSMSApp;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,57 +66,103 @@ boolean isDefaultSmsApp;
         user = FirebaseAuth.getInstance().getCurrentUser();
         database = FirebaseDatabase.getInstance();
 
-        lottieAnimationView1=findViewById(R.id.animation_view);
-        lottieAnimationView2=findViewById(R.id.animation_view2);
-        lottieSyncing=findViewById(R.id.lottiesyncanim);
-        lottieDoneAnim=findViewById(R.id.lottiedoneanim);
+        lottieAnimationView1 = findViewById(R.id.animation_view);
+        lottieAnimationView2 = findViewById(R.id.animation_view2);
+        lottieSyncing = findViewById(R.id.lottiesyncanim);
+        lottieDoneAnim = findViewById(R.id.lottiedoneanim);
 
         lottieSyncing.setVisibility(View.GONE);
 
+        LLDefaultSmsAppStep1=findViewById(R.id.LLDefaultSmsAppStep1);
 
-        smsbotIMG=findViewById(R.id.imageView3SMSBot);
+        smsbotIMG = findViewById(R.id.imageView3SMSBot);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             final String myPackageName = getPackageName();
+            OldDefaultSMSApp=Telephony.Sms.getDefaultSmsPackage(this);
+
             if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
-                isDefaultSmsApp=false;
+            //    isDefaultSmsApp = false;
                 lottieAnimationView1.setVisibility(View.VISIBLE);
                 lottieAnimationView2.setVisibility(View.INVISIBLE);
-            }else {
-                isDefaultSmsApp=true;
+            } else {
+              //  isDefaultSmsApp = true;
                 lottieAnimationView1.setVisibility(View.INVISIBLE);
                 lottieAnimationView2.setVisibility(View.VISIBLE);
+                smsbotIMG.setVisibility(View.VISIBLE);
+                LLDefaultSmsAppStep1.setVisibility(View.GONE);
             }
         } else {
-            isDefaultSmsApp=true;
+           // isDefaultSmsApp = true;
             lottieAnimationView1.setVisibility(View.INVISIBLE);
             lottieAnimationView2.setVisibility(View.VISIBLE);
+            smsbotIMG.setVisibility(View.VISIBLE);
+            LLDefaultSmsAppStep1.setVisibility(View.GONE);
             // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
         }
+        Log.d(TAG, "onCreate: isDefault SMS Handler: "+isDefaultSmsApp());
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            smsbotIMG.setVisibility(View.GONE);
+            LLDefaultSmsAppStep1.setVisibility(View.VISIBLE);
 
+        }else {
+            smsbotIMG.setVisibility(View.VISIBLE);
+            LLDefaultSmsAppStep1.setVisibility(View.GONE);
+
+        }
 
 
     }
 
     @Override
+    protected void onResume() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            final String myPackageName = getPackageName();
+            if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
+                //  isDefaultSmsApp = false;
+                lottieAnimationView1.setVisibility(View.VISIBLE);
+                lottieAnimationView2.setVisibility(View.INVISIBLE);
+            } else {
+                //isDefaultSmsApp = true;
+                lottieAnimationView1.setVisibility(View.INVISIBLE);
+                lottieAnimationView2.setVisibility(View.VISIBLE);
+
+                smsbotIMG.setVisibility(View.VISIBLE);
+                LLDefaultSmsAppStep1.setVisibility(View.GONE);
+
+            }
+        } else {
+            // isDefaultSmsApp = true;
+            lottieAnimationView1.setVisibility(View.INVISIBLE);
+            lottieAnimationView2.setVisibility(View.VISIBLE);
+            // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
+            smsbotIMG.setVisibility(View.VISIBLE);
+            LLDefaultSmsAppStep1.setVisibility(View.GONE);
+
+        }
+
+        super.onResume();
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode==1){
+        if (requestCode == 1) {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 final String myPackageName = getPackageName();
                 if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
-                    isDefaultSmsApp=false;
+                  //  isDefaultSmsApp = false;
                     lottieAnimationView1.setVisibility(View.VISIBLE);
                     lottieAnimationView2.setVisibility(View.INVISIBLE);
-                }else {
-                    isDefaultSmsApp=true;
+                } else {
+                    //isDefaultSmsApp = true;
                     lottieAnimationView1.setVisibility(View.INVISIBLE);
                     lottieAnimationView2.setVisibility(View.VISIBLE);
                 }
             } else {
-                isDefaultSmsApp=true;
+               // isDefaultSmsApp = true;
                 lottieAnimationView1.setVisibility(View.INVISIBLE);
                 lottieAnimationView2.setVisibility(View.VISIBLE);
                 // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
@@ -122,135 +172,73 @@ boolean isDefaultSmsApp;
 
     }
 
-    public void setDefaultSmsApp(View v){
+    public void setDefaultSmsApp(View v) {
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-        final String myPackageName = getPackageName();
-        if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            final String myPackageName = getPackageName();
+            if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
+  /*              Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
+                intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, getPackageName());
+                startActivity(intent);
+*/
 
-            Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS);
+                    startActivity(intent);
+
+                }else {
+                    Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
+                    intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, getPackageName());
+                    startActivity(intent);
+                }
+
+                /*Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
             intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, myPackageName);
-            startActivityForResult(intent, 1);
-            isDefaultSmsApp=true;
-      //      lottieAnimationView1.setVisibility(View.INVISIBLE);
-        //    lottieAnimationView2.setVisibility(View.VISIBLE);
+            startActivityForResult(intent, 1);  */
+             //   isDefaultSmsApp = true;
+                //    lottieAnimationView1.setVisibility(View.INVISIBLE);
+                //    lottieAnimationView2.setVisibility(View.VISIBLE);
+                Log.d(TAG, "setDefaultSmsApp: setting default SMS handler");
+            } else {
+            //    isDefaultSmsApp = true;
+                //    lottieAnimationView1.setVisibility(View.INVISIBLE);
+                //      lottieAnimationView2.setVisibility(View.VISIBLE);
 
-        }else {
-            isDefaultSmsApp=true;
-        //    lottieAnimationView1.setVisibility(View.INVISIBLE);
-      //      lottieAnimationView2.setVisibility(View.VISIBLE);
+            }
+
+        } else {
+          //  isDefaultSmsApp = true;
+            // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
+            //   lottieAnimationView1.setVisibility(View.INVISIBLE);
+//        lottieAnimationView2.setVisibility(View.VISIBLE);
 
         }
 
-    } else {
-        isDefaultSmsApp=true;
-        // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
-     //   lottieAnimationView1.setVisibility(View.INVISIBLE);
-//        lottieAnimationView2.setVisibility(View.VISIBLE);
 
     }
 
+    public void StartSaving(View v) {
+        if (isDefaultSmsApp()) {
 
-    }
+            new Thread(new Runnable() {
+                public void run() {
 
-    public void StartSaving(View v){
-      if(isDefaultSmsApp){
-          DownloadCloud();
-          lottieSyncing.setVisibility(View.VISIBLE);
-          lottieAnimationView2.setVisibility(View.INVISIBLE);
-          smsbotIMG.setVisibility(View.GONE);
-          Toast.makeText(this, "Restoring... Please wait", Toast.LENGTH_SHORT).show();
-      }else{
-          Toast.makeText(this, "First set as Default SMS App", Toast.LENGTH_SHORT).show();
-      }
-    }
-
-    void sortCloudSMS(ArrayList<HashMap<String, String>> c, ArrayList<HashMap<String, String>> d){
-        ArrayList<HashMap<String, String>> cloudsms=new ArrayList<>();
-        cloudsms=c;
-
-        ArrayList<HashMap<String, String>> devicesms=new ArrayList<>();
-        devicesms=d;
-
-        int t=devicesms.size()-1;
-        int tc=cloudsms.size()-1;
-        Log.d(TAG, "sortCloudSMS: Data: Device:"+t+"\nCloud:"+tc+"\n\ndevice sms:");
-        int saved;
-        saved=0;
-
-        int end=0;
-        for(int i=0;i<=tc;i++){
-            end++;
-            String msg=cloudsms.get(i).get(Function.KEY_MSG);
-            String phone=cloudsms.get(i).get(Function.KEY_PHONE);
-            String timestamp=cloudsms.get(i).get(Function.KEY_TIMESTAMP);
-
-
-           HashMap<String, String> c1=new HashMap<>();
-           c1=cloudsms.get(i);
-           if(devicesms.contains(c1)){
-               Log.d(TAG, "sortCloudSMS: Identical Messages: "+ c1.get(Function.KEY_TIMESTAMP)+"-------------\n");
-           }else{
-               Log.d(TAG, "sortCloudSMS: Saving on Device: "+c1.get(Function.KEY_MSG)+"----------------\n");
-String folder;
-if(c1.get(Function.KEY_TYPE).equals("1")){
-   folder="inbox";
-               }else {
-    folder="outbox";
-}
-              saveSms(c1.get(Function.KEY_PHONE),c1.get(Function.KEY_MSG),"1",c1.get(Function.KEY_TIMESTAMP),folder);
-           }
-
-            //   Log.d(TAG, "sortCloudSMS: Sorting FOR LOOP: \nMSG:"+msg
-           // +"\nphone:"+phone+"\ntS:"+timestamp);
-
-  /*        if(msg!=null && phone!=null && timestamp!=null){
-                Log.d(TAG, "sortCloudSMS: Sorting MSG "+i+"Phone:"+phone);
-                for(int x=0;x<=t;x++){
-                    String msg1=devicesms.get(x).get(Function.KEY_MSG);
-                    String phone1=devicesms.get(x).get(Function.KEY_PHONE);
-                    String timestamp1=devicesms.get(x).get(Function.KEY_TIMESTAMP);
-
-                    if(msg1!=null && phone1!=null && timestamp1!=null){
-                     //   Log.d(TAG, "sortCloudSMS: #3243: msg:"+msg1+"\nphone:"+phone1+"ts:"+timestamp1);
-
-                        if(msg.equals(msg1)
-                                //&& phone.equals(phone1)
-                                && timestamp.equals(timestamp1)){
-                            Log.d(TAG, "sortCloudSMS: Identical Messages: "+ phone1+"\n t:"+timestamp1);
-                        }else {
-                            saved=saved+1;
-                            // Save into Device
-                            Log.d(TAG, "sortCloudSMS: Saving on Device: "+phone1+"\n t:"+timestamp1+"\n saved:"+saved);
-                        }
-                    }else {
-                        Log.e(TAG, "sortCloudSMS: Corrupted MSG !! ID:"+x );
-                    }
-
-
+                    DownloadCloud();
 
                 }
+            }).start();
+          //  new RestoreTask().execute("url1", "url2", "url3");
 
-
-
-            }else{
-                Log.e(TAG, "sortCloudSMS: Corrupted Cloud Message"+i );
-            }
-*/
-  if(end==tc){
-      Log.d(TAG, "\nsortCloudSMS: END OF SAVING -----------------");
-      lottieSyncing.setVisibility(View.GONE);
-      lottieDoneAnim.setVisibility(View.VISIBLE);
-      lottieDoneAnim.playAnimation();
-      Toast.makeText(this, "Success: Restored Messages", Toast.LENGTH_LONG).show();
-
-  }
-         }
-
-
+            lottieSyncing.setVisibility(View.VISIBLE);
+            lottieAnimationView2.setVisibility(View.INVISIBLE);
+            smsbotIMG.setVisibility(View.GONE);
+            Toast.makeText(this, "Restoring... Please wait", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "First set as Default SMS App", Toast.LENGTH_SHORT).show();
+        }
     }
 
-    public boolean saveSms(String phoneNumber, String message, String readState, String time, String folderName) {
+public boolean saveSms(String phoneNumber, String message, String readState, String time, String folderName) {
         boolean ret = false;
         try {
             ContentValues values = new ContentValues();
@@ -299,13 +287,89 @@ if(c1.get(Function.KEY_TYPE).equals("1")){
             // empty box, no SMS
         }
 
-        sms1();
+    //    sms1();
 
 
         // public static final String INBOX = "content://sms/inbox";
 // public static final String SENT = "content://sms/sent";
 // public static final String DRAFT = "content://sms/draft";
 
+
+    }
+
+
+    void DownloadCloud() {
+
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            UserUID = user.getPhoneNumber().replace("+", "x");
+            SMSBackupDB = database.getReference("/users/" + UserUID + "/sms/backup");
+            Log.d(TAG, "DownloadCloud: UserID:" + UserUID);
+            SMSBackupDB.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    // This method is called once with the initial value and again
+                    // whenever data at this location is updated.
+                    //String value = dataSnapshot.getValue(String.class);
+                    // Log.d(TAG, "Value is: " + value);
+
+                    if (dataSnapshot.exists()) {
+
+                        long total = dataSnapshot.getChildrenCount();
+                        long i;
+                        i = 0;
+                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                            // TODO: handle the post
+                            i = i + 1;
+
+                            String threadName = postSnapshot.getKey();
+                            Log.d(TAG, "onDataChange: threadName: " + threadName);
+
+                            String phone = postSnapshot.child(Function.KEY_PHONE).getValue(String.class);
+
+                            String name = postSnapshot.child(Function.KEY_NAME).getValue(String.class);
+                            String _id = postSnapshot.child(Function._ID).getValue(String.class);
+                            String thread_id = postSnapshot.child(Function.KEY_THREAD_ID).getValue(String.class);
+                            String msg = postSnapshot.child(Function.KEY_MSG).getValue(String.class);
+                            String type = postSnapshot.child(Function.KEY_TYPE).getValue(String.class);
+                            String timestamp = postSnapshot.child(Function.KEY_TIMESTAMP).getValue(String.class);
+                            String time = postSnapshot.child(Function.KEY_TIME).getValue(String.class);
+
+                            HashMap<String, String> SMS = new HashMap<>();
+                            SMS.put(Function._ID, _id);
+                            SMS.put(Function.KEY_THREAD_ID, thread_id);
+                            SMS.put(Function.KEY_PHONE, phone);
+                            SMS.put(Function.KEY_MSG, msg);
+                            SMS.put(Function.KEY_TYPE, type);
+                            SMS.put(Function.KEY_TIMESTAMP, timestamp);
+                            SMS.put(Function.KEY_TIME, time);
+                            SMS.put(Function.KEY_NAME, name);
+                            CloudSms.add(SMS);
+                            Log.d(TAG, "onDataChange: msg:" + SMS + "\n-------------------------\n");
+
+
+                            //   GetThread(postSnapshot, threadName);
+                            Log.d(TAG, "i:" + i + "\n Total:" + total);
+                            if (i == total) {
+                                sms1();
+                            }
+                        }
+
+                    } else {
+                        sms1();
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    // Failed to read value
+                    Log.w(TAG, "Failed to read value.", error.toException());
+                }
+            });
+
+
+        }
 
     }
 
@@ -325,9 +389,9 @@ if(c1.get(Function.KEY_TYPE).equals("1")){
 
             HashMap<String, String> sms = new HashMap<>();
 
-       //     String body = cursor.getString(cursor.getColumnIndex("body"));
-       //     String address = cursor.getString(cursor.getColumnIndex("address"));
-         //   String xdate = cursor.getString(cursor.getColumnIndex("date"));
+            //     String body = cursor.getString(cursor.getColumnIndex("body"));
+            //     String address = cursor.getString(cursor.getColumnIndex("address"));
+            //   String xdate = cursor.getString(cursor.getColumnIndex("date"));
 
             String name = null;
             String phone = "";
@@ -349,14 +413,14 @@ if(c1.get(Function.KEY_TYPE).equals("1")){
 
             msgg.put(Function._ID, _id);
             msgg.put(Function.KEY_THREAD_ID, thread_id);
-            msgg.put(Function.KEY_PHONE,phone);
+            msgg.put(Function.KEY_PHONE, phone);
             msgg.put(Function.KEY_MSG, msg);
-            msgg.put(Function.KEY_TYPE,type);
-            msgg.put(Function.KEY_TIMESTAMP,timestamp);
+            msgg.put(Function.KEY_TYPE, type);
+            msgg.put(Function.KEY_TIMESTAMP, timestamp);
             msgg.put(Function.KEY_TIME, Function.converToTime(timestamp));
-            msgg.put(Function.KEY_NAME,name);
+            msgg.put(Function.KEY_NAME, name);
 
-           DeviceSMS.add(msgg);
+            DeviceSMS.add(msgg);
 
 
 
@@ -394,7 +458,7 @@ if(c1.get(Function.KEY_TYPE).equals("1")){
 
             if (ii == i) {
                 Log.d(TAG, "sms1: END ---------" + ii + "\n SMS: ");
-                Log.d(TAG, "-------New SMS Algo END .:\n iThread:" );
+                Log.d(TAG, "-------New SMS Algo END .:\n iThread:");
                 //    SMSBackupDB.setValue(iThread);
                 getSMSOutbox();
 
@@ -403,11 +467,12 @@ if(c1.get(Function.KEY_TYPE).equals("1")){
 
         }
 
-  if(i==0){
-      getSMSOutbox();
+        if (i == 0) {
+            getSMSOutbox();
 
-  }
+        }
     }
+
 
     void getSMSOutbox() {
   /*      Log.d(TAG, "getSMS Sent: SMSBackup: ");
@@ -484,22 +549,20 @@ if(c1.get(Function.KEY_TYPE).equals("1")){
 
             msgg.put(Function._ID, _id);
             msgg.put(Function.KEY_THREAD_ID, thread_id);
-            msgg.put(Function.KEY_PHONE,phone);
+            msgg.put(Function.KEY_PHONE, phone);
             msgg.put(Function.KEY_MSG, msg);
-            msgg.put(Function.KEY_TYPE,type);
-            msgg.put(Function.KEY_TIMESTAMP,timestamp);
+            msgg.put(Function.KEY_TYPE, type);
+            msgg.put(Function.KEY_TIMESTAMP, timestamp);
             msgg.put(Function.KEY_TIME, Function.converToTime(timestamp));
-            msgg.put(Function.KEY_NAME,name);
+            msgg.put(Function.KEY_NAME, name);
 
             DeviceSMS.add(msgg);
 
 
-
-  //          if (SMSAutoBackup) {
-                // SMSBackupDB.setValue(iThread);
-                //          SMSDB = database.getReference(DBRoot + "/users/" + UserUID + "/sms/"+address+"/").push();
-                //        SMSDB.setValue(sms);
-
+            //          if (SMSAutoBackup) {
+            // SMSBackupDB.setValue(iThread);
+            //          SMSDB = database.getReference(DBRoot + "/users/" + UserUID + "/sms/"+address+"/").push();
+            //        SMSDB.setValue(sms);
 
 
 //            }
@@ -523,122 +586,132 @@ if(c1.get(Function.KEY_TYPE).equals("1")){
 
             if (ii == i) {
                 Log.d(TAG, "sms1 sent: END ---------" + ii + "\n SMS: ");
-sortCloudSMS(CloudSms,DeviceSMS);
-              //  SMSBackupDB = database.getReference("/users/" + UserUID + "/sms/");
+                sortCloudSMS(CloudSms, DeviceSMS);
+                //  SMSBackupDB = database.getReference("/users/" + UserUID + "/sms/");
 
-            //    Map<String, Object> jj = new HashMap<>();
-       //         jj.put("backup", smsList);
-          //      SMSBackupDB.setValue(jj);
-        //        Toast.makeText(this, "Sync Complete", Toast.LENGTH_SHORT).show();
-      //          Log.d(TAG, "sms1 sent: END ---------" + ii + "\n SMS:Backup DONE  ");
-            //    long smsReceiveTime = System.currentTimeMillis();
-          //      Date date1 = new Date(smsReceiveTime);
+                //    Map<String, Object> jj = new HashMap<>();
+                //         jj.put("backup", smsList);
+                //      SMSBackupDB.setValue(jj);
+                //        Toast.makeText(this, "Sync Complete", Toast.LENGTH_SHORT).show();
+                //          Log.d(TAG, "sms1 sent: END ---------" + ii + "\n SMS:Backup DONE  ");
+                //    long smsReceiveTime = System.currentTimeMillis();
+                //      Date date1 = new Date(smsReceiveTime);
                 //String formattedDate = new SimpleDateFormat("MM/dd/yyyy").format(date);
-        //        String formattedDate1 = new SimpleDateFormat("dd/MM/yyyy hh:mm").format(date1);
+                //        String formattedDate1 = new SimpleDateFormat("dd/MM/yyyy hh:mm").format(date1);
 
-        //        sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(mContext /* Activity context */);
-        //        SharedPreferences.Editor editor = sharedPrefAutoBackup.edit();
-          //      editor.putString(mContext.getResources().getString(R.string.settings_pref_last_sync), formattedDate1);
-            //    editor.apply();
+                //        sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(mContext /* Activity context */);
+                //        SharedPreferences.Editor editor = sharedPrefAutoBackup.edit();
+                //      editor.putString(mContext.getResources().getString(R.string.settings_pref_last_sync), formattedDate1);
+                //    editor.apply();
 
-        //        if (SMSAutoBackup) {
-                    // SMSDB = database.getReference(DBRoot + "/users/" + UserUID + "/sms/"+address+"/");
-                    //  SMSDB.setValue(sms);
-          //      }
+                //        if (SMSAutoBackup) {
+                // SMSDB = database.getReference(DBRoot + "/users/" + UserUID + "/sms/"+address+"/");
+                //  SMSDB.setValue(sms);
+                //      }
 
 
             }
         }
 
-        if(i==0){
-            sortCloudSMS(CloudSms,DeviceSMS);
+        if (i == 0) {
+            sortCloudSMS(CloudSms, DeviceSMS);
 
         }
 
     }
 
-    void DownloadCloud(){
-        user = FirebaseAuth.getInstance().getCurrentUser();
-if(user!=null){
-    UserUID = user.getPhoneNumber().replace("+", "x");
-    SMSBackupDB = database.getReference("/users/" + UserUID + "/sms/backup");
-    Log.d(TAG, "DownloadCloud: UserID:"+UserUID);
-    SMSBackupDB.addListenerForSingleValueEvent(new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            // This method is called once with the initial value and again
-            // whenever data at this location is updated.
-            //String value = dataSnapshot.getValue(String.class);
-            // Log.d(TAG, "Value is: " + value);
 
-            if (dataSnapshot.exists()) {
+    void sortCloudSMS(ArrayList<HashMap<String, String>> c, ArrayList<HashMap<String, String>> d) {
+        ArrayList<HashMap<String, String>> cloudsms = new ArrayList<>();
+        cloudsms = c;
 
-                long total = dataSnapshot.getChildrenCount();
-                long i;
-                i = 0;
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    // TODO: handle the post
-                    i = i + 1;
+        ArrayList<HashMap<String, String>> devicesms = new ArrayList<>();
+        devicesms = d;
 
-                    String threadName = postSnapshot.getKey();
-                    Log.d(TAG, "onDataChange: threadName: " + threadName);
+        int t = devicesms.size() - 1;
+        int tc = cloudsms.size() - 1;
+        Log.d(TAG, "sortCloudSMS: Data: Device:" + t + "\nCloud:" + tc + "\n\ndevice sms:");
+        int saved;
+        saved = 0;
 
-                    String phone = postSnapshot.child(Function.KEY_PHONE).getValue(String.class);
-
-                    String name = postSnapshot.child(Function.KEY_NAME).getValue(String.class);
-                    String _id=postSnapshot.child(Function._ID).getValue(String.class);
-                    String thread_id=postSnapshot.child(Function.KEY_THREAD_ID).getValue(String.class);
-                    String msg=postSnapshot.child(Function.KEY_MSG).getValue(String.class);
-                    String type=postSnapshot.child(Function.KEY_TYPE).getValue(String.class);
-                    String timestamp=postSnapshot.child(Function.KEY_TIMESTAMP).getValue(String.class);
-                    String time=postSnapshot.child(Function.KEY_TIME).getValue(String.class);
-
-                    HashMap<String, String> SMS = new HashMap<>();
-                    SMS.put(Function._ID, _id);
-                    SMS.put(Function.KEY_THREAD_ID, thread_id);
-                    SMS.put(Function.KEY_PHONE,phone);
-                    SMS.put(Function.KEY_MSG, msg);
-                    SMS.put(Function.KEY_TYPE,type);
-                    SMS.put(Function.KEY_TIMESTAMP,timestamp);
-                    SMS.put(Function.KEY_TIME, time);
-                    SMS.put(Function.KEY_NAME,name);
-                    CloudSms.add(SMS);
-                    Log.d(TAG, "onDataChange: msg:"+SMS+"\n-------------------------\n");
+        int end = 0;
+        for (int i = 0; i <= tc; i++) {
+            end++;
+            String msg = cloudsms.get(i).get(Function.KEY_MSG);
+            String phone = cloudsms.get(i).get(Function.KEY_PHONE);
+            String timestamp = cloudsms.get(i).get(Function.KEY_TIMESTAMP);
 
 
+            HashMap<String, String> c1 = new HashMap<>();
+            c1 = cloudsms.get(i);
+            if (devicesms.contains(c1)) {
+                Log.d(TAG, "sortCloudSMS: Identical Messages: " + c1.get(Function.KEY_TIMESTAMP) + "-------------\n");
+            } else {
+                Log.d(TAG, "sortCloudSMS: Saving on Device: " + c1.get(Function.KEY_MSG) + "----------------\n");
+                String folder;
+                if (c1.get(Function.KEY_TYPE).equals("1")) {
+                    folder = "inbox";
+                } else {
+                    folder = "outbox";
+                }
+                saveSms(c1.get(Function.KEY_PHONE), c1.get(Function.KEY_MSG), "1", c1.get(Function.KEY_TIMESTAMP), folder);
+            }
 
+            //   Log.d(TAG, "sortCloudSMS: Sorting FOR LOOP: \nMSG:"+msg
+            // +"\nphone:"+phone+"\ntS:"+timestamp);
 
-                    //   GetThread(postSnapshot, threadName);
-                    Log.d(TAG, "i:" + i + "\n Total:" + total);
-                    if (i == total) {
-                        sms1();
+  /*        if(msg!=null && phone!=null && timestamp!=null){
+                Log.d(TAG, "sortCloudSMS: Sorting MSG "+i+"Phone:"+phone);
+                for(int x=0;x<=t;x++){
+                    String msg1=devicesms.get(x).get(Function.KEY_MSG);
+                    String phone1=devicesms.get(x).get(Function.KEY_PHONE);
+                    String timestamp1=devicesms.get(x).get(Function.KEY_TIMESTAMP);
+
+                    if(msg1!=null && phone1!=null && timestamp1!=null){
+                     //   Log.d(TAG, "sortCloudSMS: #3243: msg:"+msg1+"\nphone:"+phone1+"ts:"+timestamp1);
+
+                        if(msg.equals(msg1)
+                                //&& phone.equals(phone1)
+                                && timestamp.equals(timestamp1)){
+                            Log.d(TAG, "sortCloudSMS: Identical Messages: "+ phone1+"\n t:"+timestamp1);
+                        }else {
+                            saved=saved+1;
+                            // Save into Device
+                            Log.d(TAG, "sortCloudSMS: Saving on Device: "+phone1+"\n t:"+timestamp1+"\n saved:"+saved);
+                        }
+                    }else {
+                        Log.e(TAG, "sortCloudSMS: Corrupted MSG !! ID:"+x );
                     }
+
+
+
                 }
 
-            } else {
-                sms1();
+
+
+            }else{
+                Log.e(TAG, "sortCloudSMS: Corrupted Cloud Message"+i );
             }
+*/
+            if (end == tc) {
+                Log.d(TAG, "\nsortCloudSMS: END OF SAVING -----------------");
+                lottieSyncing.setVisibility(View.GONE);
+                lottieDoneAnim.setVisibility(View.VISIBLE);
+                lottieDoneAnim.playAnimation();
+                Toast.makeText(RestoreWizardActivity.this, "Success: Restored Messages", Toast.LENGTH_LONG).show();
 
+            }
         }
-
-        @Override
-        public void onCancelled(DatabaseError error) {
-            // Failed to read value
-            Log.w(TAG, "Failed to read value.", error.toException());
-        }
-    });
-
-
-}
 
 
     }
+
 
     void GetThread(DataSnapshot postSnapshot, String threadName) {
 
         for (DataSnapshot DS : postSnapshot.getChildren()) {
 
-         //   Log.d(TAG, "GetThread: DS : "+DS.getChildren().toString());
+            //   Log.d(TAG, "GetThread: DS : "+DS.getChildren().toString());
 
             //   String msg = DS.getKey();
             // String MsgBody = DS.child("body").getValue().toString();
@@ -660,13 +733,12 @@ if(user!=null){
             String phone = DS.child(Function.KEY_PHONE).getValue(String.class);
 
             String name = DS.child(Function.KEY_NAME).getValue(String.class);
-            String _id=DS.child(Function._ID).getValue(String.class);
-            String thread_id=DS.child(Function.KEY_THREAD_ID).getValue(String.class);
-            String msg=DS.child(Function.KEY_MSG).getValue(String.class);
-            String type=DS.child(Function.KEY_TYPE).getValue(String.class);
-            String timestamp=DS.child(Function.KEY_TIMESTAMP).getValue(String.class);
-            String time=DS.child(Function.KEY_TIME).getValue(String.class);
-
+            String _id = DS.child(Function._ID).getValue(String.class);
+            String thread_id = DS.child(Function.KEY_THREAD_ID).getValue(String.class);
+            String msg = DS.child(Function.KEY_MSG).getValue(String.class);
+            String type = DS.child(Function.KEY_TYPE).getValue(String.class);
+            String timestamp = DS.child(Function.KEY_TIMESTAMP).getValue(String.class);
+            String time = DS.child(Function.KEY_TIME).getValue(String.class);
 
 
             //    Date date = new Date(Long.parseLong(MsgTime));
@@ -675,16 +747,16 @@ if(user!=null){
             HashMap<String, String> SMS = new HashMap<>();
             SMS.put(Function._ID, _id);
             SMS.put(Function.KEY_THREAD_ID, thread_id);
-            SMS.put(Function.KEY_PHONE,phone);
+            SMS.put(Function.KEY_PHONE, phone);
             SMS.put(Function.KEY_MSG, msg);
-            SMS.put(Function.KEY_TYPE,type);
-            SMS.put(Function.KEY_TIMESTAMP,timestamp);
+            SMS.put(Function.KEY_TYPE, type);
+            SMS.put(Function.KEY_TIMESTAMP, timestamp);
             SMS.put(Function.KEY_TIME, time);
-            SMS.put(Function.KEY_NAME,name);
+            SMS.put(Function.KEY_NAME, name);
 
 
             CloudSms.add(SMS);
-            Log.d(TAG, "onDataChange: msg:"+SMS+"\n-------------------------\n");
+            Log.d(TAG, "onDataChange: msg:" + SMS + "\n-------------------------\n");
 
            /* if (iThread.containsKey(threadName)) {
                 iThread.get(threadName).add(SMS);
@@ -698,6 +770,54 @@ if(user!=null){
 
     }
 
+    boolean isDefaultSmsApp(){
+boolean s=false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            final String myPackageName = getPackageName();
+            if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
+             s = false;
+                lottieAnimationView1.setVisibility(View.VISIBLE);
+                lottieAnimationView2.setVisibility(View.INVISIBLE);
+            } else {
+               s = true;
+                lottieAnimationView1.setVisibility(View.INVISIBLE);
+                lottieAnimationView2.setVisibility(View.VISIBLE);
+            }
+        } else {
+           s = true;
+            lottieAnimationView1.setVisibility(View.INVISIBLE);
+            lottieAnimationView2.setVisibility(View.VISIBLE);
+            // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
+        }
 
+        return s;
+    }
+
+
+  /*  private class RestoreTask extends AsyncTask<String, String, String> {
+        protected String doInBackground(String... urls) {
+            Log.d(TAG, "doInBackground: RestoreTask()");
+
+            return "Done";
+        }
+
+        protected void onProgressUpdate(String... progress) {
+
+            Log.d(TAG, "onProgressUpdate: RestoreTask()");
+        }
+
+        protected void onPostExecute(String result) {
+        //    lottieSyncing.setVisibility(View.GONE);
+        //    lottieDoneAnim.setVisibility(View.VISIBLE);
+         //   lottieDoneAnim.playAnimation();
+          //  Toast.makeText(RestoreWizardActivity.this, "Success: Restored Messages", Toast.LENGTH_LONG).show();
+
+            Log.d(TAG, "onPostExecute: RestoreTask()");
+        }
+
+
+
+    }
+*/
 
 }

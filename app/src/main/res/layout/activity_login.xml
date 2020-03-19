@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:App="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:App="http://schemas.android.com/tools">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -46,11 +46,11 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginBottom="30dp"
-            App:drawableLeft="@drawable/fui_ic_phone_white_24dp"
-
             android:onClick="loginbutton"
+
             android:text=" Sign in with phone number"
-            android:textAllCaps="false" />
+            android:textAllCaps="false"
+            App:drawableLeft="@drawable/fui_ic_phone_white_24dp" />
 
         <TextView
             android:layout_width="wrap_content"

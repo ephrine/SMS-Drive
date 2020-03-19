@@ -1,55 +1,36 @@
 package devesh.ephrine.backup.sms;
-/*
+
+import android.os.Bundle;
+import android.widget.EditText;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.provider.Telephony;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.amulyakhare.textdrawable.TextDrawable;
-import com.amulyakhare.textdrawable.util.ColorGenerator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class NewMessageActivity extends AppCompatActivity {
 
-    final String TAG="NewMessageActivity ";
-    ArrayList<HashMap<String, String>> contactMap=new ArrayList<>();
+    final String TAG = "NewMessageActivity ";
     public String sendTo;
     public String message;
+    ArrayList<HashMap<String, String>> contactMap = new ArrayList<>();
     CardView selectedContactCardView;
     EditText editTextPhoneNumber;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_message);
 
-        selectedContactCardView=findViewById(R.id.selectedContactCardView);
-        editTextPhoneNumber=findViewById(R.id.editTextPhoneNumber);
+        //  selectedContactCardView = findViewById(R.id.selectedContactCardView);
+        //editTextPhoneNumber = findViewById(R.id.editTextPhoneNumber);
 
-        getContacts();
+        //    getContacts();
 
     }
-
+}
+/*
     void getContacts() {
         try {
             contactMap = (ArrayList<HashMap<String, String>>) Function.readCachedFile(this, getString(R.string.file_contact_list));
@@ -328,7 +309,7 @@ showContactCard(selected);
                 }
             });
 
-/*
+
 
        holder.AddToLibraryChip.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -338,10 +319,10 @@ showContactCard(selected);
                 mUser.AddFileLibrary(view.getTag().toString());
 
             }
-        });  */
+        });
 
 
-  /*      }
+        }
 
         // Return the size of your dataset (invoked by the layout manager)
         @Override
@@ -391,5 +372,4 @@ showContactCard(selected);
 
 
 
-}
-*/
+} */

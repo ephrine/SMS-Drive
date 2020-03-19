@@ -1,11 +1,7 @@
 package devesh.ephrine.backup.sms;
 
-import android.app.Activity;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -13,7 +9,6 @@ import android.os.Build;
 import android.provider.ContactsContract;
 import android.telephony.SmsManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 
@@ -44,7 +39,7 @@ public class Function {
     static final String KEY_TIMESTAMP = "timestamp";
     static final String KEY_TIME = "time";
     static final String KEY_READ = "read";
-    static final String TAG="Function:";
+    static final String TAG = "Function:";
 
 
     public static boolean hasPermissions(Context context, String... permissions) {
@@ -98,7 +93,7 @@ public class Function {
                         smsList.get(i).get(KEY_NAME), smsList.get(i).get(KEY_PHONE),
                         smsList.get(i).get(KEY_MSG), smsList.get(i).get(KEY_TYPE),
                         smsList.get(i).get(KEY_TIMESTAMP), smsList.get(i).get(KEY_TIME)
-                ,       smsList.get(i).get(KEY_READ)
+                        , smsList.get(i).get(KEY_READ)
                 ));
             }
         }
@@ -120,7 +115,7 @@ public class Function {
             return true;
         } catch (Exception e) {
             e.printStackTrace();
-            Log.e(TAG, "sendSMS: ERROR !!\n"+e );
+            Log.e(TAG, "sendSMS: ERROR !!\n" + e);
             return false;
         }
     }
@@ -165,7 +160,6 @@ public class Function {
         Object object = ois.readObject();
         return object;
     }
-
 
 
 }

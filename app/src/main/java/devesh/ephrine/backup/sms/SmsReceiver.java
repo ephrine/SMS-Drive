@@ -15,52 +15,48 @@ import android.os.Bundle;
 import android.provider.Telephony;
 import android.telephony.SmsMessage;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 public class SmsReceiver extends BroadcastReceiver {
-static String TAG="SmsReceived ";
-Context mContext;
+    static String TAG = "SmsReceived ";
+    Context mContext;
+
     @Override
     public void onReceive(Context context, Intent intent) {
 //---get the SMS message passed in---
         Bundle bundle = intent.getExtras();
-        mContext=context;
+        mContext = context;
         SmsMessage[] msgs = null;
         String str = "";
-        if (bundle != null)
-        {
-            String address=null;
-            String msg=null;
+        if (bundle != null) {
+            String address = null;
+            String msg = null;
             //---retrieve the SMS message received---
             Object[] pdus = (Object[]) bundle.get("pdus");
             msgs = new SmsMessage[pdus.length];
-            for (int i=0; i<msgs.length; i++){
-                msgs[i] = SmsMessage.createFromPdu((byte[])pdus[i]);
+            for (int i = 0; i < msgs.length; i++) {
+                msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
                 str += "SMS from " + msgs[i].getOriginatingAddress();
                 str += " :";
                 str += msgs[i].getMessageBody().toString();
                 str += "n";
 
-                address=msgs[i].getOriginatingAddress();
-                msg=msgs[i].getMessageBody().toString();
+                address = msgs[i].getOriginatingAddress();
+                msg = msgs[i].getMessageBody().toString();
 
             }
             //---display the new SMS message---
-        //    Toast.makeText(context, str, Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "onReceive: SMS Received \n"+str+"\n--------");
+            //    Toast.makeText(context, str, Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "onReceive: SMS Received \n" + str + "\n--------");
             long smsReceiveTime = System.currentTimeMillis();
-            saveSms(address,msg,"0",String.valueOf(smsReceiveTime),"inbox");
+            saveSms(address, msg, "0", String.valueOf(smsReceiveTime), "inbox");
 //CreateNotification(Function.getContactbyPhoneNumber(mContext,address),msg);
 
         }
 
     }
-
-
-
 
 
     public boolean saveSms(String phoneNumber, String message, String readState, String time, String folderName) {
