@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="devesh.ephrine.backup.sms">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -23,9 +24,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <service
-            android:name=".services.SyncService"
-            android:enabled="true"
-            android:exported="true"></service>
+            android:name=".services.SyncIntentService"
+            android:exported="false"
+            />
 
         <activity android:name=".payment.CheckOutActivity" />
         <activity
@@ -106,7 +107,8 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".StartActivity">
+        <activity android:name=".StartActivity"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -181,6 +183,14 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/colorAccent" />
-    </application>
+
+        <!--WorkManager-->
+        <!-- disable default provider
+        <provider
+            android:name="androidx.work.impl.WorkManagerInitializer"
+            android:authorities="${applicationId}.workmanager-init"
+            tools:node="remove" />-->
+
+      </application>
 
 </manifest>

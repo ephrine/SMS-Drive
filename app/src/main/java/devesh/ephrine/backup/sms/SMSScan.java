@@ -2,6 +2,7 @@ package devesh.ephrine.backup.sms;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -14,6 +15,9 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
+import androidx.work.Configuration;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,6 +35,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+
+import devesh.ephrine.backup.sms.services.SyncIntentService;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -482,7 +489,7 @@ public class SMSScan {
 
         iThread = new HashMap<>();
         user = FirebaseAuth.getInstance().getCurrentUser();
-        database = FirebaseDatabase.getInstance();
+              database = FirebaseDatabase.getInstance();
 
         isSubscribed = true;
         sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(mContext /* Activity context */);
@@ -545,7 +552,22 @@ public class SMSScan {
         isFinished = false;
 
         //    new SmsSyncTask().execute("url1", "url2", "url3");
-        SyncRunnable.run();
+        //SyncRunnable.run();
+        Intent intent = new Intent(mContext, SyncIntentService.class);
+     //   intent.setAction(ACTION_BAZ);
+      //  intent.putExtra(EXTRA_PARAM1, param1);
+     //   intent.putExtra(EXTRA_PARAM2, param2);
+       mContext.startService(intent);
+
+       /* WorkManager.initialize(
+                mContext,
+                new Configuration.Builder()
+                        .setExecutor(Executors.newFixedThreadPool(100))
+                        .build());
+        */
+    //    OneTimeWorkRequest uploadWorkRequest = new OneTimeWorkRequest.Builder(SyncWorkManager.class)
+   //             .build();
+         //   WorkManager.getInstance(mContext).enqueue(uploadWorkRequest);
         //  getSMS();
   /*      if (isDefaultApp) {
             if (ContextCompat.checkSelfPermission(mContext,

@@ -84,13 +84,13 @@
     <PreferenceCategory app:title="About">
 
         <Preference
-            app:key="version"
+            app:key="Version"
             app:summary="@string/AppVersionName"
             app:title="Version" />
         <Preference
-            app:key="versionCode"
+            app:key="BuildNumber"
             app:summary="@string/AppVersionCode"
-            app:title="Version Code" />
+            app:title="Build Number" />
 
         <Preference
             android:summary="For Feedback, Complaints and Compliments "

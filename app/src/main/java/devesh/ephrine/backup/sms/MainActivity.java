@@ -745,7 +745,7 @@ public class MainActivity extends AppCompatActivity {
                 String syncinterval = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_sync_interval), null);
                 String[] syncintervalArray = getResources().getStringArray(R.array.auto_sync_intervals);
                 if (syncinterval == null) {
-                    syncinterval = syncintervalArray[4];
+                    syncinterval = syncintervalArray[2];
                 }
 
                 if (syncinterval.equals(syncintervalArray[0])) {
@@ -766,7 +766,8 @@ public class MainActivity extends AppCompatActivity {
                             SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HOUR,
                             AlarmManager.INTERVAL_HOUR, pendingIntent);
 
-                } else if (syncinterval.equals(syncintervalArray[3])) {
+                }
+          /*      else if (syncinterval.equals(syncintervalArray[3])) {
                     // half Hrs Sync
                     alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                             SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HALF_HOUR,
@@ -778,12 +779,13 @@ public class MainActivity extends AppCompatActivity {
                             SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_FIFTEEN_MINUTES,
                             AlarmManager.INTERVAL_FIFTEEN_MINUTES, pendingIntent);
 
-                } else {
+                }*/
+                else {
                     // 15 min Sync
+                    // 1 Hrs Sync
                     alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                            SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_FIFTEEN_MINUTES,
-                            AlarmManager.INTERVAL_FIFTEEN_MINUTES, pendingIntent);
-
+                            SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HOUR,
+                            AlarmManager.INTERVAL_HOUR, pendingIntent);
                 }
 
             } else {
@@ -807,6 +809,8 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 if (dataSnapshot.exists()) {
+
+
                     long t = dataSnapshot.getChildrenCount();
                     int i = 0;
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {

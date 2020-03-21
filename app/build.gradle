@@ -133,7 +133,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging:+'
     implementation 'com.crashlytics.sdk.android:crashlytics:+'
     implementation 'com.google.firebase:firebase-config:+'
-    implementation "androidx.work:work-runtime:+"
+    implementation 'androidx.work:work-runtime:2.4.0-alpha01'
 
 
     implementation 'androidx.preference:preference:+'
