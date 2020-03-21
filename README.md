@@ -2,7 +2,7 @@
 
 [![PyPI status](https://img.shields.io/pypi/status/ansicolortags.svg)](https://play.google.com/store/apps/details?id=devesh.ephrine.backup.sms)
 [![Generic badge](https://img.shields.io/badge/Beta_Version-0.0.1-yellow.svg)](https://play.google.com/store/apps/details?id=devesh.ephrine.backup.sms) [![Generic badge](https://img.shields.io/badge/Download-APK-green.svg)](https://github.com/ephrine/SMS-Drive/raw/master/APK/release/app-release.apk)  [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/ephrine/SMS-Drive/blob/master/LICENSE) [![Ask Me Anything !](https://img.shields.io/badge/Ask%20me-anything-1abc9c.svg)](https://GitHub.com/deveshrx) [![GitHub stars](https://img.shields.io/github/stars/Naereen/StrapDown.js.svg?style=social&label=Star&maxAge=2592000)](https://github.com/ephrine/SMS-Drive/stargazers/) [![GitHub contributors](https://img.shields.io/github/contributors/Naereen/StrapDown.js.svg)](https://github.com/ephrine/SMS-Drive/graphs/contributors/)
-
+![Android Build APK](https://github.com/ephrine/SMS-Drive/workflows/Android%20Build%20APK/badge.svg)
 
 Back-up &amp; Sync Messages on your Device
 
@@ -11,7 +11,7 @@ Step 1: Create a [Firebase Project](https://console.firebase.google.com/) and ad
 
 Step 2: Download <code>google-dervices.json</code> file from console and add it into project location <code>/app/google-services.json</code>
 
-Step 3: Add following environmental variables into your <code>local.properties</code> file of Android Studio
+Step 3: Create a file  <code>smsdrive.local.properties</code> in parent directory(SMS-Drive) and Add following environmental variables into your <code>smsdrive.local.properties</code> file 
 
 
 >sign.key.password=YOUR_PASSWORD <br>
