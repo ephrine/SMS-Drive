@@ -20,6 +20,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -362,10 +364,16 @@ public class SettingsActivity extends AppCompatActivity {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if (user != null) {
                 UserUID = user.getPhoneNumber().replace("+", "x");
-                DeleteDB = FirebaseDatabase.getInstance().getReference("/users/" + UserUID + "/sms");
-                DeleteDB.removeValue();
-                Toast.makeText(getContext(), "Delete SMS Backup: Successful", Toast.LENGTH_SHORT).show();
+               // DeleteDB = FirebaseDatabase.getInstance().getReference("/users/" + UserUID + "/sms");
+               // DeleteDB.removeValue();
 
+               String BackupStorageDB = "SMSDrive/Users/" + UserUID + "/backup/file_cloud_sms.zip";
+
+                StorageReference mStorageRef;
+                mStorageRef = FirebaseStorage.getInstance().getReference();
+                StorageReference riversRef = mStorageRef.child(BackupStorageDB);
+                riversRef.delete();
+                Toast.makeText(getContext(), "Delete SMS Backup: Successful", Toast.LENGTH_SHORT).show();
             }
 
 

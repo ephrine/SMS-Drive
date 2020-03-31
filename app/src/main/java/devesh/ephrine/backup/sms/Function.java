@@ -12,16 +12,24 @@ import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 
+import com.crashlytics.android.Crashlytics;
+
+import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * Created by SHAJIB on 7/10/2017.
@@ -116,6 +124,8 @@ public class Function {
         } catch (Exception e) {
             e.printStackTrace();
             Log.e(TAG, "sendSMS: ERROR !!\n" + e);
+            Crashlytics.logException(e);
+
             return false;
         }
     }
@@ -161,5 +171,7 @@ public class Function {
         return object;
     }
 
+
+    //------
 
 }

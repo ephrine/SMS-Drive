@@ -57,6 +57,14 @@
             app:lottie_imageAssetsFolder="images"
             app:lottie_loop="true" />
 
+        <TextView
+            android:id="@+id/textView6ProgressStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TextView"
+            android:textAlignment="center"
+            android:textColor="@android:color/white" />
+
         <ImageView
             android:id="@+id/imageView3SMSBot"
             android:layout_width="match_parent"
@@ -117,6 +125,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/LLButtonsR"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

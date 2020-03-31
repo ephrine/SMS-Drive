@@ -1,27 +1,19 @@
 package devesh.ephrine.backup.sms;
 
-import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.Toast;
-
-import androidx.core.content.ContextCompat;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.lifeofcoding.cacheutlislibrary.CacheUtils;
 
 import java.text.SimpleDateFormat;
@@ -31,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import devesh.ephrine.backup.sms.services.SyncIntentService;
 import io.fabric.sdk.android.Fabric;
 
 public class ScannerBroadcastReceiver extends BroadcastReceiver {
@@ -56,6 +49,7 @@ public class ScannerBroadcastReceiver extends BroadcastReceiver {
 
 
     String name;
+
     @Override
     public void onReceive(Context context, Intent intent) {
         // TODO: This method is called when the BroadcastReceiver is receiving
@@ -67,7 +61,7 @@ public class ScannerBroadcastReceiver extends BroadcastReceiver {
         SMSAutoBackup = sharedPrefAutoBackup.getBoolean(mContext.getResources().getString(R.string.settings_sync), false);
         Fabric.with(mContext, new Crashlytics());
 
-        mContext=context;
+        mContext = context;
         iThread = new HashMap<>();
         user = FirebaseAuth.getInstance().getCurrentUser();
         database = FirebaseDatabase.getInstance();
@@ -79,8 +73,12 @@ public class ScannerBroadcastReceiver extends BroadcastReceiver {
         isFinished = false;
 
         if (isSubscribed) {
+            Log.d(TAG, "onReceive: ScannerBroadcastReceiver SYNC STARTED ");
+            //   Intent intent1 = new Intent(mContext, SyncIntentService.class);
+            // context.startService(intent1);
+            SyncIntentService.enqueueWork(mContext, new Intent());
 
-            new Thread(new Runnable() {
+          /*       new Thread(new Runnable() {
                 public void run() {
                     // a potentially time consuming task
                     SMSScan s = new SMSScan(mContext);
@@ -90,7 +88,7 @@ public class ScannerBroadcastReceiver extends BroadcastReceiver {
             }).start();
 
 
-            /*
+       
             OneTimeWorkRequest syncWorkRequest = new OneTimeWorkRequest.Builder(SyncWorkManager.class)
                     .build();
             WorkManager.getInstance(this).enqueue(syncWorkRequest);*/
@@ -100,125 +98,123 @@ public class ScannerBroadcastReceiver extends BroadcastReceiver {
         }
 
         //  getSMS();
-  /**      if (isDefaultApp) {
+        /**      if (isDefaultApp) {
 
-            if (ContextCompat.checkSelfPermission(mContext,
-                    Manifest.permission.READ_SMS)
-                    == PackageManager.PERMISSION_GRANTED) {
-                if (user != null && isSubscribed) {
-                    UserUID = user.getPhoneNumber().replace("+", "x");
-                    //Download Full Backup First to Prevent DataLoss
-                    SMSBackupDB = database.getReference("/users/" + UserUID + "/sms/backup");
-                    //SMSScanDevice();
+         if (ContextCompat.checkSelfPermission(mContext,
+         Manifest.permission.READ_SMS)
+         == PackageManager.PERMISSION_GRANTED) {
+         if (user != null && isSubscribed) {
+         UserUID = user.getPhoneNumber().replace("+", "x");
+         //Download Full Backup First to Prevent DataLoss
+         SMSBackupDB = database.getReference("/users/" + UserUID + "/sms/backup");
+         //SMSScanDevice();
 
-                    try {
+         try {
 
-                        tmpList.clear();
-                        tmpList = (ArrayList<HashMap<String, String>>) Function.readCachedFile(mContext, "orgsms");
+         tmpList.clear();
+         tmpList = (ArrayList<HashMap<String, String>>) Function.readCachedFile(mContext, "orgsms");
 
-                    } catch (Exception e) {
-                    }
-
-
-                    SMSBackupDB.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            // This method is called once with the initial value and again
-                            // whenever data at this location is updated.
-                            //String value = dataSnapshot.getValue(String.class);
-                            // Log.d(TAG, "Value is: " + value);
-
-                            if (dataSnapshot.exists() && isSubscribed) {
-
-                                long total = dataSnapshot.getChildrenCount();
-                                long i;
-                                i = 0;
-                                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                    // TODO: handle the post
-                                    i = i + 1;
+         } catch (Exception e) {
+         }
 
 
-                                    String threadName = postSnapshot.getKey();
-                                    Log.d(TAG, "onDataChange: threadName: ");
+         SMSBackupDB.addListenerForSingleValueEvent(new ValueEventListener() {
+        @Override public void onDataChange(DataSnapshot dataSnapshot) {
+        // This method is called once with the initial value and again
+        // whenever data at this location is updated.
+        //String value = dataSnapshot.getValue(String.class);
+        // Log.d(TAG, "Value is: " + value);
 
-                                    //     GetThread(postSnapshot, threadName);
+        if (dataSnapshot.exists() && isSubscribed) {
 
-                                 DataSnapshot DS = postSnapshot;
-
-
-                                    Log.d(TAG, "GetThread: DS :  DS.getChildren().toString()");
-
-                                    //  Log.d(TAG, "onDataChange: msg:" + msg + "\nMSG: " + MsgBody);
-                                    Log.d(TAG, "onDataChange: msg:");
-
-//            String MsgTime = DS.child("date").getValue().toString();
-                                    String phone = DS.child(Function.KEY_PHONE).getValue(String.class);
-
-                                    String name = DS.child(Function.KEY_NAME).getValue(String.class);
-                                    String _id = DS.child(Function._ID).getValue(String.class);
-                                    String thread_id = DS.child(Function.KEY_THREAD_ID).getValue(String.class);
-                                    String msg = DS.child(Function.KEY_MSG).getValue(String.class);
-                                    String type = DS.child(Function.KEY_TYPE).getValue(String.class);
-                                    String timestamp = DS.child(Function.KEY_TIMESTAMP).getValue(String.class);
-                                    String time = DS.child(Function.KEY_TIME).getValue(String.class);
+        long total = dataSnapshot.getChildrenCount();
+        long i;
+        i = 0;
+        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+        // TODO: handle the post
+        i = i + 1;
 
 
-                                    //    Date date = new Date(Long.parseLong(MsgTime));
-                                    //  String formattedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+        String threadName = postSnapshot.getKey();
+        Log.d(TAG, "onDataChange: threadName: ");
 
-                                    HashMap<String, String> SMS = new HashMap<>();
-                                    SMS.put(Function._ID, _id);
-                                    SMS.put(Function.KEY_THREAD_ID, thread_id);
-                                    SMS.put(Function.KEY_PHONE, phone);
-                                    SMS.put(Function.KEY_MSG, msg);
-                                    SMS.put(Function.KEY_TYPE, type);
-                                    SMS.put(Function.KEY_TIMESTAMP, timestamp);
-                                    SMS.put(Function.KEY_TIME, time);
-                                    SMS.put(Function.KEY_NAME, name);
+        //     GetThread(postSnapshot, threadName);
+
+        DataSnapshot DS = postSnapshot;
 
 
-                                    smsList.add(SMS);
+        Log.d(TAG, "GetThread: DS :  DS.getChildren().toString()");
 
-                                    if (iThread.containsKey(threadName)) {
-                                        iThread.get(threadName).add(SMS);
-                                    } else {
-                                        ArrayList<HashMap<String, String>> temp1 = new ArrayList<>();
-                                        temp1.add(SMS);
-                                        iThread.put(threadName, temp1);
-                                    }
+        //  Log.d(TAG, "onDataChange: msg:" + msg + "\nMSG: " + MsgBody);
+        Log.d(TAG, "onDataChange: msg:");
 
+        //            String MsgTime = DS.child("date").getValue().toString();
+        String phone = DS.child(Function.KEY_PHONE).getValue(String.class);
 
-
-                                    Log.d(TAG, "i:" + i + "\n Total:" + total);
-                                    if (i == total) {
-                                        sms1();
-                                    }
-
-                                }
-
-                            } else {
-                                if (isSubscribed) {
-                                    sms1();
-                                }
-                            }
-
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError error) {
-                            // Failed to read value
-                            Log.w(TAG, "Failed to read value.", error.toException());
-                        }
-                    });
+        String name = DS.child(Function.KEY_NAME).getValue(String.class);
+        String _id = DS.child(Function._ID).getValue(String.class);
+        String thread_id = DS.child(Function.KEY_THREAD_ID).getValue(String.class);
+        String msg = DS.child(Function.KEY_MSG).getValue(String.class);
+        String type = DS.child(Function.KEY_TYPE).getValue(String.class);
+        String timestamp = DS.child(Function.KEY_TIMESTAMP).getValue(String.class);
+        String time = DS.child(Function.KEY_TIME).getValue(String.class);
 
 
-                }
+        //    Date date = new Date(Long.parseLong(MsgTime));
+        //  String formattedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
 
-            }
+        HashMap<String, String> SMS = new HashMap<>();
+        SMS.put(Function._ID, _id);
+        SMS.put(Function.KEY_THREAD_ID, thread_id);
+        SMS.put(Function.KEY_PHONE, phone);
+        SMS.put(Function.KEY_MSG, msg);
+        SMS.put(Function.KEY_TYPE, type);
+        SMS.put(Function.KEY_TIMESTAMP, timestamp);
+        SMS.put(Function.KEY_TIME, time);
+        SMS.put(Function.KEY_NAME, name);
+
+
+        smsList.add(SMS);
+
+        if (iThread.containsKey(threadName)) {
+        iThread.get(threadName).add(SMS);
+        } else {
+        ArrayList<HashMap<String, String>> temp1 = new ArrayList<>();
+        temp1.add(SMS);
+        iThread.put(threadName, temp1);
+        }
+
+
+
+        Log.d(TAG, "i:" + i + "\n Total:" + total);
+        if (i == total) {
+        sms1();
+        }
 
         }
 
-*/
+        } else {
+        if (isSubscribed) {
+        sms1();
+        }
+        }
+
+        }
+
+        @Override public void onCancelled(DatabaseError error) {
+        // Failed to read value
+        Log.w(TAG, "Failed to read value.", error.toException());
+        }
+        });
+
+
+         }
+
+         }
+
+         }
+
+         */
         //     iThread=smsscan.GetList();
 
 
@@ -482,7 +478,6 @@ public class ScannerBroadcastReceiver extends BroadcastReceiver {
 
 
     }
-
 
 
 }
