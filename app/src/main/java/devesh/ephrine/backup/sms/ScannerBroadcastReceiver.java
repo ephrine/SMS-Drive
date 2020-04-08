@@ -66,13 +66,21 @@ public class ScannerBroadcastReceiver extends BroadcastReceiver {
         user = FirebaseAuth.getInstance().getCurrentUser();
         database = FirebaseDatabase.getInstance();
 
-        isSubscribed = true;
+        try {
+            if (CacheUtils.readFile(context.getString(R.string.cache_Sub_isSubscribe)).toString().equals("1")) {
+                isSubscribed = true;
+            } else {
+                isSubscribed = false;
+            }
+        } catch (Exception e) {
+            isSubscribed = false;
+        }
         sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(mContext /* Activity context */);
         SMSAutoBackup = sharedPrefAutoBackup.getBoolean(mContext.getResources().getString(R.string.settings_sync), false);
 
         isFinished = false;
 
-        if (isSubscribed) {
+        if (isSubscribed && SMSAutoBackup) {
             Log.d(TAG, "onReceive: ScannerBroadcastReceiver SYNC STARTED ");
             //   Intent intent1 = new Intent(mContext, SyncIntentService.class);
             // context.startService(intent1);

@@ -56,6 +56,19 @@
     <string name="file_device_sms">file_device_sms</string>
     <string name="default_sms_app_notice">Would you like to set SMS Drive as your Default Messaging App ?</string>
 
-    <string name="app_desc_short">Keep your Messages Safe and backup at ease</string>
+    <string name="app_desc_short">Keep your Messages Safe &amp; Backup</string>
     <string name="last_sync_at">Last Synced at</string>
+
+    <!--Purchase Strings-->
+    <string name="cache_Sub_PurchaseToken">cachepurchasetoken</string>
+    <string name="cache_Sub_ProductId">cacheproductid</string>
+    <string name="cache_Sub_OrderId">cacheorderid</string>
+    <string name="cache_Sub_PurchaseTimeMillis">cachepurchasetimemillis</string>
+    <string name="cache_Sub_PurchaseTime">cachepurchasetime</string>
+    <string name="cache_Sub_isSubscribe">cachesubissubscribe</string>
+    <string name="cache_Sub_Details_Price">cachesubdetailsprice</string>
+    <string name="cache_Sub_Details_Description">cachesubdetailsdetails</string>
+
+    <string name="my_subscription">My Subscription</string>
+
 </resources>

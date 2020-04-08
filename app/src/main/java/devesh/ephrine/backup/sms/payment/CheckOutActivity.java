@@ -14,6 +14,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.multidex.MultiDex;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -45,6 +46,7 @@ import java.util.concurrent.TimeUnit;
 
 import devesh.ephrine.backup.sms.BuildConfig;
 import devesh.ephrine.backup.sms.R;
+import io.fabric.sdk.android.Fabric;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -76,6 +78,8 @@ public class CheckOutActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check_out);
+        Fabric.with(this, new Crashlytics());
+
         mFunctions = FirebaseFunctions.getInstance();
 
         httpClient = new OkHttpClient.Builder()

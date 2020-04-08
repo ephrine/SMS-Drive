@@ -23,6 +23,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -76,9 +77,9 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import devesh.ephrine.backup.sms.payment.CheckSubscriptionService;
+import devesh.ephrine.backup.sms.payment.GPlayBillingCheckoutActivity;
 import io.fabric.sdk.android.Fabric;
-
-import static com.google.firebase.storage.StorageException.ERROR_OBJECT_NOT_FOUND;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -127,6 +128,12 @@ public class MainActivity extends AppCompatActivity {
     CardView defaultSMSAppCardViewWarning;
     TextView textView5CloudEmpty;
     FirebaseRemoteConfig mFirebaseRemoteConfig;
+    RelativeLayout CloudViewUnSub;
+    String BackupStorageDB;
+    CardView LLSubCardView;
+    CardView LLSyncCardView;
+    File localFile;
+    Gson gson;
     private FirebaseAuth mAuth;
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -145,8 +152,14 @@ public class MainActivity extends AppCompatActivity {
                     LayoutCloud.setVisibility(View.VISIBLE);
                     LayoutHome.setVisibility(View.GONE);
 
-
                     LoadCloudRecycleView();
+
+                    if (isSubscribed) {
+                        CloudViewUnSub.setVisibility(View.GONE);
+                    } else {
+                        CloudViewUnSub.setVisibility(View.VISIBLE);
+                    }
+
                     break;
 
                 case R.id.NavToolsMenu:
@@ -161,21 +174,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
     };
-    /*
-        @Override
-        protected void onResume() {
-            super.onResume();
-
-            if (!hasPermissions(this, PERMISSIONS)) {
-                ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
-            }else{
-                AppStart();
-
-            }
-        }
-        */
     private FirebaseFunctions mFunctions;
-    String BackupStorageDB;
 
     public static boolean hasPermissions(Context context, String... permissions) {
         if (context != null && permissions != null) {
@@ -188,6 +187,32 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        try {
+            if (CacheUtils.readFile(getString(R.string.cache_Sub_isSubscribe)).toString().equals("1")) {
+                isSubscribed = true;
+            } else {
+                isSubscribed = false;
+            }
+        } catch (Exception e) {
+            isSubscribed = false;
+        }
+
+
+        if (isSubscribed) {
+            LLSubCardView.setVisibility(View.GONE);
+            LLSyncCardView.setVisibility(View.VISIBLE);
+        } else {
+            LLSubCardView.setVisibility(View.VISIBLE);
+            LLSyncCardView.setVisibility(View.GONE);
+            //      SharedPreferences.Editor editor = sharedPrefAutoBackup.edit();
+            //     editor.putBoolean(getString(R.string.settings_sync), false).apply();
+        }
+
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -195,20 +220,32 @@ public class MainActivity extends AppCompatActivity {
 //isDefaultSmsApp=false;
         setContentView(R.layout.activity_main_home);
         Fabric.with(this, new Crashlytics());
+
+        //Subscription Check
+        Intent subscriptionCheck = new Intent(this, CheckSubscriptionService.class);
+        startService(subscriptionCheck);
+
+        Function.getDefaultLocal();
+
         onceOpen = 0;
-        isSubscribed = true;
+        //  isSubscribed = true;
         mAuth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance();
 
         LayoutHome = findViewById(R.id.layoutHome);
         LayoutCloud = findViewById(R.id.layoutCloud);
+        CloudViewUnSub = findViewById(R.id.RLUNSub);
+
+        textView5CloudEmpty = findViewById(R.id.textView5CloudEmpty);
+
+        LLSubCardView = findViewById(R.id.LLSubCardView);
+        LLSyncCardView = findViewById(R.id.LLSyncCardView);
 
         // defaultSMSAppCardViewWarning=findViewById(R.id.defaultSMSAppCardViewWarning);
         mySwipeRefreshLayout = findViewById(R.id.swipeRefresh);
 
         loadingCircle = findViewById(R.id.progressBar1);
         iThread = new HashMap<>();
-        textView5CloudEmpty = findViewById(R.id.textView5CloudEmpty);
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
@@ -571,19 +608,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void AppStart() {
+
         //  loadingCircle.setVisibility(View.GONE);
         mySwipeRefreshLayout.setRefreshing(false);
+
+        sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
+        SMSAutoBackup = sharedPrefAutoBackup.getBoolean(getResources().getString(R.string.settings_sync), false);
+
+        try {
+            if (CacheUtils.readFile(getString(R.string.cache_Sub_isSubscribe)).toString().equals("1")) {
+                isSubscribed = true;
+            } else {
+                isSubscribed = false;
+            }
+        } catch (Exception e) {
+            isSubscribed = false;
+        }
+
+
         if (isSubscribed) {
-
-
+            LLSubCardView.setVisibility(View.GONE);
+            LLSyncCardView.setVisibility(View.VISIBLE);
+        } else {
+            LLSubCardView.setVisibility(View.VISIBLE);
+            LLSyncCardView.setVisibility(View.GONE);
+            //      SharedPreferences.Editor editor = sharedPrefAutoBackup.edit();
+            //     editor.putBoolean(getString(R.string.settings_sync), false).apply();
         }
 
         loadsmsTask = new LoadSms();
         loadsmsTask.execute();
         LoadRecycleView();
 
-        sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
-        SMSAutoBackup = sharedPrefAutoBackup.getBoolean(getResources().getString(R.string.settings_sync), false);
 
   /*      Switch SyncSwitch = findViewById(R.id.switch1);
 
@@ -774,7 +830,7 @@ public class MainActivity extends AppCompatActivity {
 
             //  alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
             //        + (i * 1000), pendingIntent);
-            if (SMSAutoBackup) {
+            if (SMSAutoBackup && isSubscribed) {
 
                 Log.d(TAG, "FileAutoBackUpBroadCast: FileSyncIntervals: " + sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_sync_interval), null));
                 String syncinterval = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_sync_interval), null);
@@ -801,7 +857,8 @@ public class MainActivity extends AppCompatActivity {
                             SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HOUR,
                             AlarmManager.INTERVAL_HOUR, pendingIntent);
 
-                } else if (syncinterval.equals(syncintervalArray[3])) {
+                }
+                /* else if (syncinterval.equals(syncintervalArray[3])) {
                     // half Hrs Sync
                     alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                             SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HALF_HOUR,
@@ -813,12 +870,13 @@ public class MainActivity extends AppCompatActivity {
                             SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_FIFTEEN_MINUTES,
                             AlarmManager.INTERVAL_FIFTEEN_MINUTES, pendingIntent);
 
-                } else {
-                    // 15 min Sync
-                    // 1 Hrs Sync
+                }
+                */
+                else {
+                    // 12 Hrs Sync
                     alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                            SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HOUR,
-                            AlarmManager.INTERVAL_HOUR, pendingIntent);
+                            SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HALF_DAY,
+                            AlarmManager.INTERVAL_HALF_DAY, pendingIntent);
                 }
 
             } else {
@@ -832,92 +890,95 @@ public class MainActivity extends AppCompatActivity {
 //        Toast.makeText(this, "File upload  " + i + " seconds", Toast.LENGTH_LONG).show();
 
     }
-    File localFile;
-    Gson gson;
+
     void downloadCloudSMS() {
-        BackupStorageDB = "SMSDrive/Users/" + UserUID + "/backup/file_cloud_sms.zip";
+        Log.d(TAG, "downloadCloudSMS:  downloadCloudSMS()");
+        if (isSubscribed) {
+            Log.d(TAG, "downloadCloudSMS:  downloadCloudSMS() isSubscribed");
 
-        StorageReference mStorageRef;
-        mStorageRef = FirebaseStorage.getInstance().getReference();
-        StorageReference riversRef = mStorageRef.child(BackupStorageDB);
-       localFile = null;
-        gson = new Gson();
+            BackupStorageDB = "SMSDrive/Users/" + UserUID + "/backup/file_cloud_sms.zip";
 
-        ArrayList<HashMap<String, String>> tmpList=null;
-        try {
-            tmpList.clear();
-            tmpList = (ArrayList<HashMap<String, String>>) Function.readCachedFile(this, getString(R.string.file_device_sms));
+            StorageReference mStorageRef;
+            mStorageRef = FirebaseStorage.getInstance().getReference();
+            StorageReference riversRef = mStorageRef.child(BackupStorageDB);
+            localFile = null;
+            gson = new Gson();
 
-        } catch (Exception e) {
-            Log.d(TAG, "DownloadFromCloud: ERROR " + e);
-            Crashlytics.logException(e);
+            ArrayList<HashMap<String, String>> tmpList = null;
+            try {
+                tmpList.clear();
+                tmpList = (ArrayList<HashMap<String, String>>) Function.readCachedFile(this, getString(R.string.file_device_sms));
 
-        }
+            } catch (Exception e) {
+                Log.d(TAG, "DownloadFromCloud: ERROR " + e);
+                Crashlytics.logException(e);
 
-        try {
-            localFile = File.createTempFile("smscloud", "backup");
-        } catch (Exception e) {
-            Log.d(TAG, "DownloadFromCloud: #ERROR " + e);
-            Crashlytics.logException(e);
+            }
 
-        }
-        riversRef.getFile(localFile)
-                .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                        // Successfully downloaded data to local file
-                        Log.d(TAG, "onSuccess: DownloadFromCloud");
+            try {
+                localFile = File.createTempFile("smscloud", "backup");
+            } catch (Exception e) {
+                Log.d(TAG, "DownloadFromCloud: #ERROR " + e);
+                Crashlytics.logException(e);
 
-                        new Thread(new Runnable() {
-                            public void run() {
-                                File unziped=unzipFile(localFile);
-                                Log.d(TAG, "onSuccess: Unziped: "+unziped.getPath());
-                                String JsonStr = ConvertFileToStrng(unziped);
-                                Type type = new TypeToken<ArrayList<HashMap<String, String>>>() {
-                                }.getType();
+            }
+            riversRef.getFile(localFile)
+                    .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                            // Successfully downloaded data to local file
+                            Log.d(TAG, "onSuccess: DownloadFromCloud");
 
-                                ArrayList<HashMap<String, String>> jj = gson.fromJson(JsonStr, type);
-                                CloudSms.addAll(jj);
+                            new Thread(new Runnable() {
+                                public void run() {
+                                    File unziped = unzipFile(localFile);
+                                    Log.d(TAG, "onSuccess: Unziped: " + unziped.getPath());
+                                    String JsonStr = ConvertFileToStrng(unziped);
+                                    Type type = new TypeToken<ArrayList<HashMap<String, String>>>() {
+                                    }.getType();
 
-                                ArrayList<HashMap<String, String>> CleanHash = new ArrayList<>();
-                                CleanHash = RemoveDuplicateHashMaps(CloudSms);
+                                    ArrayList<HashMap<String, String>> jj = gson.fromJson(JsonStr, type);
+                                    CloudSms.addAll(jj);
 
-                                CloudSms.clear();
-                                CloudSms=CleanHash;
-                                //CleanHash =  smsList;
-                                //    UploadToCloud(CleanHash);
+                                    //  ArrayList<HashMap<String, String>> CleanHash = new ArrayList<>();
+                                    //  CleanHash = RemoveDuplicateHashMaps(CloudSms);
 
-                                //Unzip File
+                                    //  CloudSms.clear();
+                                    // CloudSms = CleanHash;
+                                    //CleanHash =  smsList;
+                                    //    UploadToCloud(CleanHash);
 
-                                Log.d(TAG, "onDataChange: END of CLOUD SMS");
-                                Collections.sort(CloudSms, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging sms by timestamp decending
+                                    //Unzip File
 
-                                try {
-                                    Function.createCachedFile(MainActivity.this, getString(R.string.file_cloud_sms), CloudSms);
-                                    Log.d(TAG, "onDataChange: createCachedFile file_cloud_sms ");
+                                    Log.d(TAG, "onDataChange: END of CLOUD SMS");
+                                    Collections.sort(CloudSms, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging sms by timestamp decending
 
-                                } catch (Exception e) {
-                                    Log.d(TAG, "onDataChange: ERROR #56 : " + e);
-                                    Crashlytics.logException(e);
+                                    try {
+                                        Function.createCachedFile(MainActivity.this, getString(R.string.file_cloud_sms), CloudSms);
+                                        Log.d(TAG, "onDataChange: createCachedFile file_cloud_sms ");
+
+                                    } catch (Exception e) {
+                                        Log.d(TAG, "onDataChange: ERROR #56 : " + e);
+                                        Crashlytics.logException(e);
+
+                                    }
+                                    CloudThreadSms = CloudSms;
+                                    Collections.sort(CloudThreadSms, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging sms by timestamp decending
+                                    ArrayList<HashMap<String, String>> purified = Function.removeDuplicates(CloudThreadSms); // Removing duplicates from inbox & sent
+                                    CloudThreadSms.clear();
+                                    CloudThreadSms.addAll(purified);
+                                    try {
+                                        Function.createCachedFile(MainActivity.this, getString(R.string.file_cloud_thread), CloudSms);
+                                        Log.d(TAG, "onDataChange: createCachedFile file_cloud_thread ");
+                                    } catch (Exception e) {
+                                        Log.d(TAG, "onDataChange: ERROR #5600 : " + e);
+                                        Crashlytics.logException(e);
+
+                                    }
+
 
                                 }
-                                CloudThreadSms = CloudSms;
-                                Collections.sort(CloudThreadSms, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging sms by timestamp decending
-                                ArrayList<HashMap<String, String>> purified = Function.removeDuplicates(CloudThreadSms); // Removing duplicates from inbox & sent
-                                CloudThreadSms.clear();
-                                CloudThreadSms.addAll(purified);
-                                try {
-                                    Function.createCachedFile(MainActivity.this, getString(R.string.file_cloud_thread), CloudSms);
-                                    Log.d(TAG, "onDataChange: createCachedFile file_cloud_thread ");
-                                } catch (Exception e) {
-                                    Log.d(TAG, "onDataChange: ERROR #5600 : " + e);
-                                    Crashlytics.logException(e);
-
-                                }
-
-
-                            }
-                        }).start();
+                            }).start();
 
 
 
@@ -930,33 +991,33 @@ public class MainActivity extends AppCompatActivity {
                     }
                     */
 
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle failed download
+                    Log.d(TAG, "onFailure: ERROR #546766 " + exception + " \n message: " + exception.getMessage());
+
+
+                    Log.d(TAG, "onFailure: ERROR CloudSms.clear();");
+                    CloudSms.clear();
+                    CloudThreadSms.clear();
+                    try {
+                        Function.createCachedFile(MainActivity.this, getString(R.string.file_cloud_sms), CloudSms);
+
+                        Function.createCachedFile(MainActivity.this, getString(R.string.file_cloud_thread), CloudThreadSms);
+                        Log.d(TAG, "onDataChange: createCachedFile file_cloud_thread ");
+                    } catch (Exception e) {
+                        Log.d(TAG, "onDataChange: ERROR #5600 : " + e);
+                        Crashlytics.logException(e);
+
                     }
-                }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle failed download
-                Log.d(TAG, "onFailure: ERROR #546766 " + exception+" \n message: "+exception.getMessage());
 
 
-    Log.d(TAG, "onFailure: ERROR CloudSms.clear();" );
-CloudSms.clear();
-    CloudThreadSms.clear();
-    try {
-        Function.createCachedFile(MainActivity.this, getString(R.string.file_cloud_sms), CloudSms);
+                    //    UploadToCloud(smsList);
 
-        Function.createCachedFile(MainActivity.this, getString(R.string.file_cloud_thread), CloudThreadSms);
-        Log.d(TAG, "onDataChange: createCachedFile file_cloud_thread ");
-    } catch (Exception e) {
-        Log.d(TAG, "onDataChange: ERROR #5600 : " + e);
-        Crashlytics.logException(e);
-
-    }
-
-
-            //    UploadToCloud(smsList);
-
-            }
-        });
+                }
+            });
 
 /*
         CloudSMSDB = database.getReference("/users/" + UserUID + "/sms/backup");
@@ -1034,16 +1095,16 @@ CloudSms.clear();
 
         */
 
+        }
     }
 
-    File unzipFile(File zipfile){
+    File unzipFile(File zipfile) {
         InputStream is;
         ZipInputStream zis;
-        File unzip_file=null;
+        File unzip_file = null;
 
-        try
-        {
-            unzip_file=File.createTempFile("backuprestore","json");
+        try {
+            unzip_file = File.createTempFile("backuprestore", "json");
             String filename;
             is = new FileInputStream(zipfile);
             zis = new ZipInputStream(new BufferedInputStream(is));
@@ -1051,8 +1112,7 @@ CloudSms.clear();
             byte[] buffer = new byte[1024];
             int count;
 
-            while ((ze = zis.getNextEntry()) != null)
-            {
+            while ((ze = zis.getNextEntry()) != null) {
                 filename = ze.getName();
 
                 // Need to create directories if not exists, or
@@ -1065,8 +1125,7 @@ CloudSms.clear();
 
                 OutputStream fout = new FileOutputStream(unzip_file);
 
-                while ((count = zis.read(buffer)) != -1)
-                {
+                while ((count = zis.read(buffer)) != -1) {
                     fout.write(buffer, 0, count);
                 }
 
@@ -1075,15 +1134,13 @@ CloudSms.clear();
             }
 
             zis.close();
-        }
-        catch(IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
             Crashlytics.logException(e);
 
 
         }
-        return  unzip_file;
+        return unzip_file;
     }
 
     String ConvertFileToStrng(File file) {
@@ -1110,33 +1167,30 @@ CloudSms.clear();
 
     ArrayList<HashMap<String, String>> RemoveDuplicateHashMaps(ArrayList<HashMap<String, String>> X) {
         Log.d(TAG, "RemoveDuplicateHashMaps: Removing Duplicate...");
-      final ArrayList<HashMap<String, String>> A =X;
+        final ArrayList<HashMap<String, String>> A = X;
         ArrayList<HashMap<String, String>> TempCleanHash = new ArrayList<>();
 
 
-
-                // ArrayList<HashMap<String, String>> gpList = A;
-                for (int i = 0; i < A.size(); i++) {
-                    boolean available = false;
-                    for (int j = 0; j < TempCleanHash.size(); j++) {
-                        if (TempCleanHash.get(j).get(Function.KEY_MSG) == A.get(i).get(Function.KEY_MSG)
-                                && TempCleanHash.get(j).get(Function.KEY_TIMESTAMP) == A.get(i).get(Function.KEY_TIMESTAMP)
-                                && TempCleanHash.get(j).get(Function.KEY_PHONE) == A.get(i).get(Function.KEY_PHONE)
-                                && TempCleanHash.get(j).get(Function.KEY_TYPE) == A.get(i).get(Function.KEY_TYPE)
-                        ){
-                            available = true;
-                            Log.d(TAG, "RemoveDuplicateHashMaps: Duplicate Found");
-                            break;
-                        }
-                    }
-
-                    if (!available) {
-                        Log.d(TAG, "RemoveDuplicateHashMaps: Added Non-Duplicate");
-                        TempCleanHash.add(A.get(i));
-                    }
+        // ArrayList<HashMap<String, String>> gpList = A;
+        for (int i = 0; i < A.size(); i++) {
+            boolean available = false;
+            for (int j = 0; j < TempCleanHash.size(); j++) {
+                if (TempCleanHash.get(j).get(Function.KEY_MSG) == A.get(i).get(Function.KEY_MSG)
+                        && TempCleanHash.get(j).get(Function.KEY_TIMESTAMP) == A.get(i).get(Function.KEY_TIMESTAMP)
+                        && TempCleanHash.get(j).get(Function.KEY_PHONE) == A.get(i).get(Function.KEY_PHONE)
+                        && TempCleanHash.get(j).get(Function.KEY_TYPE) == A.get(i).get(Function.KEY_TYPE)
+                ) {
+                    available = true;
+                    //    Log.d(TAG, "RemoveDuplicateHashMaps: Duplicate Found");
+                    break;
                 }
+            }
 
-
+            if (!available) {
+                Log.d(TAG, "RemoveDuplicateHashMaps: Added Non-Duplicate");
+                TempCleanHash.add(A.get(i));
+            }
+        }
 
 
         return TempCleanHash;
@@ -1365,6 +1419,15 @@ CloudSms.clear();
                     }
                 });
     }
+
+    public void openMySubscription(View v) {
+        Intent intent = new Intent(this, GPlayBillingCheckoutActivity.class);
+
+        //  String message = editText.getText().toString();
+        //intent.putExtra(EXTRA_MESSAGE, message);
+        startActivity(intent);
+    }
+
 
     //---------------- LoadSms Async Task
     class LoadSms extends AsyncTask<String, Void, String> {

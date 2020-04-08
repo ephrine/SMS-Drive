@@ -14,22 +14,18 @@ import androidx.core.app.ActivityCompat;
 
 import com.crashlytics.android.Crashlytics;
 
-import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.Locale;
 
 /**
  * Created by SHAJIB on 7/10/2017.
@@ -173,5 +169,20 @@ public class Function {
 
 
     //------
+
+    public static void getDefaultLocal() {
+        Locale defaultLocale = Locale.getDefault();
+        // displayCurrencyInfoForLocale(defaultLocale);
+
+        Locale swedishLocale = new Locale("sv", "SE");
+        // displayCurrencyInfoForLocale(swedishLocale);
+        Log.d(TAG, "getDefaultLocal: ");
+        Log.d(TAG, "Locale: " + defaultLocale.getDisplayName());
+        Currency currency = Currency.getInstance(defaultLocale);
+        Log.d(TAG, "Currency Code: " + currency.getCurrencyCode());
+        Log.d(TAG, "Symbol: " + currency.getSymbol());
+        Log.d(TAG, "Default Fraction Digits: " + currency.getDefaultFractionDigits());
+
+    }
 
 }

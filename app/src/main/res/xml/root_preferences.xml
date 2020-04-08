@@ -41,9 +41,11 @@
             app:useSimpleSummaryProvider="true" />
         <Preference
             app:key="sub"
-            app:summary="Manage your Subscription, Currently it's FREE for Beta App users"
+            app:summary="Manage your Subscription"
             app:title="Subscription" />
-
+        <!--
+        , Currently it's FREE for Beta App users
+        -->
         <!--     <ListPreference
             app:entries="@array/gender"
             app:entryValues="@array/gender_values"
@@ -63,7 +65,9 @@
     </PreferenceCategory>
 
 
-    <PreferenceCategory app:title="@string/sync_header">
+    <PreferenceCategory
+        android:key="pc_sync_title"
+        app:title="@string/sync_header">
 
         <SwitchPreferenceCompat
             app:key="@string/settings_sync"

@@ -27,10 +27,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
@@ -51,7 +49,6 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -61,33 +58,25 @@ import java.util.zip.ZipInputStream;
 import io.fabric.sdk.android.Fabric;
 
 public class RestoreWizardActivity extends AppCompatActivity {
+    public String RESTORE_PROGRESS;
     //boolean isDefaultSmsApp;
     String UserUID;
-
     String TAG = "RestoreWizardActivity ";
-
     DatabaseReference SMSBackupDB;
     FirebaseUser user;
     FirebaseDatabase database;
-
     ArrayList<HashMap<String, String>> CloudSms = new ArrayList<>();
     ArrayList<HashMap<String, String>> DeviceSMS = new ArrayList<>();
-
     LottieAnimationView lottieAnimationView1;
     LottieAnimationView lottieAnimationView2;
     LottieAnimationView lottieSyncing;
     LottieAnimationView lottieDoneAnim;
-
     ImageView smsbotIMG;
-
     LinearLayout LLDefaultSmsAppStep1;
-
     String OldDefaultSMSApp;
-
     boolean isRestoreInProgress;
-
-    public String RESTORE_PROGRESS;
     TextView RestoreProgressTextView;
+    LinearLayout LLButtonsR;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,14 +86,14 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         database = FirebaseDatabase.getInstance();
-isRestoreInProgress=false;
+        isRestoreInProgress = false;
         lottieAnimationView1 = findViewById(R.id.animation_view);
         lottieAnimationView2 = findViewById(R.id.animation_view2);
         lottieSyncing = findViewById(R.id.lottiesyncanim);
         lottieDoneAnim = findViewById(R.id.lottiedoneanim);
-RestoreProgressTextView=findViewById(R.id.textView6ProgressStatus);
+        RestoreProgressTextView = findViewById(R.id.textView6ProgressStatus);
         lottieSyncing.setVisibility(View.GONE);
-RestoreProgressTextView.setVisibility(View.GONE);
+        RestoreProgressTextView.setVisibility(View.GONE);
         LLDefaultSmsAppStep1 = findViewById(R.id.LLDefaultSmsAppStep1);
 
         smsbotIMG = findViewById(R.id.imageView3SMSBot);
@@ -152,14 +141,14 @@ RestoreProgressTextView.setVisibility(View.GONE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             final String myPackageName = getPackageName();
             if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
-                if(!isRestoreInProgress){
+                if (!isRestoreInProgress) {
                     //  isDefaultSmsApp = false;
                     lottieAnimationView1.setVisibility(View.VISIBLE);
                     lottieAnimationView2.setVisibility(View.INVISIBLE);
                 }
 
             } else {
-                if(!isRestoreInProgress){
+                if (!isRestoreInProgress) {
                     //isDefaultSmsApp = true;
                     lottieAnimationView1.setVisibility(View.INVISIBLE);
                     lottieAnimationView2.setVisibility(View.VISIBLE);
@@ -171,7 +160,7 @@ RestoreProgressTextView.setVisibility(View.GONE);
 
             }
         } else {
-            if(!isRestoreInProgress){
+            if (!isRestoreInProgress) {
                 // isDefaultSmsApp = true;
                 lottieAnimationView1.setVisibility(View.INVISIBLE);
                 lottieAnimationView2.setVisibility(View.VISIBLE);
@@ -212,15 +201,15 @@ RestoreProgressTextView.setVisibility(View.GONE);
         }
 
     }
-LinearLayout LLButtonsR;
+
     public void StartSaving(View v) {
-        LLButtonsR=findViewById(R.id.LLButtonsR);
+        LLButtonsR = findViewById(R.id.LLButtonsR);
         if (isDefaultSmsApp() && !isRestoreInProgress) {
             LLButtonsR.setVisibility(View.GONE);
-            isRestoreInProgress=true;
+            isRestoreInProgress = true;
             RestoreProgressTextView.setVisibility(View.VISIBLE);
             RestoreProgressTextView.setText("Preparing.....");
-          //  DownloadCloud();
+            //  DownloadCloud();
             new RestoreTask().execute("url1", "url2", "url3");
           /*  runOnUiThread(new Runnable() {
                 public void run() {
@@ -298,15 +287,15 @@ LinearLayout LLButtonsR;
     }
 
 
-    public void finalout(){
+    public void finalout() {
         try {
             lottieSyncing.setVisibility(View.GONE);
             lottieDoneAnim.setVisibility(View.VISIBLE);
             lottieDoneAnim.playAnimation();
             Toast.makeText(RestoreWizardActivity.this, "Success: Restored Messages", Toast.LENGTH_LONG).show();
 
-        }catch (Exception e){
-            Log.d(TAG, "finalout: ERROR #56657 "+e);
+        } catch (Exception e) {
+            Log.d(TAG, "finalout: ERROR #56657 " + e);
             Crashlytics.logException(e);
 
         }
@@ -447,6 +436,10 @@ LinearLayout LLButtonsR;
     }
 
     class RestoreTask extends AsyncTask<String, String, String> {
+        File localFile;
+        Gson gson;
+        String BackupStorageDB;
+
         protected String doInBackground(String... urls) {
             Log.d(TAG, "doInBackground: RestoreTask()");
             DownloadCloud();
@@ -466,11 +459,6 @@ LinearLayout LLButtonsR;
             Log.d(TAG, "onPostExecute: RestoreTask()");
         }
 
-
-        File localFile;
-        Gson gson;
-        String BackupStorageDB;
-
         void DownloadCloud() {
             RestoreProgressTextView.setText("Downloading....");
 
@@ -487,7 +475,7 @@ LinearLayout LLButtonsR;
                 localFile = null;
                 gson = new Gson();
 
-                ArrayList<HashMap<String, String>> tmpList=null;
+                ArrayList<HashMap<String, String>> tmpList = null;
                 try {
                     tmpList.clear();
                     tmpList = (ArrayList<HashMap<String, String>>) Function.readCachedFile(RestoreWizardActivity.this, getString(R.string.file_device_sms));
@@ -514,8 +502,8 @@ LinearLayout LLButtonsR;
 
                                 new Thread(new Runnable() {
                                     public void run() {
-                                        File unziped=unzipFile(localFile);
-                                        Log.d(TAG, "onSuccess: Unziped: "+unziped.getPath());
+                                        File unziped = unzipFile(localFile);
+                                        Log.d(TAG, "onSuccess: Unziped: " + unziped.getPath());
                                         String JsonStr = ConvertFileToStrng(unziped);
                                         Type type = new TypeToken<ArrayList<HashMap<String, String>>>() {
                                         }.getType();
@@ -563,7 +551,7 @@ LinearLayout LLButtonsR;
                         double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
                         //displaying percentage in progress dialog
                         //   yourProgressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
-                        RestoreProgressTextView.setText("Downloading: " +((int) progress) + "%...");
+                        RestoreProgressTextView.setText("Downloading: " + ((int) progress) + "%...");
 
                     }
                 });
@@ -640,14 +628,13 @@ LinearLayout LLButtonsR;
 
         }
 
-        File unzipFile(File zipfile){
+        File unzipFile(File zipfile) {
             InputStream is;
             ZipInputStream zis;
-            File unzip_file=null;
+            File unzip_file = null;
 
-            try
-            {
-                unzip_file=File.createTempFile("backuprestore","json");
+            try {
+                unzip_file = File.createTempFile("backuprestore", "json");
                 String filename;
                 is = new FileInputStream(zipfile);
                 zis = new ZipInputStream(new BufferedInputStream(is));
@@ -655,8 +642,7 @@ LinearLayout LLButtonsR;
                 byte[] buffer = new byte[1024];
                 int count;
 
-                while ((ze = zis.getNextEntry()) != null)
-                {
+                while ((ze = zis.getNextEntry()) != null) {
                     filename = ze.getName();
 
                     // Need to create directories if not exists, or
@@ -669,8 +655,7 @@ LinearLayout LLButtonsR;
 
                     OutputStream fout = new FileOutputStream(unzip_file);
 
-                    while ((count = zis.read(buffer)) != -1)
-                    {
+                    while ((count = zis.read(buffer)) != -1) {
                         fout.write(buffer, 0, count);
                     }
 
@@ -679,14 +664,12 @@ LinearLayout LLButtonsR;
                 }
 
                 zis.close();
-            }
-            catch(IOException e)
-            {
+            } catch (IOException e) {
                 e.printStackTrace();
                 Crashlytics.logException(e);
 
             }
-            return  unzip_file;
+            return unzip_file;
         }
 
         String ConvertFileToStrng(File file) {
@@ -713,9 +696,8 @@ LinearLayout LLButtonsR;
 
         ArrayList<HashMap<String, String>> RemoveDuplicateHashMaps(ArrayList<HashMap<String, String>> X) {
             Log.d(TAG, "RemoveDuplicateHashMaps: Removing Duplicate...");
-            final ArrayList<HashMap<String, String>> A =X;
+            final ArrayList<HashMap<String, String>> A = X;
             ArrayList<HashMap<String, String>> TempCleanHash = new ArrayList<>();
-
 
 
             // ArrayList<HashMap<String, String>> gpList = A;
@@ -726,7 +708,7 @@ LinearLayout LLButtonsR;
                             && TempCleanHash.get(j).get(Function.KEY_TIMESTAMP) == A.get(i).get(Function.KEY_TIMESTAMP)
                             && TempCleanHash.get(j).get(Function.KEY_PHONE) == A.get(i).get(Function.KEY_PHONE)
                             && TempCleanHash.get(j).get(Function.KEY_TYPE) == A.get(i).get(Function.KEY_TYPE)
-                    ){
+                    ) {
                         available = true;
                         Log.d(TAG, "RemoveDuplicateHashMaps: Duplicate Found");
                         break;
@@ -738,8 +720,6 @@ LinearLayout LLButtonsR;
                     TempCleanHash.add(A.get(i));
                 }
             }
-
-
 
 
             return TempCleanHash;
@@ -759,7 +739,7 @@ LinearLayout LLButtonsR;
             while (cursor.moveToNext()) {
                 ii++;
 
-                RestoreProgressTextView.setText("Preparing Inbox Messages: "+ii+"/"+i);
+                RestoreProgressTextView.setText("Preparing Inbox Messages: " + ii + "/" + i);
 
 
                 HashMap<String, String> sms = new HashMap<>();
@@ -884,7 +864,7 @@ LinearLayout LLButtonsR;
             Log.d(TAG, "sms1 sent: Cursor Count: " + i);
             while (cursor.moveToNext()) {
                 ii++;
-                RestoreProgressTextView.setText("Preparing Outbox Messages: "+ii+"/"+i);
+                RestoreProgressTextView.setText("Preparing Outbox Messages: " + ii + "/" + i);
 
                 HashMap<String, String> sms = new HashMap<>();
 
@@ -1018,7 +998,7 @@ LinearLayout LLButtonsR;
                 String phone = cloudsms.get(i).get(Function.KEY_PHONE);
                 String timestamp = cloudsms.get(i).get(Function.KEY_TIMESTAMP);
 
-                RestoreProgressTextView.setText("Restoring Messages: "+i+"/"+tc);
+                RestoreProgressTextView.setText("Restoring Messages: " + i + "/" + tc);
 
                 HashMap<String, String> c1 = new HashMap<>();
                 c1 = cloudsms.get(i);
@@ -1077,9 +1057,8 @@ LinearLayout LLButtonsR;
                 }
             }
 
-finalout();
+            finalout();
         }
-
 
 
     }

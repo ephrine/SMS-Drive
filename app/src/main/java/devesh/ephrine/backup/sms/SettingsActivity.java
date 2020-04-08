@@ -22,7 +22,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.lifeofcoding.cacheutlislibrary.CacheUtils;
 
+import devesh.ephrine.backup.sms.payment.GPlayBillingCheckoutActivity;
 import io.fabric.sdk.android.Fabric;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -51,16 +53,25 @@ public class SettingsActivity extends AppCompatActivity {
         DatabaseReference UserDB;
         String UserUID;
         DatabaseReference DeleteDB;
+        boolean isSubscribed;
 
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
             Fabric.with(getActivity(), new Crashlytics());
-
+            try {
+                if (CacheUtils.readFile(getString(R.string.cache_Sub_isSubscribe)).toString().equals("1")) {
+                    isSubscribed = true;
+                } else {
+                    isSubscribed = false;
+                }
+            } catch (Exception e) {
+                isSubscribed = false;
+            }
             sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(getActivity() /* Activity context */);
             SMSAutoBackup = sharedPrefAutoBackup.getBoolean(getResources().getString(R.string.settings_sync), false);
 
-            if (SMSAutoBackup) {
+            if (SMSAutoBackup && isSubscribed) {
                 getPreferenceScreen().findPreference(getString(R.string.settings_sync_interval)).setEnabled(true);
             } else {
                 getPreferenceScreen().findPreference(getString(R.string.settings_sync_interval)).setEnabled(false);
@@ -74,22 +85,33 @@ public class SettingsActivity extends AppCompatActivity {
 
 
             Preference prefSync = findPreference(getString(R.string.settings_sync));
-            prefSync.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                public boolean onPreferenceClick(Preference preference) {
-                    //open browser or intent here
-                    SMSAutoBackup = sharedPrefAutoBackup.getBoolean(getResources().getString(R.string.settings_sync), false);
+            Preference prefSyncTitleSummary = findPreference("pc_sync_title");
 
-                    if (SMSAutoBackup) {
-                        getPreferenceScreen().findPreference(getString(R.string.settings_sync_interval)).setEnabled(true);
+            if (isSubscribed) {
+                prefSync.setEnabled(true);
+                prefSync.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                    public boolean onPreferenceClick(Preference preference) {
+                        //open browser or intent here
+                        SMSAutoBackup = sharedPrefAutoBackup.getBoolean(getResources().getString(R.string.settings_sync), false);
 
-                    } else {
-                        getPreferenceScreen().findPreference(getString(R.string.settings_sync_interval)).setEnabled(false);
+                        if (SMSAutoBackup) {
+                            getPreferenceScreen().findPreference(getString(R.string.settings_sync_interval)).setEnabled(true);
 
+                        } else {
+                            getPreferenceScreen().findPreference(getString(R.string.settings_sync_interval)).setEnabled(false);
+
+                        }
+
+                        return true;
                     }
+                });
 
-                    return true;
-                }
-            });
+            } else {
+                getPreferenceScreen().findPreference(getString(R.string.settings_sync_interval)).setEnabled(false);
+
+                prefSync.setEnabled(false);
+                prefSyncTitleSummary.setSummary("Need Subscription Plan for Sync");
+            }
 
 
             Preference PrefSignout = findPreference("signout");
@@ -129,12 +151,11 @@ public class SettingsActivity extends AppCompatActivity {
             PrefManageSubscription.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 public boolean onPreferenceClick(Preference preference) {
 
-  /*                  Intent intent = new Intent(getActivity(), CheckOutActivity.class);
-
+                    Intent intent = new Intent(getActivity(), GPlayBillingCheckoutActivity.class);
                     //  String message = editText.getText().toString();
                     //intent.putExtra(EXTRA_MESSAGE, message);
                     startActivity(intent);
-*/
+
                     return true;
                 }
             });
@@ -364,10 +385,10 @@ public class SettingsActivity extends AppCompatActivity {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if (user != null) {
                 UserUID = user.getPhoneNumber().replace("+", "x");
-               // DeleteDB = FirebaseDatabase.getInstance().getReference("/users/" + UserUID + "/sms");
-               // DeleteDB.removeValue();
+                // DeleteDB = FirebaseDatabase.getInstance().getReference("/users/" + UserUID + "/sms");
+                // DeleteDB.removeValue();
 
-               String BackupStorageDB = "SMSDrive/Users/" + UserUID + "/backup/file_cloud_sms.zip";
+                String BackupStorageDB = "SMSDrive/Users/" + UserUID + "/backup/file_cloud_sms.zip";
 
                 StorageReference mStorageRef;
                 mStorageRef = FirebaseStorage.getInstance().getReference();

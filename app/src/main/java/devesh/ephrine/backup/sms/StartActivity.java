@@ -190,6 +190,7 @@ public class StartActivity extends AppCompatActivity {
                 AuthUI.getInstance()
                         .createSignInIntentBuilder()
                         .setAvailableProviders(providers)
+                        .setLogo(R.drawable.ephrinelogo)
                         .build(),
                 RC_SIGN_IN);
     }

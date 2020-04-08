@@ -2,18 +2,22 @@ package devesh.ephrine.backup.sms.services;
 
 import android.Manifest;
 import android.app.IntentService;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Environment;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.JobIntentService;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import com.crashlytics.android.Crashlytics;
@@ -22,10 +26,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -59,10 +61,10 @@ import java.util.zip.ZipOutputStream;
 
 import devesh.ephrine.backup.sms.Function;
 import devesh.ephrine.backup.sms.R;
+import devesh.ephrine.backup.sms.payment.CheckSubscriptionService;
 import io.fabric.sdk.android.Fabric;
 
 import static devesh.ephrine.backup.sms.Function.KEY_THREAD_ID;
-import static devesh.ephrine.backup.sms.Function.mappingInbox;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -108,6 +110,11 @@ public class SyncIntentService extends JobIntentService {
         }*/
     File localFile;
     Gson gson;
+    double TOTAL_DEVICE_SMS;
+    NotificationManagerCompat notificationManager;
+    NotificationCompat.Builder builder;
+    int PROGRESS_MAX = 100;
+    int PROGRESS_CURRENT = 0;
 
     /**
      * Starts this service to perform action Foo with the given parameters. If
@@ -156,11 +163,19 @@ public class SyncIntentService extends JobIntentService {
         return destFile;
     }
 
-
-
     @Override
     public void onCreate() {
         Fabric.with(getApplicationContext(), new Crashlytics());
+        try {
+            //Subscription Check
+            Intent subscriptionCheck = new Intent(this, CheckSubscriptionService.class);
+            startService(subscriptionCheck);
+
+        } catch (Exception e) {
+            Log.e(TAG, "onCreate: #654867 ", e);
+            Crashlytics.logException(e);
+
+        }
 
         Log.d(TAG, "onCreate: SyncIntentService() #9086");
        /* if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O){
@@ -217,18 +232,28 @@ public class SyncIntentService extends JobIntentService {
     }
 */
     public void startSync() {
+        setNotification();
         mContext = getApplicationContext();
         iThread = new HashMap<>();
         user = FirebaseAuth.getInstance().getCurrentUser();
         database = FirebaseDatabase.getInstance();
 
-        isSubscribed = true;
+        try {
+            if (CacheUtils.readFile(getString(R.string.cache_Sub_isSubscribe)).toString().equals("1")) {
+                isSubscribed = true;
+            } else {
+                isSubscribed = false;
+            }
+        } catch (Exception e) {
+            isSubscribed = false;
+        }
+
         sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(mContext /* Activity context */);
         SMSAutoBackup = sharedPrefAutoBackup.getBoolean(mContext.getResources().getString(R.string.settings_sync), false);
 
         isFinished = false;
         //  getSMS();
-        if (isDefaultApp) {
+        if (isSubscribed) {
 
             if (ContextCompat.checkSelfPermission(mContext,
                     Manifest.permission.READ_SMS)
@@ -348,13 +373,6 @@ public class SyncIntentService extends JobIntentService {
 
     }
 
-
-
-
-
-
-
-
     void GetThread(final DataSnapshot postSnapshot, final String threadName) {
 
         new Thread(new Runnable() {
@@ -426,22 +444,38 @@ public class SyncIntentService extends JobIntentService {
 
     void sms1() {
         // Write a message to the database
+        builder.setContentText("Preparing Messages");
+
+// notificationId is a unique int for each notification that you must define
+        notificationManager.notify(001, builder.build());
 
         new Thread(new Runnable() {
             public void run() {
                 // a potentially time consuming task
 
+                Uri smsSentUri = Uri.parse("content://sms/sent");
+                Cursor cursorSent = mContext.getContentResolver().query(smsSentUri, null, null, null, null);
+
+
                 Uri smsUri = Uri.parse("content://sms/inbox");
                 Cursor cursor = mContext.getContentResolver().query(smsUri, null, null, null, null);
 
-                int i = cursor.getCount();
+                double i = cursor.getCount();
+                double i2 = cursorSent.getCount();
+                TOTAL_DEVICE_SMS = i + i2;
+                double ii = 0;
 
-                int ii = 0;
+                double progress;
+
                 Log.d(TAG, "sms1: Cursor Count: " + i);
                 while (cursor.moveToNext()) {
                     ii++;
+                    progress = ii / TOTAL_DEVICE_SMS * 100;
+                    int p = (int) progress;
+                    builder.setContentText("Preparing Messages (" + p + "%)")
+                            .setProgress(100, p, false);
+                    notificationManager.notify(001, builder.build());
                     Log.d(TAG, "sms1: Cursor Count: cursor.moveToNext()");
-
 
                     HashMap<String, String> sms = new HashMap<>();
 
@@ -557,6 +591,10 @@ public class SyncIntentService extends JobIntentService {
 
     void sms2() {
 //Get OutBox SMS
+        builder.setContentText("Preparing Messages");
+
+// notificationId is a unique int for each notification that you must define
+        notificationManager.notify(001, builder.build());
 
         new Thread(new Runnable() {
             public void run() {
@@ -566,12 +604,19 @@ public class SyncIntentService extends JobIntentService {
                 Uri smsUri = Uri.parse("content://sms/sent");
                 Cursor cursor = mContext.getContentResolver().query(smsUri, null, null, null, null);
 
-                int i = cursor.getCount();
+                double i = cursor.getCount();
 
-                int ii = 0;
+                double ii = 0;
+                double progress;
                 Log.d(TAG, "sms1 sent: Cursor Count: " + i);
                 while (cursor.moveToNext()) {
                     ii++;
+
+                    progress = ii / TOTAL_DEVICE_SMS * 100;
+                    int p = (int) progress;
+                    builder.setContentText("Preparing Messages (" + p + "%)")
+                            .setProgress(100, p, false);
+                    notificationManager.notify(001, builder.build());
 
                     HashMap<String, String> sms = new HashMap<>();
 
@@ -683,6 +728,7 @@ public class SyncIntentService extends JobIntentService {
         // broadcastIntent.setAction("restartservice");
         // broadcastIntent.setClass(this, Restarter.class);
         // this.sendBroadcast(broadcastIntent);
+        notificationManager.cancel(001);
     }
 
     /*
@@ -728,6 +774,10 @@ public class SyncIntentService extends JobIntentService {
 
         */
     public void DownloadFromCloud() {
+        builder.setContentText("Syncing with cloud")
+                .setProgress(0, 0, true);
+        notificationManager.notify(001, builder.build());
+
         Log.d(TAG, "DownloadFromCloud");
         StorageReference mStorageRef;
         mStorageRef = FirebaseStorage.getInstance().getReference();
@@ -760,8 +810,8 @@ public class SyncIntentService extends JobIntentService {
                         Log.d(TAG, "onSuccess: DownloadFromCloud");
 
 
-                      File unziped=unzipFile(localFile);
-                        Log.d(TAG, "onSuccess: Unziped: "+unziped.getPath());
+                        File unziped = unzipFile(localFile);
+                        Log.d(TAG, "onSuccess: Unziped: " + unziped.getPath());
                         String JsonStr = ConvertFileToStrng(unziped);
                         Type type = new TypeToken<ArrayList<HashMap<String, String>>>() {
                         }.getType();
@@ -802,14 +852,13 @@ public class SyncIntentService extends JobIntentService {
         });
     }
 
-    File unzipFile(File zipfile){
+    File unzipFile(File zipfile) {
         InputStream is;
         ZipInputStream zis;
-       File unzip_file=null;
+        File unzip_file = null;
 
-        try
-        {
-            unzip_file=File.createTempFile("backuprestore","json");
+        try {
+            unzip_file = File.createTempFile("backuprestore", "json");
             String filename;
             is = new FileInputStream(zipfile);
             zis = new ZipInputStream(new BufferedInputStream(is));
@@ -817,8 +866,7 @@ public class SyncIntentService extends JobIntentService {
             byte[] buffer = new byte[1024];
             int count;
 
-            while ((ze = zis.getNextEntry()) != null)
-            {
+            while ((ze = zis.getNextEntry()) != null) {
                 filename = ze.getName();
 
                 // Need to create directories if not exists, or
@@ -831,8 +879,7 @@ public class SyncIntentService extends JobIntentService {
 
                 OutputStream fout = new FileOutputStream(unzip_file);
 
-                while ((count = zis.read(buffer)) != -1)
-                {
+                while ((count = zis.read(buffer)) != -1) {
                     fout.write(buffer, 0, count);
                 }
 
@@ -841,18 +888,22 @@ public class SyncIntentService extends JobIntentService {
             }
 
             zis.close();
-        }
-        catch(IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
             Crashlytics.logException(e);
 
 
         }
-return  unzip_file;
+        return unzip_file;
     }
 
     public void UploadToCloud(ArrayList<HashMap<String, String>> sms) {
+
+        builder.setContentText("Uploading Messages")
+                .setProgress(0, 0, true);
+
+        notificationManager.notify(001, builder.build());
+
         Log.d(TAG, "UploadToCloud");
         Gson gson = new Gson();
         String jsonSTR = gson.toJson(sms);
@@ -860,7 +911,7 @@ return  unzip_file;
         Type type = new TypeToken<ArrayList<HashMap<String, String>>>() {
         }.getType();
 
-        ArrayList<HashMap<String, String>> tempCloudSMS=gson.fromJson(jsonSTR,type);
+        ArrayList<HashMap<String, String>> tempCloudSMS = gson.fromJson(jsonSTR, type);
 
         try {
             Function.createCachedFile(getApplicationContext(), getString(R.string.file_cloud_sms), tempCloudSMS);
@@ -896,15 +947,15 @@ return  unzip_file;
 
         // Create ZIP
         // String sourceFile = jsonSTRING;
-     File zip_file=null;
+        File zip_file = null;
         FileOutputStream fos = null;
         OutputStream out;
 
         try {
-            zip_file=File.createTempFile("backup","zip");
+            zip_file = File.createTempFile("backup", "zip");
             //out = new FileOutputStream(Environment.getExternalStorageDirectory().getAbsolutePath()+"/backup.zip");
             out = new FileOutputStream(zip_file);
-         //   out = new FileOutputStream("backup.zip");
+            //   out = new FileOutputStream("backup.zip");
             ZipOutputStream zipOut = new ZipOutputStream(out);
             File fileToZip = mfile;
             FileInputStream fis = new FileInputStream(fileToZip);
@@ -950,7 +1001,7 @@ return  unzip_file;
 
 
 //        UploadTask uploadTask = riversRef.putStream(stream);
-    //    File cfile = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/backup.zip");
+        //    File cfile = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/backup.zip");
         File cfile = zip_file;
         Uri file = Uri.fromFile(cfile);
 
@@ -960,6 +1011,8 @@ return  unzip_file;
             @Override
             public void onFailure(@NonNull Exception exception) {
                 // Handle unsuccessful uploads
+                notificationManager.cancel(001);
+
             }
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
@@ -997,17 +1050,36 @@ return  unzip_file;
     }
 
     ArrayList<HashMap<String, String>> RemoveDuplicateHashMaps(ArrayList<HashMap<String, String>> A) {
+
+        builder.setContentText("Sorting Messages")
+                .setProgress(0, 0, true);
+
+        notificationManager.notify(001, builder.build());
+
         Log.d(TAG, "RemoveDuplicateHashMaps: Removing Duplicate...");
         ArrayList<HashMap<String, String>> CleanHash = new ArrayList<>();
-       // ArrayList<HashMap<String, String>> gpList = A;
+        // ArrayList<HashMap<String, String>> gpList = A;
+        double total = A.size();
+        Log.d(TAG, "RemoveDuplicateHashMaps: Total Hashmap Size: " + total);
         for (int i = 0; i < A.size(); i++) {
             boolean available = false;
+
+            double progress = i / total * 100;
+            Log.d(TAG, "RemoveDuplicateHashMaps: Progress: " + progress + " %");
+
+            int p = (int) progress;
+            builder.setContentText("Sorting Messages (" + p + "%)")
+                    .setProgress(100, p, false);
+
+            notificationManager.notify(001, builder.build());
+
+
             for (int j = 0; j < CleanHash.size(); j++) {
                 if (CleanHash.get(j).get(Function.KEY_MSG) == A.get(i).get(Function.KEY_MSG)
-                && CleanHash.get(j).get(Function.KEY_TIMESTAMP) == A.get(i).get(Function.KEY_TIMESTAMP)
+                        && CleanHash.get(j).get(Function.KEY_TIMESTAMP) == A.get(i).get(Function.KEY_TIMESTAMP)
                         && CleanHash.get(j).get(Function.KEY_PHONE) == A.get(i).get(Function.KEY_PHONE)
                         && CleanHash.get(j).get(Function.KEY_TYPE) == A.get(i).get(Function.KEY_TYPE)
-                ){
+                ) {
                     available = true;
                     Log.d(TAG, "RemoveDuplicateHashMaps: Duplicate Found");
                     break;
@@ -1015,7 +1087,7 @@ return  unzip_file;
             }
 
             if (!available) {
-                Log.d(TAG, "RemoveDuplicateHashMaps: Added Non-Duplicate");
+                //  Log.d(TAG, "RemoveDuplicateHashMaps: Added Non-Duplicate");
                 CleanHash.add(A.get(i));
             }
         }
@@ -1032,6 +1104,9 @@ return  unzip_file;
         SharedPreferences.Editor editor = sharedPrefAutoBackup.edit();
         editor.putString(mContext.getResources().getString(R.string.settings_pref_last_sync), formattedDate1);
         editor.apply();
+
+        notificationManager.cancel(001);
+
 
     }
 
@@ -1138,10 +1213,45 @@ return  unzip_file;
         return fileOutputStream;
     }
 
+    void setNotification() {
+
+        builder = new NotificationCompat.Builder(this, "001")
+                .setSmallIcon(R.drawable.app_logo)
+                .setContentTitle("Auto-Backup")
+                .setContentText("Syncing Messages....")
+                .setOngoing(true)
+                .setProgress(PROGRESS_MAX, PROGRESS_CURRENT, true)
+
+                .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                .setPriority(NotificationCompat.FLAG_ONGOING_EVENT);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Auto Backup & Sync";
+            String description = "Syncing Messages..";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("001", name, importance);
+            channel.setDescription(description);
+
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+
+        }
+
+        notificationManager = NotificationManagerCompat.from(this);
+        builder.setContentText("Preparing...");
+
+// notificationId is a unique int for each notification that you must define
+        notificationManager.notify(001, builder.build());
+
+
+    }
+
+
 /**
  File directory = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "Images");
  localFile = new File(directory, filename);
-
  * */
 
 
