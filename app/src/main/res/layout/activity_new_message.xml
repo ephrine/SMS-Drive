@@ -12,7 +12,6 @@
         android:orientation="vertical">
 
         <androidx.cardview.widget.CardView
-            android:id="@+id/selectedContactCardView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone"
@@ -33,21 +32,18 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/textView3ContactNameSendTo"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="TextView"
                         android:textStyle="bold" />
 
                     <TextView
-                        android:id="@+id/textView2ContactNumberSendTo"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="TextView" />
                 </LinearLayout>
 
                 <Button
-                    android:id="@+id/button2"
                     style="@style/Widget.AppCompat.Button.Colored"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -58,7 +54,6 @@
         </androidx.cardview.widget.CardView>
 
         <EditText
-            android:id="@+id/editTextPhoneNumber"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
@@ -66,13 +61,11 @@
             android:inputType="phone" />
 
         <View
-            android:id="@+id/divider2"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="?android:attr/listDivider" />
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/contactRecycleView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1" />
@@ -101,7 +94,6 @@
                     android:orientation="horizontal">
 
                     <EditText
-                        android:id="@+id/sendMsgTextBox"
 
                         style="@style/Widget.MaterialComponents.TextInputEditText.OutlinedBox.Dense"
                         android:layout_width="wrap_content"

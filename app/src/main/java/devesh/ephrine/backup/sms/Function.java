@@ -83,7 +83,12 @@ public class Function {
 
     public static ArrayList<HashMap<String, String>> removeDuplicates(ArrayList<HashMap<String, String>> smsList) {
         ArrayList<HashMap<String, String>> gpList = new ArrayList<HashMap<String, String>>();
+        double total = smsList.size();
+        double progress;
         for (int i = 0; i < smsList.size(); i++) {
+
+            progress = i / total * 100;
+            Log.d(TAG, "removeDuplicates: " + progress + "% | " + i + "/" + total);
             boolean available = false;
             for (int j = 0; j < gpList.size(); j++) {
                 if (Integer.parseInt(gpList.get(j).get(KEY_THREAD_ID)) == Integer.parseInt(smsList.get(i).get(KEY_THREAD_ID))) {

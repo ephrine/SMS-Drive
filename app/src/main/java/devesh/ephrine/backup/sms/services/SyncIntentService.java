@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -115,6 +116,10 @@ public class SyncIntentService extends JobIntentService {
     NotificationCompat.Builder builder;
     int PROGRESS_MAX = 100;
     int PROGRESS_CURRENT = 0;
+    PowerManager.WakeLock wakeLock;
+    File cache_temp1;
+    File cache_temp2;
+    SharedPreferences sharedPrefAppGeneral;
 
     /**
      * Starts this service to perform action Foo with the given parameters. If
@@ -165,6 +170,24 @@ public class SyncIntentService extends JobIntentService {
 
     @Override
     public void onCreate() {
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                TAG + "::MyWakelockTag");
+        wakeLock.acquire();
+
+        sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(mContext);
+
+        String sub = sharedPrefAppGeneral.getString(mContext.getString(R.string.cache_Sub_isSubscribe), "0");
+
+        try {
+            if (sub.equals("1")) {
+                isSubscribed = true;
+            } else {
+                isSubscribed = false;
+            }
+        } catch (Exception e) {
+            isSubscribed = false;
+        }
         Fabric.with(getApplicationContext(), new Crashlytics());
         try {
             //Subscription Check
@@ -178,16 +201,7 @@ public class SyncIntentService extends JobIntentService {
         }
 
         Log.d(TAG, "onCreate: SyncIntentService() #9086");
-       /* if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O){
-            startMyOwnForeground();
-            Log.d(TAG, "onCreate: SyncIntentService() startMyOwnForeground #908600");
 
-        }
-        else{
-            startForeground(1, new Notification());
-            Log.d(TAG, "onCreate: SyncIntentService() startForeground #9086");
-
-        }*/
         startSync();
 
         super.onCreate();
@@ -233,20 +247,12 @@ public class SyncIntentService extends JobIntentService {
 */
     public void startSync() {
         setNotification();
+
         mContext = getApplicationContext();
         iThread = new HashMap<>();
         user = FirebaseAuth.getInstance().getCurrentUser();
         database = FirebaseDatabase.getInstance();
 
-        try {
-            if (CacheUtils.readFile(getString(R.string.cache_Sub_isSubscribe)).toString().equals("1")) {
-                isSubscribed = true;
-            } else {
-                isSubscribed = false;
-            }
-        } catch (Exception e) {
-            isSubscribed = false;
-        }
 
         sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(mContext /* Activity context */);
         SMSAutoBackup = sharedPrefAutoBackup.getBoolean(mContext.getResources().getString(R.string.settings_sync), false);
@@ -278,93 +284,8 @@ public class SyncIntentService extends JobIntentService {
 
                     sms1();
 
-  /*                  SMSBackupDB.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            // This method is called once with the initial value and again
-                            // whenever data at this location is updated.
-                            //String value = dataSnapshot.getValue(String.class);
-                            // Log.d(TAG, "Value is: " + value);
 
-                            if (dataSnapshot.exists() && isSubscribed) {
-
-                                long total = dataSnapshot.getChildrenCount();
-                                long i;
-                                i = 0;
-                                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                    // TODO: handle the post
-                                    i = i + 1;
-
-
-                                    String threadName = postSnapshot.getKey();
-                                    Log.d(TAG, "onDataChange: threadName: ");
-
-                                    //     GetThread(postSnapshot, threadName);
-
-                                    Log.d(TAG, "GetThread: DS :  DS.getChildren().toString()");
-
-                                    Log.d(TAG, "onDataChange: msg:");
-                                    DataSnapshot DS=postSnapshot;
-//            String MsgTime = DS.child("date").getValue().toString();
-                                    String phone = DS.child(Function.KEY_PHONE).getValue(String.class);
-
-                                    String name = DS.child(Function.KEY_NAME).getValue(String.class);
-                                    String _id = DS.child(Function._ID).getValue(String.class);
-                                    String thread_id = DS.child(Function.KEY_THREAD_ID).getValue(String.class);
-                                    String msg = DS.child(Function.KEY_MSG).getValue(String.class);
-                                    String type = DS.child(Function.KEY_TYPE).getValue(String.class);
-                                    String timestamp = DS.child(Function.KEY_TIMESTAMP).getValue(String.class);
-                                    String time = DS.child(Function.KEY_TIME).getValue(String.class);
-                                    //    Date date = new Date(Long.parseLong(MsgTime));
-                                    //  String formattedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
-
-                                    HashMap<String, String> SMS = new HashMap<>();
-                                    SMS.put(Function._ID, _id);
-                                    SMS.put(Function.KEY_THREAD_ID, thread_id);
-                                    SMS.put(Function.KEY_PHONE, phone);
-                                    SMS.put(Function.KEY_MSG, msg);
-                                    SMS.put(Function.KEY_TYPE, type);
-                                    SMS.put(Function.KEY_TIMESTAMP, timestamp);
-                                    SMS.put(Function.KEY_TIME, time);
-                                    SMS.put(Function.KEY_NAME, name);
-
-
-                                    smsList.add(SMS);
-
-                                    if (iThread.containsKey(threadName)) {
-                                        iThread.get(threadName).add(SMS);
-                                    } else {
-                                        ArrayList<HashMap<String, String>> temp1 = new ArrayList<>();
-                                        temp1.add(SMS);
-                                        iThread.put(threadName, temp1);
-                                    }
-
-
-
-                                    Log.d(TAG, "i:" + i + "\n Total:" + total);
-                                    if (i == total) {
-                                        sms1();
-                                    }
-
-                                }
-
-                            } else {
-                                if (isSubscribed) {
-                                    sms1();
-                                }
-                            }
-
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError error) {
-                            // Failed to read value
-                            Log.w(TAG, "Failed to read value.", error.toException());
-                        }
-                    });
-
-*/
-                }
+               }
 
             }
 
@@ -373,74 +294,7 @@ public class SyncIntentService extends JobIntentService {
 
     }
 
-    void GetThread(final DataSnapshot postSnapshot, final String threadName) {
 
-        new Thread(new Runnable() {
-            public void run() {
-                // a potentially time consuming task
-                for (DataSnapshot DS : postSnapshot.getChildren()) {
-
-                    Log.d(TAG, "GetThread: DS :  DS.getChildren().toString()");
-
-                    //   String msg = DS.getKey();
-                    // String MsgBody = DS.child("body").getValue().toString();
-
-                    //---
-
-  /*
-            //String formattedDate = new SimpleDateFormat("MM/dd/yyyy").format(date);
-            String MsgText = DS.child("body").getValue().toString();
-            String folder = DS.child("folder").getValue().toString();
-          SMS.put("msg", MsgText);
-            SMS.put("time", formattedDate);
-            SMS.put("folder", folder);
-*/
-                    //  Log.d(TAG, "onDataChange: msg:" + msg + "\nMSG: " + MsgBody);
-                    Log.d(TAG, "onDataChange: msg:");
-
-//            String MsgTime = DS.child("date").getValue().toString();
-                    String phone = DS.child(Function.KEY_PHONE).getValue(String.class);
-
-                    String name = DS.child(Function.KEY_NAME).getValue(String.class);
-                    String _id = DS.child(Function._ID).getValue(String.class);
-                    String thread_id = DS.child(KEY_THREAD_ID).getValue(String.class);
-                    String msg = DS.child(Function.KEY_MSG).getValue(String.class);
-                    String type = DS.child(Function.KEY_TYPE).getValue(String.class);
-                    String timestamp = DS.child(Function.KEY_TIMESTAMP).getValue(String.class);
-                    String time = DS.child(Function.KEY_TIME).getValue(String.class);
-
-
-                    //    Date date = new Date(Long.parseLong(MsgTime));
-                    //  String formattedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
-
-                    HashMap<String, String> SMS = new HashMap<>();
-                    SMS.put(Function._ID, _id);
-                    SMS.put(KEY_THREAD_ID, thread_id);
-                    SMS.put(Function.KEY_PHONE, phone);
-                    SMS.put(Function.KEY_MSG, msg);
-                    SMS.put(Function.KEY_TYPE, type);
-                    SMS.put(Function.KEY_TIMESTAMP, timestamp);
-                    SMS.put(Function.KEY_TIME, time);
-                    SMS.put(Function.KEY_NAME, name);
-
-
-                    smsList.add(SMS);
-
-                    if (iThread.containsKey(threadName)) {
-                        iThread.get(threadName).add(SMS);
-                    } else {
-                        ArrayList<HashMap<String, String>> temp1 = new ArrayList<>();
-                        temp1.add(SMS);
-                        iThread.put(threadName, temp1);
-                    }
-
-                }
-
-
-            }
-        }).start();
-
-    }
 
     void sms1() {
         // Write a message to the database
@@ -514,7 +368,7 @@ public class SyncIntentService extends JobIntentService {
                     smsList.add(msgg);
 
 
-                    address = address.replace("+", "x");
+                  /*     address = address.replace("+", "x");
                     //  xdate=xdate.replace(".","");
                     Date date = new Date(cursor.getLong(cursor.getColumnIndex("date")));
                     //String formattedDate = new SimpleDateFormat("MM/dd/yyyy").format(date);
@@ -531,14 +385,14 @@ public class SyncIntentService extends JobIntentService {
                     sms.put("min", new SimpleDateFormat("mm").format(date));
 
 
-                    if (iThread.containsKey(address)) {
+                 if (iThread.containsKey(address)) {
                         iThread.get(address).add(sms);
 
                     } else {
                         ArrayList<HashMap<String, String>> temp1 = new ArrayList<>();
                         temp1.add(sms);
                         iThread.put(address, temp1);
-                    }
+                    }*/
 
 
                     //       SMSBackupDB.child(address).child(xdate).setValue(body);
@@ -567,22 +421,7 @@ public class SyncIntentService extends JobIntentService {
 
 
         Log.d(TAG, "getSMS Sent: SMSBackup: ");
-      /*  Cursor cursor = mContext.getContentResolver().query(Uri.parse("content://sms/sent"), null, null, null, null);
 
-        if (cursor.moveToFirst()) { // must check the result to prevent exception
-            do {
-                String msgData = "";
-                String no = "";
-                for (int idx = 0; idx < cursor.getColumnCount(); idx++) {
-                    msgData += " " + cursor.getColumnName(idx) + ":" + cursor.getString(idx);
-                    Log.d(TAG, "getSMS Sent: \n" + msgData);
-                }
-                // use msgData
-            } while (cursor.moveToNext());
-        } else {
-            // empty box, no SMS
-        }
-        */
 
         sms2();
 
@@ -668,7 +507,7 @@ public class SyncIntentService extends JobIntentService {
                     smsList.add(msgg);
 
 
-                    if (SMSAutoBackup) {
+                /*    if (SMSAutoBackup) {
                         // SMSBackupDB.setValue(iThread);
                         //          SMSDB = database.getReference(DBRoot + "/users/" + UserUID + "/sms/"+address+"/").push();
                         //        SMSDB.setValue(sms);
@@ -686,7 +525,7 @@ public class SyncIntentService extends JobIntentService {
                         iThread.put(address, temp1);
                     }
 
-
+*/
                     //    SMSBackupDB.child(address).child(xdate).setValue(body);
 
 
@@ -704,11 +543,6 @@ public class SyncIntentService extends JobIntentService {
 //                        Toast.makeText(mContext, "Sync Complete", Toast.LENGTH_SHORT).show();
                         Log.d(TAG, "sms1 sent: END ---------" + ii + "\n SMS:Backup DONE  ");
 
-                        if (SMSAutoBackup) {
-                            // SMSDB = database.getReference(DBRoot + "/users/" + UserUID + "/sms/"+address+"/");
-                            //  SMSDB.setValue(sms);
-
-                        }
                     }
                 }
 
@@ -729,50 +563,52 @@ public class SyncIntentService extends JobIntentService {
         // broadcastIntent.setClass(this, Restarter.class);
         // this.sendBroadcast(broadcastIntent);
         notificationManager.cancel(001);
+        wakeLock.release();
+
     }
 
     /*
-        @RequiresApi(Build.VERSION_CODES.O)
-        private void startMyOwnForeground()
-        {
-            String NOTIFICATION_CHANNEL_ID = "example.permanence";
-            String channelName = "Background Service";
-            NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
-            chan.setLightColor(Color.BLUE);
-            chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+    @RequiresApi(Build.VERSION_CODES.O)
+    private void startMyOwnForeground()
+    {
+        String NOTIFICATION_CHANNEL_ID = "example.permanence";
+        String channelName = "Background Service";
+        NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+        chan.setLightColor(Color.BLUE);
+        chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
 
-            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            assert manager != null;
-            manager.createNotificationChannel(chan);
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        assert manager != null;
+        manager.createNotificationChannel(chan);
 
-            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
-            Notification notification = notificationBuilder.setOngoing(true)
-                    .setContentTitle("SMS Sync in Progress..")
-                    .setContentText("SMS Sync in Progress")
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
+        Notification notification = notificationBuilder.setOngoing(true)
+                .setContentTitle("SMS Sync in Progress..")
+                .setContentText("SMS Sync in Progress")
 
-                    .setPriority(NotificationManager.IMPORTANCE_MIN)
-                    .setCategory(Notification.CATEGORY_SERVICE)
-                    .build();
-            startForeground(2, notification);
-        }
+                .setPriority(NotificationManager.IMPORTANCE_MIN)
+                .setCategory(Notification.CATEGORY_SERVICE)
+                .build();
+        startForeground(2, notification);
+    }
 
 
-        @Override
-        public int onStartCommand(Intent intent, int flags, int startId) {
-            super.onStartCommand(intent, flags, startId);
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
 
-            Log.d(TAG, "onStartCommand: SyncIntentService() #9086");
-          //  startSync();
+        Log.d(TAG, "onStartCommand: SyncIntentService() #9086");
+      //  startSync();
 
-            return START_STICKY;
-        }
-        @Nullable
-        @Override
-        public IBinder onBind(Intent intent) {
-            return null;
-        }
+        return START_STICKY;
+    }
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
 
-        */
+    */
     public void DownloadFromCloud() {
         builder.setContentText("Syncing with cloud")
                 .setProgress(0, 0, true);
@@ -788,7 +624,7 @@ public class SyncIntentService extends JobIntentService {
         try {
             tmpList.clear();
             tmpList = (ArrayList<HashMap<String, String>>) Function.readCachedFile(mContext, getString(R.string.file_device_sms));
-
+            Log.d(TAG, "DownloadFromCloud: tmpList.clear() ");
         } catch (Exception e) {
             Log.d(TAG, "DownloadFromCloud: ERROR " + e);
             Crashlytics.logException(e);
@@ -797,6 +633,7 @@ public class SyncIntentService extends JobIntentService {
 
         try {
             localFile = File.createTempFile("smscloud", "backup");
+            Log.d(TAG, "DownloadFromCloud: localFile smscloud.backup");
         } catch (Exception e) {
             Log.d(TAG, "DownloadFromCloud: #ERROR " + e);
             Crashlytics.logException(e);
@@ -899,6 +736,8 @@ public class SyncIntentService extends JobIntentService {
 
     public void UploadToCloud(ArrayList<HashMap<String, String>> sms) {
 
+        localFile.delete();
+
         builder.setContentText("Uploading Messages")
                 .setProgress(0, 0, true);
 
@@ -916,6 +755,7 @@ public class SyncIntentService extends JobIntentService {
         try {
             Function.createCachedFile(getApplicationContext(), getString(R.string.file_cloud_sms), tempCloudSMS);
             //  ArrayList<HashMap<String, String>> tmpList = (ArrayList<HashMap<String, String>>) Function.readCachedFile(getApplicationContext(), getString(R.string.file_device_sms));
+            Log.d(TAG, "UploadToCloud:  Function.createCachedFile file_cloud_sms");
         } catch (Exception e) {
             Log.d(TAG, "UploadToCloud: ERROR #4653 " + e);
             Crashlytics.logException(e);
@@ -925,6 +765,7 @@ public class SyncIntentService extends JobIntentService {
         File mfile = null;
         try {
             mfile = File.createTempFile("mbackup", "json");
+            Log.d(TAG, "UploadToCloud: mfile mbackup.json");
         } catch (Exception e) {
             Log.d(TAG, "DownloadFromCloud: #ERROR " + e);
             Crashlytics.logException(e);
@@ -933,12 +774,15 @@ public class SyncIntentService extends JobIntentService {
 
         try {
             mfile.createNewFile();
+            cache_temp1 = mfile;
+
             FileOutputStream fOut = new FileOutputStream(mfile);
             OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
             myOutWriter.append(jsonSTR);
             myOutWriter.close();
             fOut.flush();
             fOut.close();
+            Log.d(TAG, "UploadToCloud:  mfile.createNewFile();");
         } catch (IOException e) {
             Log.e("Exception", "File write failed: " + e.toString());
             Crashlytics.logException(e);
@@ -950,8 +794,8 @@ public class SyncIntentService extends JobIntentService {
         File zip_file = null;
         FileOutputStream fos = null;
         OutputStream out;
-
         try {
+            Log.d(TAG, "UploadToCloud: zip_file backup.zip");
             zip_file = File.createTempFile("backup", "zip");
             //out = new FileOutputStream(Environment.getExternalStorageDirectory().getAbsolutePath()+"/backup.zip");
             out = new FileOutputStream(zip_file);
@@ -965,6 +809,8 @@ public class SyncIntentService extends JobIntentService {
             int length;
             while ((length = fis.read(bytes)) >= 0) {
                 zipOut.write(bytes, 0, length);
+                Log.d(TAG, "UploadToCloud: zip_file backup.zip writing....");
+
             }
             zipOut.close();
             fis.close();
@@ -975,7 +821,7 @@ public class SyncIntentService extends JobIntentService {
             Crashlytics.logException(e);
 
         }
-
+        cache_temp2 = zip_file;
         BackupStorageDB = "SMSDrive/Users/" + UserUID + "/backup/file_cloud_sms.zip";
 
         StorageReference mStorageRef;
@@ -1012,15 +858,18 @@ public class SyncIntentService extends JobIntentService {
             public void onFailure(@NonNull Exception exception) {
                 // Handle unsuccessful uploads
                 notificationManager.cancel(001);
-
+                Log.d(TAG, "onFailure: ERROR #4676587 " + exception);
+                cache_temp1.delete();
+                cache_temp2.delete();
             }
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
                 // ...
-                FinalWork();
                 Log.d(TAG, "onSuccess: SUCCESS UPLOAD ZIP");
+                FinalWork();
+
             }
         });
 
@@ -1106,7 +955,15 @@ public class SyncIntentService extends JobIntentService {
         editor.apply();
 
         notificationManager.cancel(001);
+        cache_temp1.delete();
+        cache_temp2.delete();
+        wakeLock.release();
 
+        Intent intent = new Intent(this, CloudSMS2DBService.class);
+
+        //  String message = editText.getText().toString();
+        //intent.putExtra(EXTRA_MESSAGE, message);
+        startService(intent);
 
     }
 

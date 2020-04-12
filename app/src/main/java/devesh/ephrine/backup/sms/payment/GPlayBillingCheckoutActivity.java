@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -46,6 +47,7 @@ public class GPlayBillingCheckoutActivity extends AppCompatActivity implements B
     TextView textView12Price;
     Button subscribeNowButton;
     CardView OrderDetailsCardView;
+    SharedPreferences sharedPrefAppGeneral;
     private FirebaseFunctions mFunctions;
 
     @Override
@@ -66,14 +68,16 @@ public class GPlayBillingCheckoutActivity extends AppCompatActivity implements B
         textView11AutoRenew = findViewById(R.id.textView11AutoRenew);
         textView12Price = findViewById(R.id.textView12Price);
         OrderDetailsCardView = findViewById(R.id.OrderDetailsCardView);
+        sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
 
         try {
             if (CacheUtils.readFile(getString(R.string.cache_Sub_Details_Price)) != null) {
                 price = CacheUtils.readFile(getString(R.string.cache_Sub_Details_Price));
                 priceTextView.setText(" Price: " + price + " per Month");
             }
+            String sub = sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0");
 
-            if (CacheUtils.readFile(getString(R.string.cache_Sub_isSubscribe)).equals("1")) {
+            if (sub.equals("1")) {
                 subscriptionStatusText.setText("Subscribed");
                 subscriptionStatusText.setTextColor(getResources().getColor(R.color.material_green));
                 subscribeNowButton.setVisibility(View.GONE);
@@ -111,7 +115,8 @@ public class GPlayBillingCheckoutActivity extends AppCompatActivity implements B
          */
 
         Log.d(TAG, "onProductPurchased: productId:" + productId + "\nTransactionDetails" + details);
-        CacheUtils.writeFile(getString(R.string.cache_Sub_isSubscribe), "1");
+        SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
+        editor.putString(getString(R.string.cache_Sub_isSubscribe), "1").apply();
 
         subscriptionStatusText.setText("Subscribed");
         subscriptionStatusText.setTextColor(getResources().getColor(R.color.material_green));
@@ -167,12 +172,14 @@ public class GPlayBillingCheckoutActivity extends AppCompatActivity implements B
             if (subscriptionTransactionDetails != null) {
                 //User is still subscribed
                 Log.d(TAG, "checkIfUserIsSusbcribed: User is still subscribed");
-                CacheUtils.writeFile(getString(R.string.cache_Sub_isSubscribe), "1");
+                SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
+                editor.putString(getString(R.string.cache_Sub_isSubscribe), "1").apply();
 
             } else {
                 //Not subscribed
                 Log.d(TAG, "checkIfUserIsSusbcribed: Not subscribed");
-                CacheUtils.writeFile(getString(R.string.cache_Sub_isSubscribe), "0");
+                SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
+                editor.putString(getString(R.string.cache_Sub_isSubscribe), "0").apply();
 
             }
         }
@@ -252,7 +259,8 @@ public class GPlayBillingCheckoutActivity extends AppCompatActivity implements B
             CacheUtils.writeFile(getString(R.string.cache_Sub_PurchaseTimeMillis), String.valueOf(purchaseTimeTimeMillis));
             CacheUtils.writeFile(getString(R.string.cache_Sub_PurchaseToken), purchaseToken);
             CacheUtils.writeFile(getString(R.string.cache_Sub_PurchaseTime), String.valueOf(purchaseTime));
-            CacheUtils.writeFile(getString(R.string.cache_Sub_isSubscribe), "1");
+            SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
+            editor.putString(getString(R.string.cache_Sub_isSubscribe), "1").apply();
 
             // read
             // String fileContent = CacheUtils.readFile(CACHE_FILE_STRING);

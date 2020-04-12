@@ -15,7 +15,6 @@
         android:paddingRight="20dp">
 
         <TextView
-            android:id="@+id/textView3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Set SMS Drive as your Default"
@@ -25,7 +24,6 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/textView4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="SMS Drive can only access messages if it's your Default SMS App"
@@ -43,7 +41,6 @@
         android:textAllCaps="true" />
 
     <ImageView
-        android:id="@+id/imageView2"
         android:layout_width="200dp"
         android:layout_height="250dp"
         android:layout_centerInParent="true"

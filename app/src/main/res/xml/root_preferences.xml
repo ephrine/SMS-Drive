@@ -40,9 +40,13 @@
             app:title="Age"
             app:useSimpleSummaryProvider="true" />
         <Preference
+            app:key="notif"
+            app:title="Notifications" />
+        <Preference
             app:key="sub"
             app:summary="Manage your Subscription"
             app:title="Subscription" />
+
         <!--
         , Currently it's FREE for Beta App users
         -->

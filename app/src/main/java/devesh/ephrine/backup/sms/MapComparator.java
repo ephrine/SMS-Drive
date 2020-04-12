@@ -7,7 +7,7 @@ import java.util.HashMap;
  * Created by SHAJIB on 7/12/2017.
  */
 
-class MapComparator implements Comparator<HashMap<String, String>> {
+public class MapComparator implements Comparator<HashMap<String, String>> {
     private final String key;
     private final String order;
 

@@ -41,6 +41,8 @@ public class ScannerBroadcastReceiver extends BroadcastReceiver {
     FirebaseDatabase database;
     FirebaseUser user;
     SharedPreferences sharedPrefAutoBackup;
+    SharedPreferences sharedPrefAppGeneral;
+
     boolean SMSAutoBackup;
     boolean isSubscribed;
     ArrayList<HashMap<String, String>> smsList = new ArrayList<>();
@@ -58,6 +60,8 @@ public class ScannerBroadcastReceiver extends BroadcastReceiver {
         mContext = context;
         iThread = new HashMap<>();
         sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(mContext /* Activity context */);
+        sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(mContext);
+
         SMSAutoBackup = sharedPrefAutoBackup.getBoolean(mContext.getResources().getString(R.string.settings_sync), false);
         Fabric.with(mContext, new Crashlytics());
 
@@ -65,9 +69,10 @@ public class ScannerBroadcastReceiver extends BroadcastReceiver {
         iThread = new HashMap<>();
         user = FirebaseAuth.getInstance().getCurrentUser();
         database = FirebaseDatabase.getInstance();
+        String sub = sharedPrefAppGeneral.getString(mContext.getString(R.string.cache_Sub_isSubscribe), "0");
 
         try {
-            if (CacheUtils.readFile(context.getString(R.string.cache_Sub_isSubscribe)).toString().equals("1")) {
+            if (sub.equals("1")) {
                 isSubscribed = true;
             } else {
                 isSubscribed = false;
@@ -75,7 +80,7 @@ public class ScannerBroadcastReceiver extends BroadcastReceiver {
         } catch (Exception e) {
             isSubscribed = false;
         }
-        sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(mContext /* Activity context */);
+        //sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(mContext /* Activity context */);
         SMSAutoBackup = sharedPrefAutoBackup.getBoolean(mContext.getResources().getString(R.string.settings_sync), false);
 
         isFinished = false;

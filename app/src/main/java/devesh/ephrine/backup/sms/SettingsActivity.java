@@ -4,8 +4,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -22,7 +24,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.lifeofcoding.cacheutlislibrary.CacheUtils;
 
 import devesh.ephrine.backup.sms.payment.GPlayBillingCheckoutActivity;
 import io.fabric.sdk.android.Fabric;
@@ -49,6 +50,7 @@ public class SettingsActivity extends AppCompatActivity {
         final String TAG = "Settings Activity";
         // final String DBRoot = "SMSDrive/";
         SharedPreferences sharedPrefAutoBackup;
+        SharedPreferences sharedPrefAppGeneral;
         boolean SMSAutoBackup;
         DatabaseReference UserDB;
         String UserUID;
@@ -59,8 +61,13 @@ public class SettingsActivity extends AppCompatActivity {
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
             Fabric.with(getActivity(), new Crashlytics());
+            sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(getActivity() /* Activity context */);
+            sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(getActivity() /* Activity context */);
+            String sub = sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0");
+
             try {
-                if (CacheUtils.readFile(getString(R.string.cache_Sub_isSubscribe)).toString().equals("1")) {
+
+                if (sub.equals("1")) {
                     isSubscribed = true;
                 } else {
                     isSubscribed = false;
@@ -68,7 +75,6 @@ public class SettingsActivity extends AppCompatActivity {
             } catch (Exception e) {
                 isSubscribed = false;
             }
-            sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(getActivity() /* Activity context */);
             SMSAutoBackup = sharedPrefAutoBackup.getBoolean(getResources().getString(R.string.settings_sync), false);
 
             if (SMSAutoBackup && isSubscribed) {
@@ -146,6 +152,26 @@ public class SettingsActivity extends AppCompatActivity {
                     return true;
                 }
             });
+
+            Preference PrefNotifi = findPreference("notif");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                PrefNotifi.setVisible(true);
+                PrefNotifi.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                    public boolean onPreferenceClick(Preference preference) {
+                        Intent settingsIntent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                // .putExtra(Settings.EXTRA_CHANNEL_ID, "001")
+                                .putExtra(Settings.EXTRA_APP_PACKAGE, "devesh.ephrine.backup.sms");
+
+                        startActivity(settingsIntent);
+
+                        return true;
+                    }
+                });
+
+            } else {
+                PrefNotifi.setVisible(false);
+            }
 
             Preference PrefManageSubscription = findPreference("sub");
             PrefManageSubscription.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {

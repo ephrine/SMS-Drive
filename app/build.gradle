@@ -90,8 +90,8 @@ android {
         applicationId "devesh.ephrine.backup.sms"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 18
-        versionName "0.0.3 Beta Version"
+        versionCode 19
+        versionName "0.0.4 Beta Version"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
 
@@ -112,7 +112,14 @@ android {
         resValue "string", "AppVersionName", "\"" + versionName + "\""
         //    signingConfig signingConfigs.release
 
-
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [
+                        "room.schemaLocation"  : "$projectDir/schemas".toString(),
+                        "room.incremental"     : "true",
+                        "room.expandProjection": "true"]
+            }
+        }
     }
 
 
@@ -148,6 +155,7 @@ dependencies {
 
     implementation 'androidx.preference:preference:+'
 
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:+'
     androidTestImplementation 'androidx.test.espresso:espresso-core:+'
@@ -186,5 +194,20 @@ dependencies {
 // https://mvnrepository.com/artifact/net.sf.jsignature.io-tools/easystream
     //  implementation group: 'net.sf.jsignature.io-tools', name: 'easystream', version: '1.2.15'
 
+//Room Library
+    implementation "androidx.room:room-runtime:+"
+    annotationProcessor "androidx.room:room-compiler:+"
+    // For Kotlin use kapt instead of annotationProcessor
 
+    // optional - Kotlin Extensions and Coroutines support for Room
+    implementation "androidx.room:room-ktx:+"
+
+    // optional - RxJava support for Room
+    implementation "androidx.room:room-rxjava2:+"
+
+    // optional - Guava support for Room, including Optional and ListenableFuture
+    implementation "androidx.room:room-guava:+"
+
+    // Test helpers
+    testImplementation "androidx.room:room-testing:+"
 }

@@ -1,7 +1,10 @@
 package devesh.ephrine.backup.sms;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,6 +24,7 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.Arrays;
 import java.util.List;
 
+import devesh.ephrine.backup.sms.broadcastreceiver.MyBroadcastReceiver;
 import io.fabric.sdk.android.Fabric;
 
 public class StartActivity extends AppCompatActivity {
@@ -243,6 +247,13 @@ public class StartActivity extends AppCompatActivity {
         }
 
         //   isDefaultSmsApp=a;
+    }
+
+    void startEssentialsBGtask() {
+        BroadcastReceiver br = new MyBroadcastReceiver();
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        this.registerReceiver(br, filter);
     }
 
     @Override

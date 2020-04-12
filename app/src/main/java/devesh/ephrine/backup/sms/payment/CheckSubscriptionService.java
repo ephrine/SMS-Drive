@@ -40,6 +40,7 @@ public class CheckSubscriptionService extends Service implements BillingProcesso
     Date purchaseTime;
     Long purchaseTimeTimeMillis;
     SharedPreferences sharedPrefAutoBackup;
+    SharedPreferences sharedPrefAppGeneral;
     private FirebaseFunctions mFunctions;
 
     public CheckSubscriptionService() {
@@ -58,6 +59,8 @@ public class CheckSubscriptionService extends Service implements BillingProcesso
         mFunctions = FirebaseFunctions.getInstance();
         CacheUtils.configureCache(this);
         sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
+        sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
+
 
         bp = new BillingProcessor(this, LICENSE_KEY, this);
         bp.initialize();
@@ -97,7 +100,9 @@ public class CheckSubscriptionService extends Service implements BillingProcesso
             CacheUtils.writeFile(getString(R.string.cache_Sub_PurchaseTimeMillis), String.valueOf(purchaseTimeTimeMillis));
             CacheUtils.writeFile(getString(R.string.cache_Sub_PurchaseToken), purchaseToken);
             CacheUtils.writeFile(getString(R.string.cache_Sub_PurchaseTime), String.valueOf(purchaseTime));
-            CacheUtils.writeFile(getString(R.string.cache_Sub_isSubscribe), "1");
+            //  CacheUtils.writeFile(getString(R.string.cache_Sub_isSubscribe), "1");
+            SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
+            editor.putString(getString(R.string.cache_Sub_isSubscribe), "1").apply();
 
             // read
             // String fileContent = CacheUtils.readFile(CACHE_FILE_STRING);
@@ -112,17 +117,23 @@ public class CheckSubscriptionService extends Service implements BillingProcesso
                 CacheUtils.writeFile(getString(R.string.cache_Sub_PurchaseToken), "0");
                 CacheUtils.writeFile(getString(R.string.cache_Sub_PurchaseTime), "0");
 
+                SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
+                editor.putString(getString(R.string.cache_Sub_isSubscribe), "0").apply();
+
 
             }
 
         }
+        try {
+            SkuDetails subDetails = bp.getSubscriptionListingDetails(SUBSCRIPTION_ID1);
+            String price = subDetails.priceText;
+            CacheUtils.writeFile(getString(R.string.cache_Sub_PurchaseTime), "0");
 
+            Log.d(TAG, "onBillingInitialized: subDetails\n price:" + price);
 
-        SkuDetails subDetails = bp.getSubscriptionListingDetails(SUBSCRIPTION_ID1);
-        String price = subDetails.priceText;
-        CacheUtils.writeFile(getString(R.string.cache_Sub_PurchaseTime), "0");
-
-        Log.d(TAG, "onBillingInitialized: subDetails\n price:" + price);
+        } catch (Exception e) {
+            Log.e(TAG, "onBillingInitialized: #ERROR 43253 ", e);
+        }
 
 
     }
@@ -169,12 +180,16 @@ public class CheckSubscriptionService extends Service implements BillingProcesso
             if (subscriptionTransactionDetails != null) {
                 //User is still subscribed
                 Log.d(TAG, "checkIfUserIsSusbcribed: User is still subscribed");
-                CacheUtils.writeFile(getString(R.string.cache_Sub_isSubscribe), "1");
+                SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
+                editor.putString(getString(R.string.cache_Sub_isSubscribe), "1").apply();
+
 
             } else {
                 //Not subscribed
                 Log.d(TAG, "checkIfUserIsSusbcribed: Not subscribed");
-                CacheUtils.writeFile(getString(R.string.cache_Sub_isSubscribe), "0");
+                SharedPreferences.Editor editor1 = sharedPrefAppGeneral.edit();
+                editor1.putString(getString(R.string.cache_Sub_isSubscribe), "0").apply();
+
                 SharedPreferences.Editor editor = sharedPrefAutoBackup.edit();
                 editor.putBoolean(getString(R.string.settings_sync), false).apply();
 

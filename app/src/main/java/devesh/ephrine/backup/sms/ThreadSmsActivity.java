@@ -22,6 +22,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -30,6 +31,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+
+import devesh.ephrine.backup.sms.room.AppDatabase;
+import devesh.ephrine.backup.sms.room.Sms;
 
 
 public class ThreadSmsActivity extends AppCompatActivity {
@@ -44,7 +49,7 @@ public class ThreadSmsActivity extends AppCompatActivity {
     String file = "ContactFiles";
     FirebaseDatabase database;
     RecyclerView recyclerView;
-    RecyclerView.LayoutManager layoutManager;
+    LinearLayoutManager layoutManager;
 
 
     String name;
@@ -65,6 +70,7 @@ public class ThreadSmsActivity extends AppCompatActivity {
     ArrayList<HashMap<String, String>> SortSMS = new ArrayList<>();
     ProgressBar progressBarLoading;
     ProgressBar progressBarHorizontal;
+    AppDatabase db;
     private Handler handler = new Handler();
 
     @Override
@@ -103,6 +109,7 @@ public class ThreadSmsActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         database = FirebaseDatabase.getInstance();
+
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
@@ -156,23 +163,32 @@ public class ThreadSmsActivity extends AppCompatActivity {
         progressBarLoading.setVisibility(View.GONE);
         Toast.makeText(this, "Loading....", Toast.LENGTH_SHORT).show();
 
-        loadCloudSmsTask = new LoadCloudSms();
-        loadCloudSmsTask.execute();
+        db = Room.databaseBuilder(getApplicationContext(),
+                AppDatabase.class, getString(R.string.DATABASE_CLOUD_SMS_DB)).build();
+        //  CloudSMS=db.userDao().loadAllByPhoneNo("address");
+        try {
 
+            LoadCloudSms1 loadCloudSmsTask1 = new LoadCloudSms1();
+            loadCloudSmsTask1.execute();
+        } catch (Exception e) {
+            Log.e(TAG, "startLoadingCloudSms: Room #ERROR 56465 ", e);
+        }
 
-
-
-        /*     try {
+/*
+            try {
 
             CloudSMS = (ArrayList<HashMap<String, String>>) Function.readCachedFile(this, getString(R.string.file_cloud_sms));
-            int t = CloudSMS.size();
+                double t = CloudSMS.size();
 
-            int end = t - 1;
+                double end = t - 1;
             Log.d(TAG, "startLoadingCloudSms: Sorting SMS Started \n" + "Total:" + t + "\n End:" + end);
 
             for (int i = 0; i < t; i++) {
                 //    Log.d(TAG, "startLoadingCloudSms: Sorting SMS...");
-
+                double ii= i / t * 100;
+                progress = (int)ii;
+                Log.d(TAG, "startLoadingCloudSms: PROGRESS "+progress+"%");
+                progressBarHorizontal.setProgress(progress);
                 if (CloudSMS.get(i).get(Function.KEY_PHONE).equals(address)) {
 
                     if (SortSMS.contains(CloudSMS.get(i))) {
@@ -180,6 +196,7 @@ public class ThreadSmsActivity extends AppCompatActivity {
                     } else {
 
                         SortSMS.add(CloudSMS.get(i));
+                      //  loadCloudMsgRecycleView();
                     }
                     Log.d(TAG, "startLoadingCloudSms: Cloud MSG: " + CloudSMS.get(i));
 
@@ -187,7 +204,7 @@ public class ThreadSmsActivity extends AppCompatActivity {
                         Collections.sort(SortSMS, new MapComparator(Function.KEY_TIMESTAMP, "asc"));
 
                         Log.d(TAG, "startLoadingCloudSms: END OF SORTING---------");
-
+                        progressBarHorizontal.setVisibility(View.GONE);
 
                     }
 
@@ -215,7 +232,28 @@ public class ThreadSmsActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.d(TAG, "startLoadingCloudSms: ERROR #65 \n" + e);
         }
+
 */
+    }
+
+    void loadCloudMsgRecycleView() {
+        Collections.sort(SortSMS, new MapComparator(Function.KEY_TIMESTAMP, "asc"));
+
+
+        layoutManager = new LinearLayoutManager(ThreadSmsActivity.this);
+
+        recyclerView.removeAllViews();
+        //                      recyclerView.removeAllViewsInLayout();
+        recyclerView.setHasFixedSize(true);
+
+        // use a linear layout manager
+        recyclerView.setLayoutManager(layoutManager);
+        // specify an adapter (see also next example)
+
+        ThreadSmsAdapter mAdapter = new ThreadSmsAdapter(ThreadSmsActivity.this, SortSMS);
+
+        recyclerView.setAdapter(mAdapter);
+        layoutManager.scrollToPosition(smsList.size() - 1); // yourList is the ArrayList that you are passing to your RecyclerView Adapter.
 
     }
 
@@ -325,6 +363,10 @@ public class ThreadSmsActivity extends AppCompatActivity {
         return false;
     }
 
+    void updateProgress(int progress) {
+        progressBarHorizontal.setProgress(progress);
+    }
+
     class LoadSms extends AsyncTask<String, Void, String> {
         @Override
         protected void onPreExecute() {
@@ -422,16 +464,17 @@ public class ThreadSmsActivity extends AppCompatActivity {
             try {
 
                 CloudSMS = (ArrayList<HashMap<String, String>>) Function.readCachedFile(ThreadSmsActivity.this, getString(R.string.file_cloud_sms));
-                int t = CloudSMS.size();
+                double t = CloudSMS.size();
 
-                int end = t - 1;
+                double end = t - 1;
                 Log.d(TAG, "startLoadingCloudSms: Sorting SMS Started \n" + "Total:" + t + "\n End:" + end);
 
                 for (int i = 0; i < t; i++) {
 
-                    progress = i / t * 100;
+                    double ii = i / t * 100;
+                    progress = (int) ii;
                     Log.d(TAG, "doInBackground: PROGRESS :" + progress);
-
+                    updateProgress(progress);
                     //    Log.d(TAG, "startLoadingCloudSms: Sorting SMS...");
 
                     if (CloudSMS.get(i).get(Function.KEY_PHONE).equals(address)) {
@@ -502,6 +545,119 @@ public class ThreadSmsActivity extends AppCompatActivity {
 
 
     }
+
+    class LoadCloudSms1 extends AsyncTask<String, Integer, String> {
+        int progress;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+//            tmpList.clear();
+            Log.d(TAG, "LoadCloudSms: onPreExecute ");
+            progress = 0;
+        }
+
+        protected String doInBackground(String... args) {
+            Log.d(TAG, "LoadCloudSms: doInBackground() ");
+            try {
+
+                //     CloudSMS = (ArrayList<HashMap<String, String>>) Function.readCachedFile(ThreadSmsActivity.this, getString(R.string.file_cloud_sms));
+                List<Sms> smsL = db.userDao().loadAllByPhoneNo(address);
+                double t = smsL.size();
+
+                double end = t - 1;
+                Log.d(TAG, "startLoadingCloudSms: Sorting SMS Started \n" + "Total:" + t + "\n End:" + end);
+//address
+                for (int i = 0; i < t; i++) {
+
+                    double ii = i / t * 100;
+                    progress = (int) ii;
+                    Log.d(TAG, "doInBackground: PROGRESS :" + progress);
+                    updateProgress(progress);
+                    //    Log.d(TAG, "startLoadingCloudSms: Sorting SMS...");
+                    HashMap<String, String> hm = new HashMap<>();
+                    hm.put(Function._ID, smsL.get(i).ID);
+                    hm.put(Function.KEY_READ, smsL.get(i).KEY_READ);
+                    hm.put(Function.KEY_TIMESTAMP, smsL.get(i).KEY_TIMESTAMP);
+                    hm.put(Function.KEY_TYPE, smsL.get(i).KEY_TYPE);
+                    hm.put(Function.KEY_PHONE, smsL.get(i).KEY_PHONE);
+                    hm.put(Function.KEY_MSG, smsL.get(i).KEY_MSG);
+                    hm.put(Function.KEY_NAME, smsL.get(i).KEY_NAME);
+                    SortSMS.add(hm);
+
+                /*
+                    if (CloudSMS.get(i).get(Function.KEY_PHONE).equals(address)) {
+
+                        if (SortSMS.contains(CloudSMS.get(i))) {
+
+                        } else {
+
+                            SortSMS.add(CloudSMS.get(i));
+                        }
+                        Log.d(TAG, "startLoadingCloudSms: Cloud MSG: " + CloudSMS.get(i));
+
+                        if (i == end) {
+                            Collections.sort(SortSMS, new MapComparator(Function.KEY_TIMESTAMP, "asc"));
+
+                            Log.d(TAG, "startLoadingCloudSms: END OF SORTING---------");
+
+
+                        }
+
+                    } else {
+                    }
+                    */
+
+                }
+                Collections.sort(SortSMS, new MapComparator(Function.KEY_TIMESTAMP, "asc"));
+
+
+            } catch (Exception e) {
+                Log.e(TAG, "doInBackground: ERROR #673445 " + e);
+            }
+
+            return "Done";
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            progressBarHorizontal.setProgress(progress);
+            Log.d(TAG, "doInBackground: PROGRESS update :" + progress);
+
+            //Main.getApp().progressBar.setProgress(values[0]);
+            //Main.getApp().txt_percentage.setText("downloading" + values[0] + "%");
+        }
+
+        @Override
+        protected void onPostExecute(String xml) {
+            Log.d(TAG, "LoadCloudSms: onPostExecute ");
+
+            layoutManager = new LinearLayoutManager(ThreadSmsActivity.this);
+
+            recyclerView.removeAllViews();
+            //                      recyclerView.removeAllViewsInLayout();
+            recyclerView.setHasFixedSize(true);
+
+            // use a linear layout manager
+            recyclerView.setLayoutManager(layoutManager);
+            // specify an adapter (see also next example)
+
+            ThreadSmsAdapter mAdapter = new ThreadSmsAdapter(ThreadSmsActivity.this, SortSMS);
+
+            recyclerView.setAdapter(mAdapter);
+            layoutManager.setStackFromEnd(true);
+
+            layoutManager.scrollToPosition(smsList.size() - 1); // yourList is the ArrayList that you are passing to your RecyclerView Adapter.
+
+            progressBarLoading.setVisibility(View.GONE);
+
+            progressBarHorizontal.setVisibility(View.GONE);
+        }
+
+
+    }
+
 }
 
 
