@@ -90,7 +90,7 @@ android {
         applicationId "devesh.ephrine.backup.sms"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 19
+        versionCode 20
         versionName "0.0.4 Beta Version"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
