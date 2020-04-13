@@ -26,7 +26,6 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FileDownloadTask;
@@ -51,6 +50,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Type;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -175,7 +175,7 @@ public class SyncIntentService extends JobIntentService {
                 TAG + "::MyWakelockTag");
         wakeLock.acquire();
 
-        sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(mContext);
+        sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         String sub = sharedPrefAppGeneral.getString(mContext.getString(R.string.cache_Sub_isSubscribe), "0");
 
@@ -285,7 +285,7 @@ public class SyncIntentService extends JobIntentService {
                     sms1();
 
 
-               }
+                }
 
             }
 
@@ -293,7 +293,6 @@ public class SyncIntentService extends JobIntentService {
 
 
     }
-
 
 
     void sms1() {
@@ -326,7 +325,9 @@ public class SyncIntentService extends JobIntentService {
                     ii++;
                     progress = ii / TOTAL_DEVICE_SMS * 100;
                     int p = (int) progress;
-                    builder.setContentText("Preparing Messages (" + p + "%)")
+                    String prg = new DecimalFormat("##.##").format(progress);
+
+                    builder.setContentText("Preparing Messages (" + prg + "%)")
                             .setProgress(100, p, false);
                     notificationManager.notify(001, builder.build());
                     Log.d(TAG, "sms1: Cursor Count: cursor.moveToNext()");
@@ -453,7 +454,9 @@ public class SyncIntentService extends JobIntentService {
 
                     progress = ii / TOTAL_DEVICE_SMS * 100;
                     int p = (int) progress;
-                    builder.setContentText("Preparing Messages (" + p + "%)")
+                    String prg = new DecimalFormat("##.##").format(progress);
+
+                    builder.setContentText("Preparing Messages (" + prg + "%)")
                             .setProgress(100, p, false);
                     notificationManager.notify(001, builder.build());
 
@@ -917,7 +920,9 @@ public class SyncIntentService extends JobIntentService {
             Log.d(TAG, "RemoveDuplicateHashMaps: Progress: " + progress + " %");
 
             int p = (int) progress;
-            builder.setContentText("Sorting Messages (" + p + "%)")
+            String prg = new DecimalFormat("##.##").format(progress);
+
+            builder.setContentText("Sorting Messages (" + prg + "%)")
                     .setProgress(100, p, false);
 
             notificationManager.notify(001, builder.build());

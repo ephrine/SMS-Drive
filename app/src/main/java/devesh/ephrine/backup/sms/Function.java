@@ -91,10 +91,13 @@ public class Function {
             Log.d(TAG, "removeDuplicates: " + progress + "% | " + i + "/" + total);
             boolean available = false;
             for (int j = 0; j < gpList.size(); j++) {
-                if (Integer.parseInt(gpList.get(j).get(KEY_THREAD_ID)) == Integer.parseInt(smsList.get(i).get(KEY_THREAD_ID))) {
-                    available = true;
-                    break;
+                if (gpList.get(j).get(KEY_THREAD_ID) != null && smsList.get(i).get(KEY_THREAD_ID) != null) {
+                    if (Integer.parseInt(gpList.get(j).get(KEY_THREAD_ID)) == Integer.parseInt(smsList.get(i).get(KEY_THREAD_ID))) {
+                        available = true;
+                        break;
+                    }
                 }
+
             }
 
             if (!available) {
@@ -105,6 +108,7 @@ public class Function {
                         , smsList.get(i).get(KEY_READ)
                 ));
             }
+
         }
         return gpList;
     }

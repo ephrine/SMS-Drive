@@ -1,5 +1,7 @@
 package devesh.ephrine.backup.sms;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,6 +11,10 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
@@ -47,6 +53,10 @@ public class SettingsActivity extends AppCompatActivity {
 
 
     public static class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
+        public static final String AUTHORITY = "devesh.ephrine.backup.sms";
+        public static final String ACCOUNT_TYPE = "devesh.ephrine.backup.sms.ACCOUNT";
+        public String ACCOUNT = "my_custom_account_name";
+
         final String TAG = "Settings Activity";
         // final String DBRoot = "SMSDrive/";
         SharedPreferences sharedPrefAutoBackup;
@@ -64,6 +74,9 @@ public class SettingsActivity extends AppCompatActivity {
             sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(getActivity() /* Activity context */);
             sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(getActivity() /* Activity context */);
             String sub = sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0");
+
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+ACCOUNT=user.getPhoneNumber();
 
             try {
 
@@ -84,9 +97,10 @@ public class SettingsActivity extends AppCompatActivity {
             }
 
             Preference pref = findPreference("pref_userphno");
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+           // FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if (user != null) {
                 pref.setSummary(user.getPhoneNumber());
+
             }
 
 
@@ -131,6 +145,19 @@ public class SettingsActivity extends AppCompatActivity {
                     builder.setPositiveButton("Sign out", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             // User clicked OK button
+                            // Global Variables
+
+                            // Account Manager definition
+                            AccountManager accountManager = (AccountManager) getActivity().getSystemService(ACCOUNT_SERVICE);
+
+                            // loop through all accounts to remove them
+                            Account[] accounts = accountManager.getAccounts();
+                            for (int index = 0; index < accounts.length; index++) {
+                                if (accounts[index].type.intern() == AUTHORITY){
+                                    accountManager.removeAccount(accounts[index], null, null);
+                                    Log.d(TAG, "onClick: Account Deleted from Main");
+                                }
+                            }
                             FirebaseAuth.getInstance().signOut();
                             deleteAppData();
                             Toast.makeText(getContext(), "Signed out !", Toast.LENGTH_SHORT).show();
@@ -172,6 +199,61 @@ public class SettingsActivity extends AppCompatActivity {
             } else {
                 PrefNotifi.setVisible(false);
             }
+
+            Preference PrefPromoCodeKey = findPreference("promocodekey");
+            PrefPromoCodeKey.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                public boolean onPreferenceClick(Preference preference) {
+                    Toast.makeText(getActivity(), "Beta Feature", Toast.LENGTH_SHORT).show();
+                    // Build an AlertDialog
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+                    LayoutInflater inflater = getLayoutInflater();
+                    View dialogView = inflater.inflate(R.layout.alertdialog_custom_view, null);
+
+                    // Specify alert dialog is not cancelable/not ignorable
+                    builder.setCancelable(false);
+
+                    // Set the custom layout as alert dialog view
+                    builder.setView(dialogView);
+
+                    // Get the custom alert dialog view widgets reference
+                    Button btn_positive = (Button) dialogView.findViewById(R.id.dialog_positive_btn);
+                    Button btn_negative = (Button) dialogView.findViewById(R.id.dialog_negative_btn);
+                    final EditText et_name = (EditText) dialogView.findViewById(R.id.et_name);
+
+                    // Create the alert dialog
+                    final AlertDialog dialog = builder.create();
+
+                    // Set positive/yes button click listener
+                    btn_positive.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            // Dismiss the alert dialog
+                            dialog.cancel();
+                            String name = et_name.getText().toString();
+                            Log.d(TAG, "onClick: Dialogue: " + name);
+
+                        }
+                    });
+
+                    // Set negative/no button click listener
+                    btn_negative.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            // Dismiss/cancel the alert dialog
+                            //dialog.cancel();
+                            dialog.dismiss();
+
+                        }
+                    });
+
+                    // Display the custom alert dialog on interface
+                    dialog.show();
+
+
+                    return true;
+                }
+            });
 
             Preference PrefManageSubscription = findPreference("sub");
             PrefManageSubscription.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {

@@ -35,4 +35,5 @@ public interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAllr2(List<Sms> sms);
 
+
 }

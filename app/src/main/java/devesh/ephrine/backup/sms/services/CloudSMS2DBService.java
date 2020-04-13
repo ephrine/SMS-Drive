@@ -1,21 +1,27 @@
 package devesh.ephrine.backup.sms.services;
 
 import android.app.ActivityManager;
-import android.app.Service;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.IBinder;
+import android.os.Build;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.JobIntentService;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.room.Room;
 
 import com.crashlytics.android.Crashlytics;
 import com.lifeofcoding.cacheutlislibrary.CacheUtils;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,26 +30,48 @@ import devesh.ephrine.backup.sms.Function;
 import devesh.ephrine.backup.sms.R;
 import devesh.ephrine.backup.sms.room.AppDatabase;
 import devesh.ephrine.backup.sms.room.Sms;
+import io.fabric.sdk.android.Fabric;
 
-public class CloudSMS2DBService extends Service {
+public class CloudSMS2DBService extends JobIntentService {
+    /*
+        @Override
+        public IBinder onBind(Intent intent) {
+            // TODO: Return the communication channel to the service.
+            return mBinder;
+
+        }
+        */
+    public static final int JOB_ID = 3;
     ArrayList<HashMap<String, String>> CloudSms = new ArrayList<>();
     String TAG = "CloudSMS2DBService :";
     SharedPreferences sharedPrefAppGeneral;
-
+    /**
+     * interface for clients that bind
+     */
+    //  IBinder mBinder;
     /**
      * indicates how to behave if the service is killed
      */
     int mStartMode;
-    /**
-     * interface for clients that bind
-     */
-    IBinder mBinder;
     /**
      * indicates whether onRebind should be used
      */
     boolean mAllowRebind;
     AppDatabase db;
     PowerManager.WakeLock wakeLock;
+    NotificationManagerCompat notificationManager;
+    NotificationCompat.Builder nmbuilder;
+    int PROGRESS_MAX = 100;
+
+    /**
+     * The service is starting, due to a call to startService()
+     */
+    /*@Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_STICKY;
+    }
+    */
+    int PROGRESS_CURRENT = 0;
 
     /**
      * interface for clients that bind
@@ -52,19 +80,21 @@ public class CloudSMS2DBService extends Service {
     public CloudSMS2DBService() {
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        return mBinder;
-
+    public static void enqueueWork(Context context, Intent work) {
+        enqueueWork(context, CloudSMS2DBService.class, JOB_ID, work);
     }
 
-    /**
-     * The service is starting, due to a call to startService()
-     */
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        return START_STICKY;
+    protected void onHandleWork(@NonNull Intent intent) {
+        // your code
+
+        Fabric.with(getApplicationContext(), new Crashlytics());
+
+        Log.d(TAG, "onCreate: SyncIntentService() #9086");
+
+
+        //    startSync();
+
     }
 
     /**
@@ -74,7 +104,11 @@ public class CloudSMS2DBService extends Service {
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
         db.close();
-        wakeLock.release();
+        try {
+            wakeLock.release();
+        } catch (Exception e) {
+            Log.e(TAG, "onDestroy: ERROR #8786 ", e);
+        }
 
     }
 
@@ -87,6 +121,8 @@ public class CloudSMS2DBService extends Service {
                 TAG + "::MyWakelockTag");
         wakeLock.acquire();
 
+        sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(this);
+
         if (getCurProcessName(getApplicationContext()).equals(getPackageName())) {
             // initialize the database
             db = Room.databaseBuilder(getApplicationContext(),
@@ -95,10 +131,9 @@ public class CloudSMS2DBService extends Service {
 
                     .build();
         }
-        sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
         editor.putString(getString(R.string.BG_Task_Status), "1").apply();
-
+        setNotificationCloudRefresh();
 
         AddSmsDB asd = new AddSmsDB();
         asd.execute();
@@ -117,6 +152,41 @@ public class CloudSMS2DBService extends Service {
         return "";
     }
 
+    void setNotificationCloudRefresh() {
+
+        nmbuilder = new NotificationCompat.Builder(this, "002")
+                .setSmallIcon(R.drawable.app_logo)
+                .setContentTitle("Processing Messages from Cloud")
+                .setContentText("")
+                .setOngoing(true)
+                .setProgress(PROGRESS_MAX, PROGRESS_CURRENT, true)
+
+                .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                .setPriority(NotificationCompat.FLAG_ONGOING_EVENT);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "General Tasks";
+            String description = "Refresh Messages in background";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("002", name, importance);
+            channel.setDescription(description);
+
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+
+        }
+
+        notificationManager = NotificationManagerCompat.from(this);
+        nmbuilder.setContentText("");
+
+// notificationId is a unique int for each notification that you must define
+        notificationManager.notify(002, nmbuilder.build());
+
+
+    }
+
     class AddSmsDB extends AsyncTask<String, Void, String> {
         final String TAG = "CloudSMS2DBService ";
 
@@ -125,6 +195,7 @@ public class CloudSMS2DBService extends Service {
             super.onPreExecute();
             Log.d(TAG, "onPreExecute");
             CacheUtils.writeFile(getString(R.string.BG_Task_Status), "1");
+
 
         }
 
@@ -149,39 +220,55 @@ public class CloudSMS2DBService extends Service {
 
             double progress;
             List<Sms> slist = new ArrayList<>();
+            nmbuilder.setProgress(PROGRESS_MAX, PROGRESS_CURRENT, false);
+            notificationManager.notify(002, nmbuilder.build());
 
-            for (int j = 1; j <= CloudSms.size(); j++) {
+            try {
+                for (int j = 0; j <= CloudSms.size(); j++) {
 
-                progress = j / t * 100;
-                Log.d(TAG, "AddSmsDB | doInBackground: PROGRESS: " + progress + "% \n j=" + j + "/" + t);
-                try {
+                    progress = j / t * 100;
+                    String prg = new DecimalFormat("##.##").format(progress);
+                    Log.d(TAG, "AddSmsDB | doInBackground: PROGRESS: " + progress + "% \n j=" + j + "/" + t);
+                    PROGRESS_CURRENT = (int) progress;
+                    nmbuilder.setProgress(PROGRESS_MAX, PROGRESS_CURRENT, false).setContentText("" + prg + "%");
+                    notificationManager.notify(002, nmbuilder.build());
+                    try {
 
+                        Sms u = new Sms();
+                        //u.uid= 1;
+                        u.ID = CloudSms.get(j).get(Function._ID);
+                        u.KEY_THREAD_ID = CloudSms.get(j).get(Function.KEY_THREAD_ID);
+                        u.KEY_NAME = CloudSms.get(j).get(Function.KEY_NAME);
+                        u.KEY_PHONE = CloudSms.get(j).get(Function.KEY_PHONE);
+                        u.KEY_MSG = CloudSms.get(j).get(Function.KEY_MSG);
+                        u.KEY_TYPE = CloudSms.get(j).get(Function.KEY_TYPE);
+                        u.KEY_TIMESTAMP = CloudSms.get(j).get(Function.KEY_TIMESTAMP);
+                        u.KEY_TIME = CloudSms.get(j).get(Function.KEY_TIME);
+                        u.KEY_READ = CloudSms.get(j).get(Function.KEY_READ);
 
-                    Sms u = new Sms();
-                    //u.uid= 1;
-                    u.ID = CloudSms.get(j).get(Function._ID);
-                    u.KEY_THREAD_ID = CloudSms.get(j).get(Function.KEY_THREAD_ID);
-                    u.KEY_NAME = CloudSms.get(j).get(Function.KEY_NAME);
-                    u.KEY_PHONE = CloudSms.get(j).get(Function.KEY_PHONE);
-                    u.KEY_MSG = CloudSms.get(j).get(Function.KEY_MSG);
-                    u.KEY_TYPE = CloudSms.get(j).get(Function.KEY_TYPE);
-                    u.KEY_TIMESTAMP = CloudSms.get(j).get(Function.KEY_TIMESTAMP);
-                    u.KEY_TIME = CloudSms.get(j).get(Function.KEY_TIME);
-                    u.KEY_READ = CloudSms.get(j).get(Function.KEY_READ);
+                        slist.add(u);
+                        //db.close();
 
-                    slist.add(u);
-                    //db.close();
+                    } catch (Exception e) {
+                        Log.e(TAG, "doInBackground: ERROR #04732 " + e);
+                        Crashlytics.logException(e);
+                        notificationManager.cancel(002);
 
-                } catch (Exception e) {
-                    Log.e(TAG, "doInBackground: #ERROR " + e);
-                    Crashlytics.logException(e);
-
+                    }
 
                 }
 
-
+            } catch (Exception e) {
+                Log.e(TAG, "doInBackground: #45642 ", e);
+                Crashlytics.logException(e);
+                stopSelf();
             }
-            db.userDao().insertAllr2(slist);
+
+            try {
+                db.userDao().insertAllr2(slist);
+            } catch (Exception e) {
+                Log.e(TAG, "doInBackground: ERROR #76542 ", e);
+            }
 
   /*          db.userDao().insertAll(u);
             db.userDao().getAll();
@@ -195,12 +282,16 @@ public class CloudSMS2DBService extends Service {
         protected void onPostExecute(String xml) {
             Log.d(TAG, "onPostExecute");
             wakeLock.release();
-            db.close();
+            if (db != null) {
+                db.close();
+            }
+
 
             SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
             editor.putString(getString(R.string.BG_Task_Status), "0").apply();
-
-
+            CloudSms.clear();
+            notificationManager.cancel(002);
+            stopSelf();
         }
     }
 

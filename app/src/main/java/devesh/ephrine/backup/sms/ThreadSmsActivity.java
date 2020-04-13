@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
@@ -166,13 +167,26 @@ public class ThreadSmsActivity extends AppCompatActivity {
         db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, getString(R.string.DATABASE_CLOUD_SMS_DB)).build();
         //  CloudSMS=db.userDao().loadAllByPhoneNo("address");
-        try {
 
-            LoadCloudSms1 loadCloudSmsTask1 = new LoadCloudSms1();
-            loadCloudSmsTask1.execute();
-        } catch (Exception e) {
-            Log.e(TAG, "startLoadingCloudSms: Room #ERROR 56465 ", e);
-        }
+        final Runnable r = new Runnable() {
+            public void run() {
+
+                try {
+
+                    LoadCloudSms1 loadCloudSmsTask1 = new LoadCloudSms1();
+                    loadCloudSmsTask1.execute();
+                } catch (Exception e) {
+                    Log.e(TAG, "startLoadingCloudSms: Room #ERROR 56465 ", e);
+                    Crashlytics.logException(e);
+
+                }
+
+
+                handler.postDelayed(this, 5000);
+            }
+        };
+        handler.postDelayed(r, 0);
+
 
 /*
             try {
@@ -236,14 +250,14 @@ public class ThreadSmsActivity extends AppCompatActivity {
 */
     }
 
+
     void loadCloudMsgRecycleView() {
         Collections.sort(SortSMS, new MapComparator(Function.KEY_TIMESTAMP, "asc"));
-
 
         layoutManager = new LinearLayoutManager(ThreadSmsActivity.this);
 
         recyclerView.removeAllViews();
-        //                      recyclerView.removeAllViewsInLayout();
+        //  recyclerView.removeAllViewsInLayout();
         recyclerView.setHasFixedSize(true);
 
         // use a linear layout manager
@@ -614,6 +628,8 @@ public class ThreadSmsActivity extends AppCompatActivity {
 
             } catch (Exception e) {
                 Log.e(TAG, "doInBackground: ERROR #673445 " + e);
+                Crashlytics.logException(e);
+
             }
 
             return "Done";

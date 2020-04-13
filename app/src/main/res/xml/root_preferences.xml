@@ -42,6 +42,12 @@
         <Preference
             app:key="notif"
             app:title="Notifications" />
+
+        <Preference
+            app:key="promocodekey"
+            app:summary="Promo codes, Discount Coupons, Referral codes"
+            app:title="Redeem a Code"
+            app:useSimpleSummaryProvider="true" />
         <Preference
             app:key="sub"
             app:summary="Manage your Subscription"

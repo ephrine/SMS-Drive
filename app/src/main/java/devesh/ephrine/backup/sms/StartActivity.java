@@ -1,5 +1,7 @@
 package devesh.ephrine.backup.sms;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -159,13 +161,26 @@ public class StartActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 // Successfully signed in
                 if (isDefaultSmsApp) {
-
                     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+                  /*  AccountManager accountManager = AccountManager.get(this); //this is Activity
+                    Account account = new Account(user.getPhoneNumber(),"devesh.ephrine.backup.sms.ACCOUNT");
+
+                    boolean success = accountManager.addAccountExplicitly(account,"password",null);
+                    if(success){
+                        Log.d(TAG,"Account created");
+                    }else{
+                        Log.d(TAG,"Account creation failed. Look at previous logs to investigate");
+                    }
+                    */
+
+                   // FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                     Intent intent = new Intent(this, MainActivity.class);
 
                     //  String message = editText.getText().toString();
                     //intent.putExtra(EXTRA_MESSAGE, message);
                     startActivity(intent);
+
                     StartActivity.this.finish();
                 } else {
                     setContentView(R.layout.set_default);
