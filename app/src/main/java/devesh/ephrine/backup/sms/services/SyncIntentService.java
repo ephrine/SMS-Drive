@@ -170,25 +170,32 @@ public class SyncIntentService extends JobIntentService {
 
     @Override
     public void onCreate() {
+        Fabric.with(getApplicationContext(), new Crashlytics());
+
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+       wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 TAG + "::MyWakelockTag");
         wakeLock.acquire();
 
         sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-        String sub = sharedPrefAppGeneral.getString(mContext.getString(R.string.cache_Sub_isSubscribe), "0");
+        if(sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0")!=null){
+            String sub = sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0");
 
-        try {
-            if (sub.equals("1")) {
-                isSubscribed = true;
-            } else {
+            try {
+                if (sub.equals("1")) {
+                    isSubscribed = true;
+                } else {
+                    isSubscribed = false;
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "onCreate: ERROR #6545 ",e );
                 isSubscribed = false;
             }
-        } catch (Exception e) {
-            isSubscribed = false;
+        }else {
+            isSubscribed=false;
         }
-        Fabric.with(getApplicationContext(), new Crashlytics());
+
         try {
             //Subscription Check
             Intent subscriptionCheck = new Intent(this, CheckSubscriptionService.class);
@@ -962,7 +969,7 @@ public class SyncIntentService extends JobIntentService {
         notificationManager.cancel(001);
         cache_temp1.delete();
         cache_temp2.delete();
-        wakeLock.release();
+       wakeLock.release();
 
         Intent intent = new Intent(this, CloudSMS2DBService.class);
 
