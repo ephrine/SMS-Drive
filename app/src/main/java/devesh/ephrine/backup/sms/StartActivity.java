@@ -1,7 +1,5 @@
 package devesh.ephrine.backup.sms;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -174,7 +172,7 @@ public class StartActivity extends AppCompatActivity {
                     }
                     */
 
-                   // FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                    // FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                     Intent intent = new Intent(this, MainActivity.class);
 
                     //  String message = editText.getText().toString();

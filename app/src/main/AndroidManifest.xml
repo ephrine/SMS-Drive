@@ -17,12 +17,12 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-   <!--
-    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
-    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
-    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
-    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
--->
+    <!--
+     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
+     <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+     <uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
+     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+ -->
     <application
         android:allowBackup="true"
         android:hardwareAccelerated="false"
@@ -32,6 +32,11 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <meta-data
+            android:name="firebase_performance_logcat_enabled"
+            android:value="true" />
+
         <receiver
             android:name=".broadcastreceiver.MyBroadcastReceiver"
             android:enabled="true"
@@ -215,13 +220,15 @@
             </intent-filter>
         </service>
 
-        <service android:name=".account.AuthenticatorService" android:exported="false">
+        <service
+            android:name=".account.AuthenticatorService"
+            android:exported="false">
             <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator"/>
+                <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
             <meta-data
                 android:name="android.accounts.AccountAuthenticator"
-                android:resource="@xml/authenticator"/>
+                android:resource="@xml/authenticator" />
         </service>
 
         <!--

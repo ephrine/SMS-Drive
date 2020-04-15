@@ -81,7 +81,6 @@ import devesh.ephrine.backup.sms.payment.CheckSubscriptionService;
 import devesh.ephrine.backup.sms.payment.GPlayBillingCheckoutActivity;
 import devesh.ephrine.backup.sms.room.AppDatabase;
 import devesh.ephrine.backup.sms.room.Sms;
-import devesh.ephrine.backup.sms.room.UserDao;
 import devesh.ephrine.backup.sms.services.DeviceScanIntentService;
 import devesh.ephrine.backup.sms.services.DownloadCloudMessagesService;
 import io.fabric.sdk.android.Fabric;
@@ -2007,5 +2006,17 @@ final int position, long id) {
         }
     }
 
+/*
+isMyServiceRunning(MyService.class)
 
+private boolean isMyServiceRunning(Class<?> serviceClass) {
+    ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+    for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+        if (serviceClass.getName().equals(service.service.getClassName())) {
+            return true;
+        }
+    }
+    return false;
+}
+    */
 }

@@ -28,6 +28,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.perf.FirebasePerformance;
+import com.google.firebase.perf.metrics.Trace;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -120,6 +122,7 @@ public class SyncIntentService extends JobIntentService {
     File cache_temp1;
     File cache_temp2;
     SharedPreferences sharedPrefAppGeneral;
+    Trace myTrace;
 
     /**
      * Starts this service to perform action Foo with the given parameters. If
@@ -172,14 +175,17 @@ public class SyncIntentService extends JobIntentService {
     public void onCreate() {
         Fabric.with(getApplicationContext(), new Crashlytics());
 
+        myTrace = FirebasePerformance.getInstance().newTrace("SyncIntentService");
+        myTrace.start();
+
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-       wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 TAG + "::MyWakelockTag");
         wakeLock.acquire();
 
         sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-        if(sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0")!=null){
+        if (sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0") != null) {
             String sub = sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0");
 
             try {
@@ -189,11 +195,11 @@ public class SyncIntentService extends JobIntentService {
                     isSubscribed = false;
                 }
             } catch (Exception e) {
-                Log.e(TAG, "onCreate: ERROR #6545 ",e );
+                Log.e(TAG, "onCreate: ERROR #6545 ", e);
                 isSubscribed = false;
             }
-        }else {
-            isSubscribed=false;
+        } else {
+            isSubscribed = false;
         }
 
         try {
@@ -573,7 +579,18 @@ public class SyncIntentService extends JobIntentService {
         // broadcastIntent.setClass(this, Restarter.class);
         // this.sendBroadcast(broadcastIntent);
         notificationManager.cancel(001);
-        wakeLock.release();
+       try{
+           wakeLock.release();
+       }catch (Exception e){
+           Log.e(TAG, "onDestroy: ERROR #2763 ",e );
+           Crashlytics.logException(e);
+       }
+        try{
+            myTrace.stop();
+        }catch (Exception e){
+            Log.e(TAG, "onDestroy: ERROR #564 ",e );
+        }
+
 
     }
 
@@ -662,6 +679,9 @@ public class SyncIntentService extends JobIntentService {
                         String JsonStr = ConvertFileToStrng(unziped);
                         Type type = new TypeToken<ArrayList<HashMap<String, String>>>() {
                         }.getType();
+
+                        //   JsonReader reader = new JsonReader(new StringReader(JsonStr));
+                        //   reader.setLenient(true);
 
                         ArrayList<HashMap<String, String>> jj = gson.fromJson(JsonStr, type);
                         smsList.addAll(jj);
@@ -969,13 +989,19 @@ public class SyncIntentService extends JobIntentService {
         notificationManager.cancel(001);
         cache_temp1.delete();
         cache_temp2.delete();
-       wakeLock.release();
+
+        try {
+            wakeLock.release();
+        } catch (Exception e) {
+            Log.e(TAG, "FinalWork: ERROR #23456 ", e);
+            Crashlytics.log("ERROR in wakeLock.release();");
+            Crashlytics.logException(e);
+        }
+
 
         Intent intent = new Intent(this, CloudSMS2DBService.class);
-
-        //  String message = editText.getText().toString();
-        //intent.putExtra(EXTRA_MESSAGE, message);
         startService(intent);
+        myTrace.stop();
 
     }
 

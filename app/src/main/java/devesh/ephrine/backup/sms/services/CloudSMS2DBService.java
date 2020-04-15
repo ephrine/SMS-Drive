@@ -19,6 +19,8 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.room.Room;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.firebase.perf.FirebasePerformance;
+import com.google.firebase.perf.metrics.Trace;
 import com.lifeofcoding.cacheutlislibrary.CacheUtils;
 
 import java.text.DecimalFormat;
@@ -72,6 +74,8 @@ public class CloudSMS2DBService extends JobIntentService {
     }
     */
     int PROGRESS_CURRENT = 0;
+    Trace myTrace;
+
 
     /**
      * interface for clients that bind
@@ -110,11 +114,19 @@ public class CloudSMS2DBService extends JobIntentService {
             Log.e(TAG, "onDestroy: ERROR #8786 ", e);
         }
 
+        try{
+            myTrace.stop();
+        }catch (Exception e){
+            Log.e(TAG, "onDestroy: ERROR #564 ",e );
+        }
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        myTrace = FirebasePerformance.getInstance().newTrace("SyncIntentService");
+        myTrace.start();
 
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -291,6 +303,11 @@ public class CloudSMS2DBService extends JobIntentService {
             editor.putString(getString(R.string.BG_Task_Status), "0").apply();
             CloudSms.clear();
             notificationManager.cancel(002);
+            try{
+                myTrace.stop();
+            }catch (Exception e){
+                Log.e(TAG, "onDestroy: ERROR #564 ",e );
+            }
             stopSelf();
         }
     }

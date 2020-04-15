@@ -57,9 +57,8 @@ public class SettingsActivity extends AppCompatActivity {
     public static class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
         public static final String AUTHORITY = "devesh.ephrine.backup.sms";
         public static final String ACCOUNT_TYPE = "devesh.ephrine.backup.sms.ACCOUNT";
-        public String ACCOUNT = "my_custom_account_name";
-
         final String TAG = "Settings Activity";
+        public String ACCOUNT = "my_custom_account_name";
         // final String DBRoot = "SMSDrive/";
         SharedPreferences sharedPrefAutoBackup;
         SharedPreferences sharedPrefAppGeneral;
@@ -78,7 +77,7 @@ public class SettingsActivity extends AppCompatActivity {
             String sub = sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0");
 
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-ACCOUNT=user.getPhoneNumber();
+            ACCOUNT = user.getPhoneNumber();
 
             try {
 
@@ -99,7 +98,7 @@ ACCOUNT=user.getPhoneNumber();
             }
 
             Preference pref = findPreference("pref_userphno");
-           // FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            // FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if (user != null) {
                 pref.setSummary(user.getPhoneNumber());
 
@@ -155,7 +154,7 @@ ACCOUNT=user.getPhoneNumber();
                             // loop through all accounts to remove them
                             Account[] accounts = accountManager.getAccounts();
                             for (int index = 0; index < accounts.length; index++) {
-                                if (accounts[index].type.intern() == AUTHORITY){
+                                if (accounts[index].type.intern() == AUTHORITY) {
                                     accountManager.removeAccount(accounts[index], null, null);
                                     Log.d(TAG, "onClick: Account Deleted from Main");
                                 }
@@ -509,7 +508,6 @@ ACCOUNT=user.getPhoneNumber();
 
 
         }
-
 
 
     }

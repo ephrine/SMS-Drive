@@ -24,6 +24,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.perf.FirebasePerformance;
+import com.google.firebase.perf.metrics.Trace;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -84,6 +86,7 @@ public class DownloadCloudMessagesService extends JobIntentService {
     NotificationManagerCompat notificationManager;
     NotificationCompat.Builder nmbuilder;
     int PROGRESS_MAX = 100;
+    Trace myTrace;
 
 
     /**
@@ -142,11 +145,19 @@ try {
 }*/
         notificationManager.cancel(002);
 
+        try{
+            myTrace.stop();
+        }catch (Exception e){
+            Log.e(TAG, "onDestroy: ERROR #564 ",e );
+        }
+
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        myTrace = FirebasePerformance.getInstance().newTrace("SyncIntentService");
+        myTrace.start();
 
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -659,6 +670,12 @@ try {
             editor.putString(getString(R.string.BG_Task_Status), "0").apply();
             CloudSms.clear();
             notificationManager.cancel(002);
+
+            try{
+                myTrace.stop();
+            }catch (Exception e){
+                Log.e(TAG, "onDestroy: ERROR #564 ",e );
+            }
             stopSelf();
         }
     }
