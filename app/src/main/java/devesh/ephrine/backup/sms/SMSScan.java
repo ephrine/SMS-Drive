@@ -1,6 +1,7 @@
 package devesh.ephrine.backup.sms;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -547,96 +548,22 @@ public class SMSScan {
 
     public void ScanNow() {
         isFinished = false;
-
-        //    new SmsSyncTask().execute("url1", "url2", "url3");
-        //SyncRunnable.run();
-        //      Intent intent = new Intent(mContext, SyncIntentService.class);
-        //   intent.setAction(ACTION_BAZ);
-        //  intent.putExtra(EXTRA_PARAM1, param1);
-        //   intent.putExtra(EXTRA_PARAM2, param2);
-//       mContext.startService(intent);
-        SyncIntentService.enqueueWork(mContext, new Intent());
-       /* WorkManager.initialize(
-                mContext,
-                new Configuration.Builder()
-                        .setExecutor(Executors.newFixedThreadPool(100))
-                        .build());
-        */
-        //    OneTimeWorkRequest uploadWorkRequest = new OneTimeWorkRequest.Builder(SyncWorkManager.class)
-        //             .build();
-        //   WorkManager.getInstance(mContext).enqueue(uploadWorkRequest);
-        //  getSMS();
-  /*      if (isDefaultApp) {
-            if (ContextCompat.checkSelfPermission(mContext,
-                    Manifest.permission.READ_SMS)
-                    == PackageManager.PERMISSION_GRANTED) {
-                if (user != null && isSubscribed) {
-                    UserUID = user.getPhoneNumber().replace("+", "x");
-                    //Download Full Backup First to Prevent DataLoss
-                    SMSBackupDB = database.getReference("/users/" + UserUID + "/sms/backup");
-                    //SMSScanDevice();
-
-                    try {
-
-                        tmpList.clear();
-                        tmpList = (ArrayList<HashMap<String, String>>) Function.readCachedFile(mContext, "orgsms");
-
-                    } catch (Exception e) {
-                    }
-
-
-                    SMSBackupDB.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            // This method is called once with the initial value and again
-                            // whenever data at this location is updated.
-                            //String value = dataSnapshot.getValue(String.class);
-                            // Log.d(TAG, "Value is: " + value);
-
-                            if (dataSnapshot.exists() && isSubscribed) {
-
-                                long total = dataSnapshot.getChildrenCount();
-                                long i;
-                                i = 0;
-                                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                    // TODO: handle the post
-                                    i = i + 1;
-
-
-                                    String threadName = postSnapshot.getKey();
-                                    Log.d(TAG, "onDataChange: threadName: " + threadName);
-
-                                    GetThread(postSnapshot, threadName);
-                                    Log.d(TAG, "i:" + i + "\n Total:" + total);
-                                    if (i == total) {
-                                        sms1();
-                                    }
-
-                                }
-
-                            } else {
-                                if (isSubscribed) {
-                                    sms1();
-                                }
-                            }
-
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError error) {
-                            // Failed to read value
-                            Log.w(TAG, "Failed to read value.", error.toException());
-                        }
-                    });
-
-
-                }
-
-            }
-
+        if (!isMyServiceRunning(SyncIntentService.class)) {
+            SyncIntentService.enqueueWork(mContext, new Intent());
+            Log.d(TAG, "ScanNow: SyncIntentService.enqueueWork");
+        } else {
+            Log.e(TAG, "ScanNow: SyncIntentService.enqueueWork Already");
         }
 
+// ...then create a OneTimeWorkRequest that uses those constraints
+  /*      OneTimeWorkRequest sync =
+                new OneTimeWorkRequest.Builder(SyncWorkManager.class)
+                        .build();
+
+        WorkManager.getInstance(mContext).beginUniqueWork("sync", ExistingWorkPolicy.KEEP , sync)
+        .enqueue();
 */
+
     }
 
     void backupNow() {
@@ -645,6 +572,16 @@ public class SMSScan {
         SMSBackupDB = database.getReference("/users/" + UserUID + "/sms/");
         SMSBackupDB.setValue(lst);
 
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     class SmsSyncTask extends AsyncTask<String, String, String> {

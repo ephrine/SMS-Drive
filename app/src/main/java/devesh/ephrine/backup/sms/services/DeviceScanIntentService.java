@@ -127,10 +127,10 @@ public class DeviceScanIntentService extends JobIntentService {
         SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
         editor.putString(getString(R.string.BG_Task_Status), "0").apply();
 
-        try{
+        try {
             myTrace.stop();
-        }catch (Exception e){
-            Log.e(TAG, "onDestroy: ERROR #564 ",e );
+        } catch (Exception e) {
+            Log.e(TAG, "onDestroy: ERROR #564 ", e);
         }
 
 
@@ -272,12 +272,11 @@ public class DeviceScanIntentService extends JobIntentService {
             //  String message = editText.getText().toString();
             //intent.putExtra(EXTRA_MESSAGE, message);
             startService(intent);
-            try{
+            try {
                 myTrace.stop();
-            }catch (Exception e){
-                Log.e(TAG, "onDestroy: ERROR #564 ",e );
+            } catch (Exception e) {
+                Log.e(TAG, "onDestroy: ERROR #564 ", e);
             }
-
 
 
         }

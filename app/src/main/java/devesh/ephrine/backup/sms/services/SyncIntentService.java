@@ -12,6 +12,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
+import android.os.Process;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -55,14 +56,17 @@ import java.lang.reflect.Type;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import devesh.ephrine.backup.sms.Function;
+import devesh.ephrine.backup.sms.MapComparator;
 import devesh.ephrine.backup.sms.R;
 import devesh.ephrine.backup.sms.payment.CheckSubscriptionService;
 import io.fabric.sdk.android.Fabric;
@@ -90,7 +94,7 @@ public class SyncIntentService extends JobIntentService {
     final String TAG = "SyncIntentService";
     final boolean isDefaultApp = true;
     //  final String DBRoot = "SMSDrive/";
-    public HashMap<String, ArrayList<HashMap<String, String>>> iThread;
+    public HashMap<String, LinkedHashSet<HashMap<String, String>>> iThread;
     //   public HashMap<String, Object> iThread;
     Context mContext;
     boolean isFinished;
@@ -102,9 +106,9 @@ public class SyncIntentService extends JobIntentService {
     SharedPreferences sharedPrefAutoBackup;
     boolean SMSAutoBackup;
     boolean isSubscribed;
-    ArrayList<HashMap<String, String>> smsList = new ArrayList<>();
-    ArrayList<HashMap<String, String>> customList = new ArrayList<HashMap<String, String>>();
-    ArrayList<HashMap<String, String>> tmpList = new ArrayList<HashMap<String, String>>();
+    LinkedHashSet<HashMap<String, String>> smsList = new LinkedHashSet<>();
+    LinkedHashSet<HashMap<String, String>> customList = new LinkedHashSet<HashMap<String, String>>();
+    LinkedHashSet<HashMap<String, String>> tmpList = new LinkedHashSet<HashMap<String, String>>();
     String BackupStorageDB;
     String name;
     /*
@@ -124,35 +128,6 @@ public class SyncIntentService extends JobIntentService {
     SharedPreferences sharedPrefAppGeneral;
     Trace myTrace;
 
-    /**
-     * Starts this service to perform action Foo with the given parameters. If
-     * the service is already performing a task this action will be queued.
-     *
-     * @see IntentService
-     */
-    // TODO: Customize helper method
-    public static void startActionFoo(Context context, String param1, String param2) {
-        Intent intent = new Intent(context, SyncIntentService.class);
-        intent.setAction(ACTION_FOO);
-        intent.putExtra(EXTRA_PARAM1, param1);
-        intent.putExtra(EXTRA_PARAM2, param2);
-        context.startService(intent);
-    }
-
-    /**
-     * Starts this service to perform action Baz with the given parameters. If
-     * the service is already performing a task this action will be queued.
-     *
-     * @see IntentService
-     */
-    // TODO: Customize helper method
-    public static void startActionBaz(Context context, String param1, String param2) {
-        Intent intent = new Intent(context, SyncIntentService.class);
-        intent.setAction(ACTION_BAZ);
-        intent.putExtra(EXTRA_PARAM1, param1);
-        intent.putExtra(EXTRA_PARAM2, param2);
-        context.startService(intent);
-    }
 
     public static void enqueueWork(Context context, Intent work) {
         enqueueWork(context, SyncIntentService.class, JOB_ID, work);
@@ -173,6 +148,8 @@ public class SyncIntentService extends JobIntentService {
 
     @Override
     public void onCreate() {
+        super.onCreate();
+        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         Fabric.with(getApplicationContext(), new Crashlytics());
 
         myTrace = FirebasePerformance.getInstance().newTrace("SyncIntentService");
@@ -181,7 +158,7 @@ public class SyncIntentService extends JobIntentService {
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 TAG + "::MyWakelockTag");
-        wakeLock.acquire();
+        wakeLock.acquire(60 * 60 * 1000L /*10 minutes*/);
 
         sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
@@ -217,7 +194,6 @@ public class SyncIntentService extends JobIntentService {
 
         startSync();
 
-        super.onCreate();
     }
 
     @Override
@@ -229,7 +205,6 @@ public class SyncIntentService extends JobIntentService {
         Log.d(TAG, "onCreate: SyncIntentService() #9086");
 
 
-        Fabric.with(getApplicationContext(), new Crashlytics());
         //    startSync();
 
     }
@@ -266,7 +241,6 @@ public class SyncIntentService extends JobIntentService {
         user = FirebaseAuth.getInstance().getCurrentUser();
         database = FirebaseDatabase.getInstance();
 
-
         sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(mContext /* Activity context */);
         SMSAutoBackup = sharedPrefAutoBackup.getBoolean(mContext.getResources().getString(R.string.settings_sync), false);
 
@@ -278,25 +252,34 @@ public class SyncIntentService extends JobIntentService {
                     Manifest.permission.READ_SMS)
                     == PackageManager.PERMISSION_GRANTED) {
                 if (user != null && isSubscribed) {
+
+       /*             new Thread(new Runnable() {
+                        public void run() {
+                  OneTimeWorkRequest sync =
+                            new OneTimeWorkRequest.Builder(SyncWorkManager.class)
+                                    .build();
+
+                    WorkManager.getInstance(getApplicationContext()).beginUniqueWork("sync", ExistingWorkPolicy.KEEP , sync)
+                            .enqueue();
+
+
+                        }
+                    }).start();
+                    */
                     UserUID = user.getPhoneNumber().replace("+", "x");
-                    //Download Full Backup First to Prevent DataLoss
-                    //     SMSBackupDB = database.getReference("/users/" + UserUID + "/sms/backup");
-                    //SMSScanDevice();
+
                     BackupStorageDB = "SMSDrive/Users/" + UserUID + "/backup/file_cloud_sms.zip";
 
+
                     try {
-
                         tmpList.clear();
-                        tmpList = (ArrayList<HashMap<String, String>>) Function.readCachedFile(mContext, "orgsms");
-
+                        tmpList = (LinkedHashSet<HashMap<String, String>>) Function.readCachedFile(mContext, "orgsms");
                     } catch (Exception e) {
                         Log.d(TAG, "startSync: ERROR " + e);
                         Crashlytics.logException(e);
-
                     }
 
                     sms1();
-
 
                 }
 
@@ -318,6 +301,7 @@ public class SyncIntentService extends JobIntentService {
         new Thread(new Runnable() {
             public void run() {
                 // a potentially time consuming task
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
                 Uri smsSentUri = Uri.parse("content://sms/sent");
                 Cursor cursorSent = mContext.getContentResolver().query(smsSentUri, null, null, null, null);
@@ -403,7 +387,7 @@ public class SyncIntentService extends JobIntentService {
                         iThread.get(address).add(sms);
 
                     } else {
-                        ArrayList<HashMap<String, String>> temp1 = new ArrayList<>();
+                        LinkedHashSet<HashMap<String, String>> temp1 = new LinkedHashSet<>();
                         temp1.add(sms);
                         iThread.put(address, temp1);
                     }*/
@@ -452,8 +436,9 @@ public class SyncIntentService extends JobIntentService {
         new Thread(new Runnable() {
             public void run() {
                 // a potentially time consuming task
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
-                List<String> lstSms = new ArrayList<String>();
+                List<String> lstSms = new ArrayList<>();
                 Uri smsUri = Uri.parse("content://sms/sent");
                 Cursor cursor = mContext.getContentResolver().query(smsUri, null, null, null, null);
 
@@ -536,7 +521,7 @@ public class SyncIntentService extends JobIntentService {
                         iThread.get(address).add(sms);
 
                     } else {
-                        ArrayList<HashMap<String, String>> temp1 = new ArrayList<>();
+                        LinkedHashSet<HashMap<String, String>> temp1 = new LinkedHashSet<>();
                         temp1.add(sms);
                         iThread.put(address, temp1);
                     }
@@ -579,16 +564,16 @@ public class SyncIntentService extends JobIntentService {
         // broadcastIntent.setClass(this, Restarter.class);
         // this.sendBroadcast(broadcastIntent);
         notificationManager.cancel(001);
-       try{
-           wakeLock.release();
-       }catch (Exception e){
-           Log.e(TAG, "onDestroy: ERROR #2763 ",e );
-           Crashlytics.logException(e);
-       }
-        try{
+        try {
+            wakeLock.release();
+        } catch (Exception e) {
+            Log.e(TAG, "onDestroy: ERROR #2763 ", e);
+            Crashlytics.logException(e);
+        }
+        try {
             myTrace.stop();
-        }catch (Exception e){
-            Log.e(TAG, "onDestroy: ERROR #564 ",e );
+        } catch (Exception e) {
+            Log.e(TAG, "onDestroy: ERROR #564 ", e);
         }
 
 
@@ -640,58 +625,63 @@ public class SyncIntentService extends JobIntentService {
         builder.setContentText("Syncing with cloud")
                 .setProgress(0, 0, true);
         notificationManager.notify(001, builder.build());
+        new Thread(new Runnable() {
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
-        Log.d(TAG, "DownloadFromCloud");
-        StorageReference mStorageRef;
-        mStorageRef = FirebaseStorage.getInstance().getReference();
-        StorageReference riversRef = mStorageRef.child(BackupStorageDB);
-        localFile = null;
-        gson = new Gson();
+                Log.d(TAG, "DownloadFromCloud");
+                StorageReference mStorageRef;
+                mStorageRef = FirebaseStorage.getInstance().getReference();
+                StorageReference riversRef = mStorageRef.child(BackupStorageDB);
+                localFile = null;
+                gson = new Gson();
 
-        try {
-            tmpList.clear();
-            tmpList = (ArrayList<HashMap<String, String>>) Function.readCachedFile(mContext, getString(R.string.file_device_sms));
-            Log.d(TAG, "DownloadFromCloud: tmpList.clear() ");
-        } catch (Exception e) {
-            Log.d(TAG, "DownloadFromCloud: ERROR " + e);
-            Crashlytics.logException(e);
+                try {
+                    tmpList.clear();
+                    tmpList = (LinkedHashSet<HashMap<String, String>>) Function.readCachedFile(mContext, getString(R.string.file_device_sms));
+                    Log.d(TAG, "DownloadFromCloud: tmpList.clear() ");
+                } catch (Exception e) {
+                    Log.d(TAG, "DownloadFromCloud: ERROR " + e);
+                    Crashlytics.logException(e);
 
-        }
+                }
 
-        try {
-            localFile = File.createTempFile("smscloud", "backup");
-            Log.d(TAG, "DownloadFromCloud: localFile smscloud.backup");
-        } catch (Exception e) {
-            Log.d(TAG, "DownloadFromCloud: #ERROR " + e);
-            Crashlytics.logException(e);
+                try {
+                    localFile = File.createTempFile("smscloud", "backup");
+                    Log.d(TAG, "DownloadFromCloud: localFile smscloud.backup");
+                } catch (Exception e) {
+                    Log.d(TAG, "DownloadFromCloud: #ERROR " + e);
+                    Crashlytics.logException(e);
 
-        }
-        riversRef.getFile(localFile)
-                .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                        // Successfully downloaded data to local file
-                        Log.d(TAG, "onSuccess: DownloadFromCloud");
+                }
+                riversRef.getFile(localFile)
+                        .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                // Successfully downloaded data to local file
+                                Log.d(TAG, "onSuccess: DownloadFromCloud");
 
 
-                        File unziped = unzipFile(localFile);
-                        Log.d(TAG, "onSuccess: Unziped: " + unziped.getPath());
-                        String JsonStr = ConvertFileToStrng(unziped);
-                        Type type = new TypeToken<ArrayList<HashMap<String, String>>>() {
-                        }.getType();
+                                File unziped = unzipFile(localFile);
+                                Log.d(TAG, "onSuccess: Unziped: " + unziped.getPath());
+                                String JsonStr = ConvertFileToStrng(unziped);
+                                Type type = new TypeToken<LinkedHashSet<HashMap<String, String>>>() {
+                                }.getType();
 
-                        //   JsonReader reader = new JsonReader(new StringReader(JsonStr));
-                        //   reader.setLenient(true);
+                                //   JsonReader reader = new JsonReader(new StringReader(JsonStr));
+                                //   reader.setLenient(true);
 
-                        ArrayList<HashMap<String, String>> jj = gson.fromJson(JsonStr, type);
-                        smsList.addAll(jj);
+                                LinkedHashSet<HashMap<String, String>> jj = gson.fromJson(JsonStr, type);
+                                smsList.addAll(jj);
 
-                        ArrayList<HashMap<String, String>> CleanHash = new ArrayList<>();
-                        CleanHash = RemoveDuplicateHashMaps(smsList);
-                        //CleanHash =  smsList;
-                        UploadToCloud(CleanHash);
+                                LinkedHashSet<HashMap<String, String>> CleanHash = new LinkedHashSet<>(smsList);
+                                //     CleanHash.addAll(smsList);
+                                //CleanHash = RemoveDuplicateHashMaps(smsList);
 
-                        //Unzip File
+                                //CleanHash =  smsList;
+                                UploadToCloud(CleanHash);
+
+                                //Unzip File
 
 
 
@@ -706,17 +696,24 @@ public class SyncIntentService extends JobIntentService {
                     }
                     */
 
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle failed download
-                Log.d(TAG, "onFailure: ERROR " + exception);
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle failed download
+                        Log.d(TAG, "onFailure: ERROR " + exception);
+                        LinkedHashSet<HashMap<String, String>> CleanHash = new LinkedHashSet<>(smsList);
+//CleanHash.addAll(smsList);
 
-                UploadToCloud(smsList);
+                        UploadToCloud(CleanHash);
+
+                    }
+                });
 
             }
-        });
+        }).start();
+
+
     }
 
     File unzipFile(File zipfile) {
@@ -764,99 +761,141 @@ public class SyncIntentService extends JobIntentService {
         return unzip_file;
     }
 
-    public void UploadToCloud(ArrayList<HashMap<String, String>> sms) {
+    public void UploadToCloud(final LinkedHashSet<HashMap<String, String>> sms) {
 
-        localFile.delete();
+        new Thread(new Runnable() {
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                try {
+                    ArrayList<HashMap<String, String>> jj = new ArrayList<>(sms);
+                    Function.createCachedFile(mContext, getString(R.string.file_cloud_sms), jj);
+                    Log.d(TAG, "onDataChange: createCachedFile file_cloud_sms ");
 
-        builder.setContentText("Uploading Messages")
-                .setProgress(0, 0, true);
+                } catch (Exception e) {
+                    Log.d(TAG, "onDataChange: ERROR #56 : " + e);
+                    Crashlytics.logException(e);
 
-        notificationManager.notify(001, builder.build());
+                }
+                localFile.delete();
 
-        Log.d(TAG, "UploadToCloud");
-        Gson gson = new Gson();
-        String jsonSTR = gson.toJson(sms);
+                builder.setContentText("Performing Backup")
+                        .setProgress(0, 0, true);
 
-        Type type = new TypeToken<ArrayList<HashMap<String, String>>>() {
-        }.getType();
+                notificationManager.notify(001, builder.build());
 
-        ArrayList<HashMap<String, String>> tempCloudSMS = gson.fromJson(jsonSTR, type);
+                Log.d(TAG, "UploadToCloud");
+                Gson gson = new Gson();
+                String jsonSTR = gson.toJson(sms);
 
-        try {
-            Function.createCachedFile(getApplicationContext(), getString(R.string.file_cloud_sms), tempCloudSMS);
-            //  ArrayList<HashMap<String, String>> tmpList = (ArrayList<HashMap<String, String>>) Function.readCachedFile(getApplicationContext(), getString(R.string.file_device_sms));
-            Log.d(TAG, "UploadToCloud:  Function.createCachedFile file_cloud_sms");
-        } catch (Exception e) {
-            Log.d(TAG, "UploadToCloud: ERROR #4653 " + e);
-            Crashlytics.logException(e);
+                Type type = new TypeToken<ArrayList<HashMap<String, String>>>() {
+                }.getType();
 
-        }
+                ArrayList<HashMap<String, String>> tempCloudSMS = gson.fromJson(jsonSTR, type);
 
-        File mfile = null;
-        try {
-            mfile = File.createTempFile("mbackup", "json");
-            Log.d(TAG, "UploadToCloud: mfile mbackup.json");
-        } catch (Exception e) {
-            Log.d(TAG, "DownloadFromCloud: #ERROR " + e);
-            Crashlytics.logException(e);
+                try {
+                    Function.createCachedFile(getApplicationContext(), getString(R.string.file_cloud_sms), tempCloudSMS);
+                    //  LinkedHashSet<HashMap<String, String>> tmpList = (LinkedHashSet<HashMap<String, String>>) Function.readCachedFile(getApplicationContext(), getString(R.string.file_device_sms));
+                    Log.d(TAG, "UploadToCloud:  Function.createCachedFile file_cloud_sms");
+                } catch (Exception e) {
+                    Log.d(TAG, "UploadToCloud: ERROR #4653 " + e);
+                    Crashlytics.logException(e);
 
-        }
+                }
 
-        try {
-            mfile.createNewFile();
-            cache_temp1 = mfile;
+                File mfile = null;
+                try {
+                    mfile = File.createTempFile("mbackup", "json");
+                    Log.d(TAG, "UploadToCloud: mfile mbackup.json");
+                } catch (Exception e) {
+                    Log.d(TAG, "DownloadFromCloud: #ERROR " + e);
+                    Crashlytics.logException(e);
 
-            FileOutputStream fOut = new FileOutputStream(mfile);
-            OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
-            myOutWriter.append(jsonSTR);
-            myOutWriter.close();
-            fOut.flush();
-            fOut.close();
-            Log.d(TAG, "UploadToCloud:  mfile.createNewFile();");
-        } catch (IOException e) {
-            Log.e("Exception", "File write failed: " + e.toString());
-            Crashlytics.logException(e);
+                }
 
-        }
+                try {
+                    mfile.createNewFile();
+                    cache_temp1 = mfile;
 
-        // Create ZIP
-        // String sourceFile = jsonSTRING;
-        File zip_file = null;
-        FileOutputStream fos = null;
-        OutputStream out;
-        try {
-            Log.d(TAG, "UploadToCloud: zip_file backup.zip");
-            zip_file = File.createTempFile("backup", "zip");
-            //out = new FileOutputStream(Environment.getExternalStorageDirectory().getAbsolutePath()+"/backup.zip");
-            out = new FileOutputStream(zip_file);
-            //   out = new FileOutputStream("backup.zip");
-            ZipOutputStream zipOut = new ZipOutputStream(out);
-            File fileToZip = mfile;
-            FileInputStream fis = new FileInputStream(fileToZip);
-            ZipEntry zipEntry = new ZipEntry(fileToZip.getName());
-            zipOut.putNextEntry(zipEntry);
-            byte[] bytes = new byte[1024];
-            int length;
-            while ((length = fis.read(bytes)) >= 0) {
-                zipOut.write(bytes, 0, length);
-                Log.d(TAG, "UploadToCloud: zip_file backup.zip writing....");
+                    FileOutputStream fOut = new FileOutputStream(mfile);
+                    OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
+                    myOutWriter.append(jsonSTR);
+                    myOutWriter.close();
+                    fOut.flush();
+                    fOut.close();
+                    Log.d(TAG, "UploadToCloud:  mfile.createNewFile();");
+                } catch (IOException e) {
+                    Log.e("Exception", "File write failed: " + e.toString());
+                    Crashlytics.logException(e);
+
+                }
+
+                // Create ZIP
+                // String sourceFile = jsonSTRING;
+                File zip_file = null;
+                FileOutputStream fos = null;
+                OutputStream out;
+                try {
+                    Log.d(TAG, "UploadToCloud: zip_file backup.zip");
+                    zip_file = File.createTempFile("backup", "zip");
+                    //out = new FileOutputStream(Environment.getExternalStorageDirectory().getAbsolutePath()+"/backup.zip");
+                    out = new FileOutputStream(zip_file);
+                    //   out = new FileOutputStream("backup.zip");
+                    ZipOutputStream zipOut = new ZipOutputStream(out);
+                    File fileToZip = mfile;
+                    FileInputStream fis = new FileInputStream(fileToZip);
+                    ZipEntry zipEntry = new ZipEntry(fileToZip.getName());
+                    zipOut.putNextEntry(zipEntry);
+                    byte[] bytes = new byte[1024];
+                    int length;
+                    while ((length = fis.read(bytes)) >= 0) {
+                        zipOut.write(bytes, 0, length);
+                        Log.d(TAG, "UploadToCloud: zip_file backup.zip writing....");
+
+                    }
+                    zipOut.close();
+                    fis.close();
+                    out.close();
+
+                } catch (Exception e) {
+                    Log.d(TAG, "createZIP: ERROR #2345 " + e);
+                    Crashlytics.logException(e);
+
+                }
+                cache_temp2 = zip_file;
+                BackupStorageDB = "SMSDrive/Users/" + UserUID + "/backup/file_cloud_sms.zip";
+
+                StorageReference mStorageRef;
+                mStorageRef = FirebaseStorage.getInstance().getReference();
+                StorageReference riversRef = mStorageRef.child(BackupStorageDB);
+
+                File cfile = zip_file;
+                Uri file = Uri.fromFile(cfile);
+
+                UploadTask uploadTask = riversRef.putFile(file);
+
+                uploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle unsuccessful uploads
+                        notificationManager.cancel(001);
+                        Log.d(TAG, "onFailure: ERROR #4676587 " + exception);
+                        cache_temp1.delete();
+                        cache_temp2.delete();
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
+                        // ...
+                        Log.d(TAG, "onSuccess: SUCCESS UPLOAD ZIP");
+                        FinalWork(sms);
+
+                    }
+                });
+
 
             }
-            zipOut.close();
-            fis.close();
-            out.close();
-
-        } catch (Exception e) {
-            Log.d(TAG, "createZIP: ERROR #2345 " + e);
-            Crashlytics.logException(e);
-
-        }
-        cache_temp2 = zip_file;
-        BackupStorageDB = "SMSDrive/Users/" + UserUID + "/backup/file_cloud_sms.zip";
-
-        StorageReference mStorageRef;
-        mStorageRef = FirebaseStorage.getInstance().getReference();
-        StorageReference riversRef = mStorageRef.child(BackupStorageDB);
+        }).start();
 
 
       /*  InputStream stream = null;
@@ -878,30 +917,6 @@ public class SyncIntentService extends JobIntentService {
 
 //        UploadTask uploadTask = riversRef.putStream(stream);
         //    File cfile = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/backup.zip");
-        File cfile = zip_file;
-        Uri file = Uri.fromFile(cfile);
-
-        UploadTask uploadTask = riversRef.putFile(file);
-
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle unsuccessful uploads
-                notificationManager.cancel(001);
-                Log.d(TAG, "onFailure: ERROR #4676587 " + exception);
-                cache_temp1.delete();
-                cache_temp2.delete();
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
-                // ...
-                Log.d(TAG, "onSuccess: SUCCESS UPLOAD ZIP");
-                FinalWork();
-
-            }
-        });
 
 
     }
@@ -928,54 +943,69 @@ public class SyncIntentService extends JobIntentService {
         return text.toString();
     }
 
-    ArrayList<HashMap<String, String>> RemoveDuplicateHashMaps(ArrayList<HashMap<String, String>> A) {
+    /*  LinkedHashSet<HashMap<String, String>> RemoveDuplicateHashMaps(LinkedHashSet<HashMap<String, String>> A) {
 
-        builder.setContentText("Sorting Messages")
-                .setProgress(0, 0, true);
+          builder.setContentText("Sorting Messages")
+                  .setProgress(0, 0, true);
 
-        notificationManager.notify(001, builder.build());
+          notificationManager.notify(001, builder.build());
 
-        Log.d(TAG, "RemoveDuplicateHashMaps: Removing Duplicate...");
-        ArrayList<HashMap<String, String>> CleanHash = new ArrayList<>();
-        // ArrayList<HashMap<String, String>> gpList = A;
-        double total = A.size();
-        Log.d(TAG, "RemoveDuplicateHashMaps: Total Hashmap Size: " + total);
-        for (int i = 0; i < A.size(); i++) {
-            boolean available = false;
+          Log.d(TAG, "RemoveDuplicateHashMaps: Removing Duplicate...");
+          LinkedHashSet<HashMap<String, String>> CleanHash = new LinkedHashSet<>();
+          // LinkedHashSet<HashMap<String, String>> gpList = A;
+          double total = A.size();
+          Log.d(TAG, "RemoveDuplicateHashMaps: Total Hashmap Size: " + total);
+          for (int i = 0; i < A.size(); i++) {
+              boolean available = false;
 
-            double progress = i / total * 100;
-            Log.d(TAG, "RemoveDuplicateHashMaps: Progress: " + progress + " %");
+              double progress = i / total * 100;
+              Log.d(TAG, "RemoveDuplicateHashMaps: Progress: " + progress + " %");
 
-            int p = (int) progress;
-            String prg = new DecimalFormat("##.##").format(progress);
+              int p = (int) progress;
+              String prg = new DecimalFormat("##.##").format(progress);
 
-            builder.setContentText("Sorting Messages (" + prg + "%)")
-                    .setProgress(100, p, false);
+              builder.setContentText("Sorting Messages (" + prg + "%)")
+                      .setProgress(100, p, false);
 
-            notificationManager.notify(001, builder.build());
+              notificationManager.notify(001, builder.build());
 
 
-            for (int j = 0; j < CleanHash.size(); j++) {
-                if (CleanHash.get(j).get(Function.KEY_MSG) == A.get(i).get(Function.KEY_MSG)
-                        && CleanHash.get(j).get(Function.KEY_TIMESTAMP) == A.get(i).get(Function.KEY_TIMESTAMP)
-                        && CleanHash.get(j).get(Function.KEY_PHONE) == A.get(i).get(Function.KEY_PHONE)
-                        && CleanHash.get(j).get(Function.KEY_TYPE) == A.get(i).get(Function.KEY_TYPE)
-                ) {
-                    available = true;
-                    Log.d(TAG, "RemoveDuplicateHashMaps: Duplicate Found");
-                    break;
-                }
-            }
+              for (int j = 0; j < CleanHash.size(); j++) {
+                  if (CleanHash.get(j).get(Function.KEY_MSG) == A.get(i).get(Function.KEY_MSG)
+                          && CleanHash.get(j).get(Function.KEY_TIMESTAMP) == A.get(i).get(Function.KEY_TIMESTAMP)
+                          && CleanHash.get(j).get(Function.KEY_PHONE) == A.get(i).get(Function.KEY_PHONE)
+                          && CleanHash.get(j).get(Function.KEY_TYPE) == A.get(i).get(Function.KEY_TYPE)
+                  ) {
+                      available = true;
+                      Log.d(TAG, "RemoveDuplicateHashMaps: Duplicate Found");
+                      break;
+                  }
+              }
 
-            if (!available) {
-                //  Log.d(TAG, "RemoveDuplicateHashMaps: Added Non-Duplicate");
-                CleanHash.add(A.get(i));
-            }
+              if (!available) {
+                  //  Log.d(TAG, "RemoveDuplicateHashMaps: Added Non-Duplicate");
+                  CleanHash.add(A.get(i));
+              }
+          }
+          return CleanHash;
+      }
+  */
+    void FinalWork(LinkedHashSet<HashMap<String, String>> CloudSms) {
+        ArrayList<HashMap<String, String>> CloudThreadSms = new ArrayList<>(CloudSms);
+        //  CloudThreadSms.addAll(CloudSms);
+        ArrayList<HashMap<String, String>> purified = Function.removeDuplicates(CloudThreadSms); // Removing duplicates from inbox & sent
+        Collections.sort(purified, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging sms by timestamp decending
+        CloudThreadSms.clear();
+        CloudThreadSms.addAll(purified);
+        try {
+            Function.createCachedFile(this, getString(R.string.file_cloud_thread), CloudThreadSms);
+            Log.d(TAG, "onDataChange: createCachedFile file_cloud_thread ");
+
+        } catch (Exception e) {
+            Log.d(TAG, "onDataChange: ERROR #5600 : " + e);
+            Crashlytics.logException(e);
+            //       wakeLock.release();
         }
-        return CleanHash;
-    }
-
-    void FinalWork() {
         long smsReceiveTime = System.currentTimeMillis();
         Date date1 = new Date(smsReceiveTime);
         //String formattedDate = new SimpleDateFormat("MM/dd/yyyy").format(date);
@@ -1004,6 +1034,7 @@ public class SyncIntentService extends JobIntentService {
         myTrace.stop();
 
     }
+
 
     FileOutputStream createZIP(String jsonSTRING) {
 
@@ -1116,7 +1147,7 @@ public class SyncIntentService extends JobIntentService {
                 .setContentText("Syncing Messages....")
                 .setOngoing(true)
                 .setProgress(PROGRESS_MAX, PROGRESS_CURRENT, true)
-
+                .setNotificationSilent()
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .setPriority(NotificationCompat.FLAG_ONGOING_EVENT);
 

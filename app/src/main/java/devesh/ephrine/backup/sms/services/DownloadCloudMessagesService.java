@@ -145,10 +145,10 @@ try {
 }*/
         notificationManager.cancel(002);
 
-        try{
+        try {
             myTrace.stop();
-        }catch (Exception e){
-            Log.e(TAG, "onDestroy: ERROR #564 ",e );
+        } catch (Exception e) {
+            Log.e(TAG, "onDestroy: ERROR #564 ", e);
         }
 
     }
@@ -671,10 +671,10 @@ try {
             CloudSms.clear();
             notificationManager.cancel(002);
 
-            try{
+            try {
                 myTrace.stop();
-            }catch (Exception e){
-                Log.e(TAG, "onDestroy: ERROR #564 ",e );
+            } catch (Exception e) {
+                Log.e(TAG, "onDestroy: ERROR #564 ", e);
             }
             stopSelf();
         }

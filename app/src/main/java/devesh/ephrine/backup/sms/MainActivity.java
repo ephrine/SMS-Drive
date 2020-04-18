@@ -1,6 +1,7 @@
 package devesh.ephrine.backup.sms;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -59,6 +60,9 @@ import com.google.firebase.functions.HttpsCallableResult;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.gson.Gson;
 import com.lifeofcoding.cacheutlislibrary.CacheUtils;
+import com.microsoft.appcenter.AppCenter;
+import com.microsoft.appcenter.analytics.Analytics;
+import com.microsoft.appcenter.crashes.Crashes;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -81,8 +85,10 @@ import devesh.ephrine.backup.sms.payment.CheckSubscriptionService;
 import devesh.ephrine.backup.sms.payment.GPlayBillingCheckoutActivity;
 import devesh.ephrine.backup.sms.room.AppDatabase;
 import devesh.ephrine.backup.sms.room.Sms;
+import devesh.ephrine.backup.sms.services.CloudSMS2DBService;
 import devesh.ephrine.backup.sms.services.DeviceScanIntentService;
 import devesh.ephrine.backup.sms.services.DownloadCloudMessagesService;
+import devesh.ephrine.backup.sms.services.SyncIntentService;
 import io.fabric.sdk.android.Fabric;
 
 
@@ -145,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
     LinearLayout LLCloudPanelIdeal;
     LinearLayout LLCloudRefreshing;
     LinearLayout LLCloudEmpty;
-    // LinearLayout LLBGmsgprocessing;
+    LinearLayout LLBGmsgprocessing;
     SharedPreferences.OnSharedPreferenceChangeListener AppGenPrefListener;
     String bg_TASK_STATUS;
     NotificationManagerCompat notificationManager;
@@ -162,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.NavDevieMenu:
                     LayoutCloud.setVisibility(View.GONE);
                     LayoutHome.setVisibility(View.VISIBLE);
+                    checkBGRunningServices();
 
                     break;
 
@@ -177,6 +184,7 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         CloudViewUnSub.setVisibility(View.VISIBLE);
                     }
+                    checkBGRunningServices();
 
                     break;
 
@@ -211,11 +219,7 @@ public class MainActivity extends AppCompatActivity {
         String sub = sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0");
 
         try {
-            if (sub.equals("1")) {
-                isSubscribed = true;
-            } else {
-                isSubscribed = false;
-            }
+            isSubscribed = sub.equals("1");
         } catch (Exception e) {
             isSubscribed = false;
         }
@@ -237,6 +241,8 @@ public class MainActivity extends AppCompatActivity {
         } else {
             //       LLBGmsgprocessing.setVisibility(View.GONE);
         }
+        checkBGRunningServices();
+
 
     }
 
@@ -246,6 +252,8 @@ public class MainActivity extends AppCompatActivity {
 //isDefaultSmsApp=false;
         setContentView(R.layout.activity_main_home);
         Fabric.with(this, new Crashlytics());
+        AppCenter.start(getApplication(), BuildConfig.MS_AppCenter_Key,
+                Analytics.class, Crashes.class);
 
         sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
         sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
@@ -293,8 +301,9 @@ public class MainActivity extends AppCompatActivity {
         LLCloudEmpty = findViewById(R.id.LLCloudEmpty);
         LLCloudEmpty.setVisibility(View.GONE);
 
-        //  LLBGmsgprocessing=findViewById(R.id.LLBGmsgprocessing);
-//LLBGmsgprocessing.setVisibility(View.GONE);
+        LLBGmsgprocessing = findViewById(R.id.LLBGmsgprocessing);
+        LLBGmsgprocessing.setVisibility(View.GONE);
+
         // defaultSMSAppCardViewWarning=findViewById(R.id.defaultSMSAppCardViewWarning);
         mySwipeRefreshLayout = findViewById(R.id.swipeRefresh);
 
@@ -653,6 +662,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "LoadCloudRecycleView: Error #324 : " + e);
             Crashlytics.logException(e);
 
+            Toast.makeText(this, "Tap on Refresh", Toast.LENGTH_SHORT).show();
         }
 
         CloudRecycleView = findViewById(R.id.cloudsmsrecycle);
@@ -709,7 +719,7 @@ public class MainActivity extends AppCompatActivity {
         loadsmsTask = new LoadSms();
         loadsmsTask.execute();
         LoadRecycleView();
-
+        checkBGRunningServices();
 
   /*      Switch SyncSwitch = findViewById(R.id.switch1);
 
@@ -912,8 +922,10 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "FileAutoBackUpBroadCast: FileSyncIntervals: " + sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_sync_interval), null));
                 String syncinterval = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_sync_interval), null);
                 String[] syncintervalArray = getResources().getStringArray(R.array.auto_sync_intervals);
+
+                int syncINT;
                 if (syncinterval == null) {
-                    syncinterval = syncintervalArray[2];
+                    syncinterval = syncintervalArray[3];
                 }
 
                 if (syncinterval.equals(syncintervalArray[0])) {
@@ -921,41 +933,54 @@ public class MainActivity extends AppCompatActivity {
                     alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                             SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_DAY,
                             AlarmManager.INTERVAL_DAY, pendingIntent);
-
+                    syncINT = 24;
                 } else if (syncinterval.equals(syncintervalArray[1])) {
                     // 12 Hrs Sync
                     alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                             SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HALF_DAY,
                             AlarmManager.INTERVAL_HALF_DAY, pendingIntent);
-
+                    syncINT = 12;
                 } else if (syncinterval.equals(syncintervalArray[2])) {
                     // 1 Hrs Sync
                     alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                             SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HOUR,
                             AlarmManager.INTERVAL_HOUR, pendingIntent);
 
-                }
-                /* else if (syncinterval.equals(syncintervalArray[3])) {
+                    syncINT = 1;
+                } else if (syncinterval.equals(syncintervalArray[3])) {
                     // half Hrs Sync
                     alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                             SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HALF_HOUR,
                             AlarmManager.INTERVAL_HALF_HOUR, pendingIntent);
 
-                } else if (syncinterval.equals(syncintervalArray[4])) {
+                }/* else if (syncinterval.equals(syncintervalArray[4])) {
                     // 15 min Sync
                     alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                             SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_FIFTEEN_MINUTES,
                             AlarmManager.INTERVAL_FIFTEEN_MINUTES, pendingIntent);
 
                 }
-                */
-                else {
-                    // 12 Hrs Sync
+                */ else {
+                    // 1 Hrs Sync
                     alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                            SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HALF_DAY,
-                            AlarmManager.INTERVAL_HALF_DAY, pendingIntent);
+                            SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HOUR,
+                            AlarmManager.INTERVAL_HOUR, pendingIntent);
+                    syncINT = 12;
                 }
 
+            /*
+ Constraints constraints = new Constraints.Builder()
+                    .setRequiresCharging(true)
+                    .build();
+          */
+
+  /*              PeriodicWorkRequest saveRequest =
+                        new PeriodicWorkRequest.Builder(SyncWorkManager.class, syncINT, TimeUnit.HOURS)
+                                //  .setConstraints(constraints)
+                                .build();
+                WorkManager.getInstance(this)
+                        .enqueue(saveRequest);
+*/
             } else {
                 Log.d(TAG, "FileAutoBackUpBroadCast: #657456 AlarmCancled: Auto Sync OFF");
                 alarmManager.cancel(pendingIntent);
@@ -1768,6 +1793,24 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    void checkBGRunningServices() {
+        if (isMyServiceRunning(SyncIntentService.class) || isMyServiceRunning(CloudSMS2DBService.class)
+                || isMyServiceRunning(DownloadCloudMessagesService.class)) {
+            LLBGmsgprocessing.setVisibility(View.VISIBLE);
+        } else {
+            LLBGmsgprocessing.setVisibility(View.GONE);
+        }
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     //---------------- LoadSms Async Task
     class LoadSms extends AsyncTask<String, Void, String> {
@@ -1965,7 +2008,7 @@ final int position, long id) {
             List<Sms> sl = new ArrayList<>();
             for (int j = 0; j <= cloud_sms.size() - 1; j++) {
 
-                progress = (int) j / t * 100;
+                progress = j / t * 100;
                 Log.d(TAG, "doInBackground: PROGRESS: " + progress + "% \n j=" + j + "/" + t);
                 Sms u = new Sms();
                 //u.uid= 1;

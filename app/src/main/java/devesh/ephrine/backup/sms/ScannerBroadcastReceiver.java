@@ -1,5 +1,6 @@
 package devesh.ephrine.backup.sms;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -65,7 +66,6 @@ public class ScannerBroadcastReceiver extends BroadcastReceiver {
         SMSAutoBackup = sharedPrefAutoBackup.getBoolean(mContext.getResources().getString(R.string.settings_sync), false);
         Fabric.with(mContext, new Crashlytics());
 
-        mContext = context;
         iThread = new HashMap<>();
         user = FirebaseAuth.getInstance().getCurrentUser();
         database = FirebaseDatabase.getInstance();
@@ -89,22 +89,25 @@ public class ScannerBroadcastReceiver extends BroadcastReceiver {
             Log.d(TAG, "onReceive: ScannerBroadcastReceiver SYNC STARTED ");
             //   Intent intent1 = new Intent(mContext, SyncIntentService.class);
             // context.startService(intent1);
-            SyncIntentService.enqueueWork(mContext, new Intent());
+            if (!isMyServiceRunning(SyncIntentService.class)) {
+                SyncIntentService.enqueueWork(mContext, new Intent());
+            }
 
-          /*       new Thread(new Runnable() {
-                public void run() {
-                    // a potentially time consuming task
-                    SMSScan s = new SMSScan(mContext);
-                    s.ScanNow();
+            // Create a Constraints object that defines when the task should run
 
-                }
-            }).start();
-
-
-       
-            OneTimeWorkRequest syncWorkRequest = new OneTimeWorkRequest.Builder(SyncWorkManager.class)
+           /* Constraints constraints = new Constraints.Builder()
+                    .setRequiresCharging(true)
                     .build();
-            WorkManager.getInstance(this).enqueue(syncWorkRequest);*/
+
+
+            PeriodicWorkRequest saveRequest =
+                    new PeriodicWorkRequest.Builder(SyncWorkManager.class, 1, TimeUnit.HOURS)
+                          //  .setConstraints(constraints)
+                            .build();
+
+            WorkManager.getInstance(context)
+                    .enqueue(saveRequest);  */
+
             Log.d(TAG, "onReceive: Syncing...");
         } else {
             Log.d(TAG, "onReceive: Please Subscribe before Sync ");
@@ -492,5 +495,14 @@ public class ScannerBroadcastReceiver extends BroadcastReceiver {
 
     }
 
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

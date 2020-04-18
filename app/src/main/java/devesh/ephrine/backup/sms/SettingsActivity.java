@@ -1,7 +1,5 @@
 package devesh.ephrine.backup.sms;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,10 +9,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
@@ -148,7 +142,7 @@ public class SettingsActivity extends AppCompatActivity {
                             // User clicked OK button
                             // Global Variables
 
-                            // Account Manager definition
+                        /*    // Account Manager definition
                             AccountManager accountManager = (AccountManager) getActivity().getSystemService(ACCOUNT_SERVICE);
 
                             // loop through all accounts to remove them
@@ -158,7 +152,7 @@ public class SettingsActivity extends AppCompatActivity {
                                     accountManager.removeAccount(accounts[index], null, null);
                                     Log.d(TAG, "onClick: Account Deleted from Main");
                                 }
-                            }
+                            }*/
                             FirebaseAuth.getInstance().signOut();
                             deleteAppData();
                             Toast.makeText(getContext(), "Signed out !", Toast.LENGTH_SHORT).show();
@@ -201,7 +195,7 @@ public class SettingsActivity extends AppCompatActivity {
                 PrefNotifi.setVisible(false);
             }
 
-            Preference PrefPromoCodeKey = findPreference("promocodekey");
+       /*     Preference PrefPromoCodeKey = findPreference("promocodekey");
             PrefPromoCodeKey.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 public boolean onPreferenceClick(Preference preference) {
                     Toast.makeText(getActivity(), "Beta Feature", Toast.LENGTH_SHORT).show();
@@ -255,7 +249,7 @@ public class SettingsActivity extends AppCompatActivity {
                     return true;
                 }
             });
-
+*/
             Preference PrefManageSubscription = findPreference("sub");
             PrefManageSubscription.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 public boolean onPreferenceClick(Preference preference) {
@@ -295,7 +289,7 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             });
 
-            Preference PrefOpenSource = findPreference("osl");
+   /*         Preference PrefOpenSource = findPreference("osl");
             PrefOpenSource.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 public boolean onPreferenceClick(Preference preference) {
                     //open browser or intent here
@@ -304,7 +298,7 @@ public class SettingsActivity extends AppCompatActivity {
                     return true;
                 }
             });
-
+*/
 
             Preference Prefwebsite = findPreference("epwebsite");
             Prefwebsite.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {

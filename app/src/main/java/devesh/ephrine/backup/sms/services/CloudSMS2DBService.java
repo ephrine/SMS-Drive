@@ -114,10 +114,10 @@ public class CloudSMS2DBService extends JobIntentService {
             Log.e(TAG, "onDestroy: ERROR #8786 ", e);
         }
 
-        try{
+        try {
             myTrace.stop();
-        }catch (Exception e){
-            Log.e(TAG, "onDestroy: ERROR #564 ",e );
+        } catch (Exception e) {
+            Log.e(TAG, "onDestroy: ERROR #564 ", e);
         }
     }
 
@@ -278,6 +278,7 @@ public class CloudSMS2DBService extends JobIntentService {
 
             try {
                 db.userDao().insertAllr2(slist);
+                Log.d(TAG, "doInBackground: Added into DB SUCCESS");
             } catch (Exception e) {
                 Log.e(TAG, "doInBackground: ERROR #76542 ", e);
             }
@@ -293,7 +294,11 @@ public class CloudSMS2DBService extends JobIntentService {
         @Override
         protected void onPostExecute(String xml) {
             Log.d(TAG, "onPostExecute");
-            wakeLock.release();
+            try {
+                wakeLock.release();
+            } catch (Exception e) {
+                Log.e(TAG, "onPostExecute: ERROR #35271 ", e);
+            }
             if (db != null) {
                 db.close();
             }
@@ -303,10 +308,10 @@ public class CloudSMS2DBService extends JobIntentService {
             editor.putString(getString(R.string.BG_Task_Status), "0").apply();
             CloudSms.clear();
             notificationManager.cancel(002);
-            try{
+            try {
                 myTrace.stop();
-            }catch (Exception e){
-                Log.e(TAG, "onDestroy: ERROR #564 ",e );
+            } catch (Exception e) {
+                Log.e(TAG, "onDestroy: ERROR #564 ", e);
             }
             stopSelf();
         }

@@ -20,15 +20,17 @@
         android:orientation="vertical">
 
         <LinearLayout
+            android:id="@+id/LLBGmsgprocessing"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:visibility="gone">
+            android:padding="5dp"
+            android:visibility="visible">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Processing Messages" />
+                android:text="Running Background Task...Please Wait" />
 
             <ProgressBar
                 style="?android:attr/progressBarStyleHorizontal"

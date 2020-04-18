@@ -9,6 +9,7 @@ apply plugin: 'com.google.firebase.firebase-perf'
 def paymentserverurl
 def gplaysubscriptionid1
 def gplaylicensekey
+def MS_AppCenterKey
 
 Properties properties = new Properties()
 
@@ -24,6 +25,7 @@ if (!lp.exists()) {
     paymentserverurl = properties.getProperty('paymentserverurl')
     gplaysubscriptionid1 = properties.getProperty('gplaysubscriptionid1')
     gplaylicensekey = properties.getProperty('g.license.key')
+    MS_AppCenterKey = properties.getProperty('msappcenter')
 
 } else {
     project.logger.info('Located local.properties file')
@@ -32,6 +34,7 @@ if (!lp.exists()) {
     paymentserverurl = properties.getProperty('paymentserverurl')
     gplaysubscriptionid1 = properties.getProperty('gplaysubscriptionid1')
     gplaylicensekey = properties.getProperty('g.license.key')
+    MS_AppCenterKey = properties.getProperty('msappcenter')
 
 
 }
@@ -91,8 +94,8 @@ android {
         applicationId "devesh.ephrine.backup.sms"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 22
-        versionName "0.0.4 Beta Version"
+        versionCode 23
+        versionName "0.0.5 Beta Version"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
 
@@ -105,6 +108,7 @@ android {
 
         buildConfigField "String", "Google_Play_Subscription_ID1", "\"" + gplaysubscriptionid1 + "\""
 
+        buildConfigField "String", "MS_AppCenter_Key", "\"" + MS_AppCenterKey + "\""
 
         //  resValue "string", "AdMob_AppId", "\"" + "none" + "\""
 
@@ -154,7 +158,7 @@ dependencies {
 // Add the dependency for the Performance Monitoring library
     implementation 'com.google.firebase:firebase-perf:+'
 
-    implementation 'androidx.work:work-runtime:2.4.0-alpha01'
+    //  implementation 'androidx.work:work-runtime:2.4.0-alpha01'
 
 
     implementation 'androidx.preference:preference:+'
@@ -214,4 +218,9 @@ dependencies {
 
     // Test helpers
     testImplementation "androidx.room:room-testing:+"
+
+    // MS AppCenter
+    implementation "com.microsoft.appcenter:appcenter-analytics:+"
+    implementation "com.microsoft.appcenter:appcenter-crashes:+"
+
 }

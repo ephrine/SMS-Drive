@@ -44,6 +44,7 @@
             app:title="Notifications" />
 
         <Preference
+            app:isPreferenceVisible="false"
             app:key="promocodekey"
             app:summary="Promo codes, Discount Coupons, Referral codes"
             app:title="Redeem a Code"
@@ -122,15 +123,15 @@
             app:title="@string/fui_privacy_policy"
             app:useSimpleSummaryProvider="true" />
 
-        <Preference
-            app:key="osl"
-            app:title="Open Source Licences" />
+        <!--    <Preference
+             app:key="osl"
+             app:title="Open Source Licences" />
 
 
-        <!--     <Preference
-                 app:key="tc"
-                 app:title="Terms &amp; Conditions" />
-     -->
+       <Preference
+                  app:key="tc"
+                  app:title="Terms &amp; Conditions" />
+      -->
 
     </PreferenceCategory>
 

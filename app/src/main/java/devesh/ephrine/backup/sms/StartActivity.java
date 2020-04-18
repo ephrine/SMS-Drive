@@ -20,6 +20,9 @@ import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.microsoft.appcenter.AppCenter;
+import com.microsoft.appcenter.analytics.Analytics;
+import com.microsoft.appcenter.crashes.Crashes;
 
 import java.util.Arrays;
 import java.util.List;
@@ -40,6 +43,8 @@ public class StartActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
 
+        AppCenter.start(getApplication(), BuildConfig.MS_AppCenter_Key,
+                Analytics.class, Crashes.class);
         setContentView(R.layout.activity_start);
         getSupportActionBar().hide();
         mAuth = FirebaseAuth.getInstance();
