@@ -61,7 +61,14 @@
     <string name="BG_Task_Status">BGTaskStatus</string>
 
 
+
+
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="ARG_ACCOUNT_TYPE">accountType</string>
+    <string name="ARG_AUTH_TOKEN_TYPE">authTokenType</string>
+    <string name="ARG_IS_ADDING_NEW_ACCOUNT">isAddingNewAccount</string>
+    <string name="PARAM_USER_PASSWORD">password</string>
+
+
 
 </resources>

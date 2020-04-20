@@ -263,6 +263,24 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             });
 
+            Preference PrefDisablePowerSave = findPreference("disablepowersave");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                PrefDisablePowerSave.setVisible(true);
+
+                PrefDisablePowerSave.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                    public boolean onPreferenceClick(Preference preference) {
+                        Intent intent = new Intent();
+                        intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+                        startActivity(intent);
+                        Toast.makeText(getActivity(), "Add to Whitelist or Disable Battery Optimization for SMS Drive", Toast.LENGTH_LONG).show();
+
+                        return true;
+                    }
+                });
+            }else{
+                PrefDisablePowerSave.setVisible(false);
+            }
+
 
             Preference PrefContact = findPreference("contact");
             PrefContact.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
