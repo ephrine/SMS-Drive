@@ -25,7 +25,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import devesh.ephrine.backup.sms.payment.GPlayBillingCheckoutActivity;
 import io.fabric.sdk.android.Fabric;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -51,6 +50,11 @@ public class SettingsActivity extends AppCompatActivity {
     public static class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
         public static final String AUTHORITY = "devesh.ephrine.backup.sms";
         public static final String ACCOUNT_TYPE = "devesh.ephrine.backup.sms.ACCOUNT";
+
+        public static final String FLAVOUR_MASTER = "master";
+        public static final String FLAVOUR_GALAXY = "galaxy";
+        public static final String FLAVOUR_HUAWEI = "huawei";
+
         final String TAG = "Settings Activity";
         public String ACCOUNT = "my_custom_account_name";
         // final String DBRoot = "SMSDrive/";
@@ -75,11 +79,7 @@ public class SettingsActivity extends AppCompatActivity {
 
             try {
 
-                if (sub.equals("1")) {
-                    isSubscribed = true;
-                } else {
-                    isSubscribed = false;
-                }
+                isSubscribed = sub.equals("1");
             } catch (Exception e) {
                 isSubscribed = false;
             }
@@ -253,12 +253,23 @@ public class SettingsActivity extends AppCompatActivity {
             Preference PrefManageSubscription = findPreference("sub");
             PrefManageSubscription.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 public boolean onPreferenceClick(Preference preference) {
+                    if (BuildConfig.FLAVOR.equals(FLAVOUR_MASTER)) {
 
-                    Intent intent = new Intent(getActivity(), GPlayBillingCheckoutActivity.class);
-                    //  String message = editText.getText().toString();
-                    //intent.putExtra(EXTRA_MESSAGE, message);
-                    startActivity(intent);
+                        Intent intent = new Intent(getActivity(), PaymentActivity.class);
+                        //  String message = editText.getText().toString();
+                        //intent.putExtra(EXTRA_MESSAGE, message);
+                        startActivity(intent);
 
+                    } else if (BuildConfig.FLAVOR.equals(FLAVOUR_GALAXY)) {
+
+                        Intent intent = new Intent(getActivity(), PaymentActivity.class);
+                        //  String message = editText.getText().toString();
+                        //intent.putExtra(EXTRA_MESSAGE, message);
+                        startActivity(intent);
+
+                    } else if (BuildConfig.FLAVOR.equals(FLAVOUR_HUAWEI)) {
+                        Log.d(TAG, "onPreferenceClick: " + FLAVOUR_HUAWEI);
+                    }
                     return true;
                 }
             });
@@ -277,7 +288,7 @@ public class SettingsActivity extends AppCompatActivity {
                         return true;
                     }
                 });
-            }else{
+            } else {
                 PrefDisablePowerSave.setVisible(false);
             }
 

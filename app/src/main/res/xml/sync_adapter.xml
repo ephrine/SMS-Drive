@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<sync-adapter
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:contentAuthority="com.example.android.datasync.provider"
+<sync-adapter xmlns:android="http://schemas.android.com/apk/res/android"
     android:accountType="com.android.example.datasync"
-    android:userVisible="false"
-    android:supportsUploading="false"
     android:allowParallelSyncs="false"
-    android:isAlwaysSyncable="true"/>
+    android:contentAuthority="com.example.android.datasync.provider"
+    android:isAlwaysSyncable="true"
+    android:supportsUploading="false"
+    android:userVisible="false" />

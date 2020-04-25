@@ -17,6 +17,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     // Global variables
     // Define a variable to contain a content resolver instance
     ContentResolver contentResolver;
+
     /**
      * Set up the sync adapter
      */

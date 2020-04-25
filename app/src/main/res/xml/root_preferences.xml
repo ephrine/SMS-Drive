@@ -75,7 +75,6 @@
             app:title="Sign Out" />
 
 
-
     </PreferenceCategory>
 
 
@@ -96,9 +95,9 @@
             android:summary="@string/sync_interval_summary"
             android:title="@string/sync_interval" />
         <Preference
+            android:summary="Some Devices has Aggressive Power Optimization &amp; Doze mode which can interfere in Auto-Sync Process. Use only if Necessary"
             app:key="disablepowersave"
             app:title="Disable Battery Optimization"
-            android:summary="Some Devices has Aggressive Power Optimization &amp; Doze mode which can interfere in Auto-Sync Process. Use only if Necessary"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 

@@ -81,8 +81,6 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import devesh.ephrine.backup.sms.payment.CheckSubscriptionService;
-import devesh.ephrine.backup.sms.payment.GPlayBillingCheckoutActivity;
 import devesh.ephrine.backup.sms.room.AppDatabase;
 import devesh.ephrine.backup.sms.room.Sms;
 import devesh.ephrine.backup.sms.services.CloudSMS2DBService;
@@ -251,6 +249,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 //isDefaultSmsApp=false;
         setContentView(R.layout.activity_main_home);
+        String flavour = BuildConfig.FLAVOR;
+        Log.d(TAG, "onCreate: FLAVOUR: " + flavour);
+
         Fabric.with(this, new Crashlytics());
         AppCenter.start(getApplication(), BuildConfig.MS_AppCenter_Key,
                 Analytics.class, Crashes.class);
@@ -1457,7 +1458,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void openMySubscription(View v) {
-        Intent intent = new Intent(this, GPlayBillingCheckoutActivity.class);
+        Intent intent = new Intent(this, PaymentActivity.class);
 
         //  String message = editText.getText().toString();
         //intent.putExtra(EXTRA_MESSAGE, message);

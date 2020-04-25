@@ -16,18 +16,16 @@ import androidx.annotation.NonNull;
 import androidx.core.app.JobIntentService;
 
 import com.crashlytics.android.Crashlytics;
-import com.google.firebase.perf.FirebasePerformance;
-import com.google.firebase.perf.metrics.Trace;
 import com.lifeofcoding.cacheutlislibrary.CacheUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
+import devesh.ephrine.backup.sms.CheckSubscriptionService;
 import devesh.ephrine.backup.sms.Function;
 import devesh.ephrine.backup.sms.MapComparator;
 import devesh.ephrine.backup.sms.R;
-import devesh.ephrine.backup.sms.payment.CheckSubscriptionService;
 import io.fabric.sdk.android.Fabric;
 
 /**
@@ -54,7 +52,7 @@ public class DeviceScanIntentService extends JobIntentService {
     ArrayList<HashMap<String, String>> DeviceSMS = new ArrayList<>();
     PowerManager.WakeLock wakeLock;
     SharedPreferences sharedPrefAppGeneral;
-    Trace myTrace;
+    //  Trace myTrace;
 
     public static void enqueueWork(Context context, Intent work) {
         enqueueWork(context, DeviceScanIntentService.class, JOB_ID, work);
@@ -63,8 +61,8 @@ public class DeviceScanIntentService extends JobIntentService {
     @Override
     public void onCreate() {
 
-        myTrace = FirebasePerformance.getInstance().newTrace("SyncIntentService");
-        myTrace.start();
+        //    myTrace = FirebasePerformance.getInstance().newTrace("SyncIntentService");
+        //     myTrace.start();
 
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -128,7 +126,7 @@ public class DeviceScanIntentService extends JobIntentService {
         editor.putString(getString(R.string.BG_Task_Status), "0").apply();
 
         try {
-            myTrace.stop();
+            //    myTrace.stop();
         } catch (Exception e) {
             Log.e(TAG, "onDestroy: ERROR #564 ", e);
         }
@@ -273,7 +271,7 @@ public class DeviceScanIntentService extends JobIntentService {
             //intent.putExtra(EXTRA_MESSAGE, message);
             startService(intent);
             try {
-                myTrace.stop();
+                //           myTrace.stop();
             } catch (Exception e) {
                 Log.e(TAG, "onDestroy: ERROR #564 ", e);
             }

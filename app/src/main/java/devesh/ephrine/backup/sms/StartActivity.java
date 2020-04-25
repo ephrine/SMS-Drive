@@ -29,19 +29,10 @@ import com.microsoft.appcenter.crashes.Crashes;
 import java.util.Arrays;
 import java.util.List;
 
-
 import devesh.ephrine.backup.sms.broadcastreceiver.MyBroadcastReceiver;
 import io.fabric.sdk.android.Fabric;
 
 public class StartActivity extends AppCompatActivity {
-    private static final int RC_SIGN_IN = 123;
-    private static final int DEFAULT_SMS_CODE = 1;
-    final String TAG = "StartActivity ";
-    final Boolean isDefaultSmsApp = true;
-    FirebaseUser currentUser;
-    private FirebaseAuth mAuth;
-
-
     // Constants
     // The authority for the sync adapter's content provider
     public static final String AUTHORITY = "com.example.android.datasync.provider";
@@ -49,8 +40,47 @@ public class StartActivity extends AppCompatActivity {
     public static final String ACCOUNT_TYPE = "devesh.ephrine.backup.sms";
     // The account name
     public static final String ACCOUNT = "dummyaccount";
+    private static final int RC_SIGN_IN = 123;
+    private static final int DEFAULT_SMS_CODE = 1;
+    final String TAG = "StartActivity ";
+    final Boolean isDefaultSmsApp = true;
+    FirebaseUser currentUser;
     // Instance fields
     Account mAccount;
+    private FirebaseAuth mAuth;
+
+    /**
+     * Create a new dummy account for the sync adapter
+     *
+     * @param context The application context
+     */
+    public static void CreateSyncAccount(Context context) {
+        // Create the account type and default account
+        Account newAccount = new Account(
+                ACCOUNT, ACCOUNT_TYPE);
+        // Get an instance of the Android account manager
+        AccountManager accountManager =
+                (AccountManager) context.getSystemService(
+                        ACCOUNT_SERVICE);
+        /*
+         * Add the account and account type, no password or user data
+         * If successful, return the Account object, otherwise report an error.
+         */
+        if (accountManager.addAccountExplicitly(newAccount, null, null)) {
+            /*
+             * If you don't set android:syncable="true" in
+             * in your <provider> element in the manifest,
+             * then call context.setIsSyncable(account, AUTHORITY, 1)
+             * here.
+             */
+        } else {
+            /*
+             * The account exists or some other error occurred. Log this, report it,
+             * or handle it internally.
+             */
+        }
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,10 +196,10 @@ public class StartActivity extends AppCompatActivity {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             Intent intent = new Intent(this, MainActivity.class);
 
-              //  String message = editText.getText().toString();
+            //  String message = editText.getText().toString();
             //intent.putExtra(EXTRA_MESSAGE, message);
             startActivity(intent);
-        //    CreateSyncAccount(this);
+            //    CreateSyncAccount(this);
 
             StartActivity.this.finish();
 
@@ -195,7 +225,7 @@ public class StartActivity extends AppCompatActivity {
 
                     // FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                     Intent intent = new Intent(this, MainActivity.class);
-                 //   CreateSyncAccount(this);
+                    //   CreateSyncAccount(this);
 
                     //  String message = editText.getText().toString();
                     //intent.putExtra(EXTRA_MESSAGE, message);
@@ -241,7 +271,6 @@ public class StartActivity extends AppCompatActivity {
 
     }
 
-
     public void setDefaultSmsApp1(View v) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -271,11 +300,7 @@ public class StartActivity extends AppCompatActivity {
         boolean a;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             final String myPackageName = getPackageName();
-            if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
-                a = false;
-            } else {
-                a = true;
-            }
+            a = Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName);
         } else {
             a = true;
             // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
@@ -295,38 +320,5 @@ public class StartActivity extends AppCompatActivity {
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         MultiDex.install(this);
-    }
-
-    /**
-     * Create a new dummy account for the sync adapter
-     *
-     * @param context The application context
-     */
-    public static void CreateSyncAccount(Context context) {
-        // Create the account type and default account
-        Account newAccount = new Account(
-                ACCOUNT, ACCOUNT_TYPE);
-        // Get an instance of the Android account manager
-        AccountManager accountManager =
-                (AccountManager) context.getSystemService(
-                        ACCOUNT_SERVICE);
-        /*
-         * Add the account and account type, no password or user data
-         * If successful, return the Account object, otherwise report an error.
-         */
-        if (accountManager.addAccountExplicitly(newAccount, null, null)) {
-            /*
-             * If you don't set android:syncable="true" in
-             * in your <provider> element in the manifest,
-             * then call context.setIsSyncable(account, AUTHORITY, 1)
-             * here.
-             */
-        } else {
-            /*
-             * The account exists or some other error occurred. Log this, report it,
-             * or handle it internally.
-             */
-        }
-
     }
 }

@@ -29,8 +29,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.perf.FirebasePerformance;
-import com.google.firebase.perf.metrics.Trace;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -65,10 +63,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import devesh.ephrine.backup.sms.CheckSubscriptionService;
 import devesh.ephrine.backup.sms.Function;
 import devesh.ephrine.backup.sms.MapComparator;
 import devesh.ephrine.backup.sms.R;
-import devesh.ephrine.backup.sms.payment.CheckSubscriptionService;
 import io.fabric.sdk.android.Fabric;
 
 import static devesh.ephrine.backup.sms.Function.KEY_THREAD_ID;
@@ -126,7 +124,7 @@ public class SyncIntentService extends JobIntentService {
     File cache_temp1;
     File cache_temp2;
     SharedPreferences sharedPrefAppGeneral;
-    Trace myTrace;
+    // Trace myTrace;
 
 
     public static void enqueueWork(Context context, Intent work) {
@@ -152,8 +150,8 @@ public class SyncIntentService extends JobIntentService {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         Fabric.with(getApplicationContext(), new Crashlytics());
 
-        myTrace = FirebasePerformance.getInstance().newTrace("SyncIntentService");
-        myTrace.start();
+        //  myTrace = FirebasePerformance.getInstance().newTrace("SyncIntentService");
+        //   myTrace.start();
 
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -166,11 +164,7 @@ public class SyncIntentService extends JobIntentService {
             String sub = sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0");
 
             try {
-                if (sub.equals("1")) {
-                    isSubscribed = true;
-                } else {
-                    isSubscribed = false;
-                }
+                isSubscribed = sub.equals("1");
             } catch (Exception e) {
                 Log.e(TAG, "onCreate: ERROR #6545 ", e);
                 isSubscribed = false;
@@ -571,7 +565,7 @@ public class SyncIntentService extends JobIntentService {
             Crashlytics.logException(e);
         }
         try {
-            myTrace.stop();
+            //       myTrace.stop();
         } catch (Exception e) {
             Log.e(TAG, "onDestroy: ERROR #564 ", e);
         }
@@ -1031,7 +1025,7 @@ public class SyncIntentService extends JobIntentService {
 
         Intent intent = new Intent(this, CloudSMS2DBService.class);
         startService(intent);
-        myTrace.stop();
+        //   myTrace.stop();
 
     }
 

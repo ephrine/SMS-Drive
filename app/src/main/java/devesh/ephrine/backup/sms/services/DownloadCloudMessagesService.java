@@ -24,8 +24,6 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.perf.FirebasePerformance;
-import com.google.firebase.perf.metrics.Trace;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -86,7 +84,7 @@ public class DownloadCloudMessagesService extends JobIntentService {
     NotificationManagerCompat notificationManager;
     NotificationCompat.Builder nmbuilder;
     int PROGRESS_MAX = 100;
-    Trace myTrace;
+    //  Trace myTrace;
 
 
     /**
@@ -146,7 +144,7 @@ try {
         notificationManager.cancel(002);
 
         try {
-            myTrace.stop();
+            //      myTrace.stop();
         } catch (Exception e) {
             Log.e(TAG, "onDestroy: ERROR #564 ", e);
         }
@@ -156,8 +154,8 @@ try {
     @Override
     public void onCreate() {
         super.onCreate();
-        myTrace = FirebasePerformance.getInstance().newTrace("SyncIntentService");
-        myTrace.start();
+        //    myTrace = FirebasePerformance.getInstance().newTrace("SyncIntentService");
+        //    myTrace.start();
 
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -187,11 +185,7 @@ try {
 
         String sub = sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0");
 
-        if (sub.equals("1")) {
-            isSubscribed = true;
-        } else {
-            isSubscribed = false;
-        }
+        isSubscribed = sub.equals("1");
 
 
         if (isSubscribed) {
@@ -672,7 +666,7 @@ try {
             notificationManager.cancel(002);
 
             try {
-                myTrace.stop();
+                //           myTrace.stop();
             } catch (Exception e) {
                 Log.e(TAG, "onDestroy: ERROR #564 ", e);
             }

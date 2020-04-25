@@ -4,7 +4,7 @@ ext {
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'io.fabric'
-apply plugin: 'com.google.firebase.firebase-perf'
+//apply plugin: 'com.google.firebase.firebase-perf'
 
 def paymentserverurl
 def gplaysubscriptionid1
@@ -114,7 +114,7 @@ android {
 
         resValue "string", "AppVersionCode", "\"" + versionCode + "\""
 
-        resValue "string", "AppVersionName", "\"" + versionName + "\""
+        //     resValue "string", "AppVersionName", "\"" + versionName + "\""
         //    signingConfig signingConfigs.release
 
         javaCompileOptions {
@@ -138,8 +138,38 @@ android {
         }
     }
 
-}
 
+    flavorDimensions "appstore"
+    productFlavors {
+        master {
+            dimension "appstore"
+            versionName "0.0.5 Beta Version"
+            //  applicationId "devesh.ephrine.backup.sms"
+            resValue "string", "AppFlavour", "\"" + "master" + "\""
+            resValue "string", "AppVersionName", "\"" + versionName + "\""
+        }
+        galaxy {
+            dimension "appstore"
+            versionName "0.0.5 Beta (Samsung)"
+            //     applicationId "devesh.ephrine.backup.sms"
+            resValue "string", "AppFlavour", "\"" + "galaxy" + "\""
+            resValue "string", "AppVersionName", "\"" + versionName + "\""
+           // archivesBaseName = "galaxy-app"
+
+        }
+        huawei {
+            dimension "appstore"
+            versionName "0.0.5 Beta (Huawei)"
+            //   applicationId "devesh.ephrine.backup.sms"
+            resValue "string", "AppFlavour", "\"" + "huawei" + "\""
+            resValue "string", "AppVersionName", "\"" + versionName + "\""
+        }
+
+    }
+
+
+
+}
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
@@ -156,7 +186,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-config:+'
     implementation 'com.google.firebase:firebase-functions:+'
 // Add the dependency for the Performance Monitoring library
-    implementation 'com.google.firebase:firebase-perf:+'
+    //  implementation 'com.google.firebase:firebase-perf:19.0.6'
 
     //  implementation 'androidx.work:work-runtime:2.4.0-alpha01'
 
@@ -172,7 +202,7 @@ dependencies {
     //  implementation 'com.google.code.gson:gson:2.8.6'
 
     //Google in-app Billing
-    implementation 'com.anjlab.android.iab.v3:library:+'
+    masterImplementation 'com.anjlab.android.iab.v3:library:+'
 
     implementation 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
 
@@ -222,5 +252,8 @@ dependencies {
     // MS AppCenter
     implementation "com.microsoft.appcenter:appcenter-analytics:+"
     implementation "com.microsoft.appcenter:appcenter-crashes:+"
+
+    //Samsung Galaxy In-App-purchases
+    galaxyImplementation project(':IAP6Helper')
 
 }

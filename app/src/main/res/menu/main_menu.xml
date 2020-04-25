@@ -25,8 +25,8 @@
 
     <item
         android:id="@+id/settings"
+        android:icon="@drawable/ic_settings_white_50dp"
         android:title="Settings"
-        app:showAsAction="always"
-        android:icon="@drawable/ic_settings_white_50dp"/>
+        app:showAsAction="always" />
 
 </menu>
