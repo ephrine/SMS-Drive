@@ -1,0 +1,20 @@
+[
+  {
+    "outputType": {
+      "type": "APK"
+    },
+    "apkData": {
+      "type": "MAIN",
+      "splits": [],
+      "versionCode": 24,
+      "versionName": "0.0.5 Beta Version",
+      "enabled": true,
+      "outputFile": "app-master-release.apk",
+      "fullName": "masterRelease",
+      "baseName": "master-release",
+      "dirName": ""
+    },
+    "path": "app-master-release.apk",
+    "properties": {}
+  }
+]

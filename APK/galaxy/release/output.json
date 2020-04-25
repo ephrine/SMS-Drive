@@ -1,0 +1,20 @@
+[
+  {
+    "outputType": {
+      "type": "APK"
+    },
+    "apkData": {
+      "type": "MAIN",
+      "splits": [],
+      "versionCode": 24,
+      "versionName": "0.0.5 Beta (Samsung)",
+      "enabled": true,
+      "outputFile": "galaxy-app-galaxy-release.apk",
+      "fullName": "galaxyRelease",
+      "baseName": "galaxy-release",
+      "dirName": ""
+    },
+    "path": "galaxy-app-galaxy-release.apk",
+    "properties": {}
+  }
+]
