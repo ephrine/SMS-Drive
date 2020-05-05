@@ -18,7 +18,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.preference.PreferenceManager;
 import android.provider.Telephony;
 import android.util.Log;
 import android.view.Menu;
@@ -38,6 +37,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
@@ -113,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences sharedPrefAppGeneral;
 
     boolean SMSAutoBackup;
+
     boolean isSubscribed;
     ProgressBar loadingCircle;
     LoadSms loadsmsTask;
@@ -156,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
     NotificationCompat.Builder nmbuilder;
     int PROGRESS_MAX = 100;
     int PROGRESS_CURRENT = 0;
+    TextView textNoInternerError;
     private FirebaseAuth mAuth;
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -217,7 +219,10 @@ public class MainActivity extends AppCompatActivity {
         String sub = sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0");
 
         try {
-            isSubscribed = sub.equals("1");
+            if (sub.equals("1")) {
+                isSubscribed = true;
+            }
+            //isSubscribed = sub.equals("1");
         } catch (Exception e) {
             isSubscribed = false;
         }
@@ -262,7 +267,9 @@ public class MainActivity extends AppCompatActivity {
         //Subscription Check
         try {
             Intent subscriptionCheck = new Intent(this, CheckSubscriptionService.class);
+
             startService(subscriptionCheck);
+
 
         } catch (Exception e) {
             Log.e(TAG, "onCreate: #5465653 ", e);
@@ -307,6 +314,8 @@ public class MainActivity extends AppCompatActivity {
 
         // defaultSMSAppCardViewWarning=findViewById(R.id.defaultSMSAppCardViewWarning);
         mySwipeRefreshLayout = findViewById(R.id.swipeRefresh);
+
+        textNoInternerError = findViewById(R.id.textView3InternetError);
 
         loadingCircle = findViewById(R.id.progressBar1);
         iThread = new HashMap<>();
@@ -411,13 +420,19 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-        bg_TASK_STATUS = sharedPrefAppGeneral.getString(getString(R.string.BG_Task_Status), "0");
+        /*bg_TASK_STATUS = sharedPrefAppGeneral.getString(getString(R.string.BG_Task_Status), "0");
         if (bg_TASK_STATUS.equals("1")) {
             //  LLBGmsgprocessing.setVisibility(View.VISIBLE);
         } else {
             //  LLBGmsgprocessing.setVisibility(View.GONE);
-        }
+        }*/
 
+        if (!isNetworkAvailable()) {
+            textNoInternerError.setVisibility(View.VISIBLE);
+            Log.d(TAG, "onCreate: NO INTERNET !");
+        } else {
+            textNoInternerError.setVisibility(View.GONE);
+        }
 
     }
 
@@ -716,11 +731,11 @@ public class MainActivity extends AppCompatActivity {
             //      SharedPreferences.Editor editor = sharedPrefAutoBackup.edit();
             //     editor.putBoolean(getString(R.string.settings_sync), false).apply();
         }
+        checkBGRunningServices();
 
         loadsmsTask = new LoadSms();
         loadsmsTask.execute();
         LoadRecycleView();
-        checkBGRunningServices();
 
   /*      Switch SyncSwitch = findViewById(R.id.switch1);
 
@@ -1813,6 +1828,48 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
+    private boolean isNetworkAvailable() {
+        return true;
+
+     /*     ConnectivityManager connectivityManager = ((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
+        return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
+
+           boolean haveConnectedWifi = false;
+        boolean haveConnectedMobile = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+        for (NetworkInfo ni : netInfo) {
+            if (ni.getTypeName().equalsIgnoreCase("WIFI"))
+                if (ni.isConnected())
+                    haveConnectedWifi = true;
+            if (ni.getTypeName().equalsIgnoreCase("MOBILE"))
+                if (ni.isConnected())
+                    haveConnectedMobile = true;
+        }
+        return haveConnectedWifi || haveConnectedMobile;
+       try {
+            InetAddress ipAddr = InetAddress.getByName("google.com");
+            //You can replace it with your name
+            return !ipAddr.equals("");
+
+        } catch (Exception e) {
+            return false;
+        }
+       ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        */
+    }
+
+    public void stopLoadingRefreshView() {
+        mySwipeRefreshLayout = findViewById(R.id.swipeRefresh);
+
+        mySwipeRefreshLayout.setRefreshing(false);
+
+    }
+
     //---------------- LoadSms Async Task
     class LoadSms extends AsyncTask<String, Void, String> {
         final String TAG = "LoadSms | ";
@@ -1830,12 +1887,24 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+
+            Log.d(TAG, "onPreExecute: ");
+
             smsList.clear();
             //   loadingCircle.setVisibility(View.VISIBLE);
             mySwipeRefreshLayout.setRefreshing(true);
+           /* try{
+                Function.createCachedFile(MainActivity.this, "orgsms", null);
+            }catch (Exception e){
+
+            }
+            */
+
+
         }
 
         protected String doInBackground(String... args) {
+            Log.d(TAG, "doInBackground: ");
             String xml = "";
             if (isDefaultSmsApp) {
 
@@ -1904,7 +1973,7 @@ public class MainActivity extends AppCompatActivity {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                     Crashlytics.logException(e);
-
+                    stopLoadingRefreshView();
                 }
 
                 try {
@@ -1914,6 +1983,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "doInBackground: createCachedFile ORG SMS CREATED");
                 } catch (Exception e) {
                     Crashlytics.logException(e);
+                    stopLoadingRefreshView();
 
                 }
 
@@ -1928,6 +1998,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "doInBackground: createCachedFile CREATED");
                 } catch (Exception e) {
                     Crashlytics.logException(e);
+                    stopLoadingRefreshView();
 
                 }
                 // Updating cache data
@@ -1938,7 +2009,9 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String xml) {
+            Log.d(TAG, "onPostExecute: ");
             loadingCircle.setVisibility(View.GONE);
+            stopLoadingRefreshView();
 
             if (!tmpList.equals(smsList)) {
                 /*
@@ -1986,7 +2059,8 @@ final int position, long id) {
             super.onPreExecute();
             Log.d(TAG, "onPreExecute");
             db = Room.databaseBuilder(getApplicationContext(),
-                    AppDatabase.class, getString(R.string.DATABASE_SMS_DB)).build();
+                    AppDatabase.class, getString(R.string.DATABASE_SMS_DB)).fallbackToDestructiveMigration()
+                    .build();
 
         }
 
@@ -2022,7 +2096,7 @@ final int position, long id) {
                 u.KEY_TYPE = cloud_sms.get(j).get(Function.KEY_TYPE);
                 u.KEY_TIMESTAMP = cloud_sms.get(j).get(Function.KEY_TIMESTAMP);
                 u.KEY_TIME = cloud_sms.get(j).get(Function.KEY_TIME);
-                u.KEY_READ = cloud_sms.get(j).get(Function.KEY_READ);
+                //  u.KEY_READ = cloud_sms.get(j).get(Function.KEY_READ);
 
                 sl.add(u);
 

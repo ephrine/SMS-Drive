@@ -3,9 +3,6 @@
     package="devesh.ephrine.backup.sms">
 
 
-    <uses-permission android:name="com.android.vending.BILLING" />
-
-
     <application
         android:allowBackup="true"
         android:hardwareAccelerated="false"

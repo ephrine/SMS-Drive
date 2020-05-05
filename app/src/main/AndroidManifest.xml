@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="devesh.ephrine.backup.sms">
 
-
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_SMS" />
@@ -16,17 +15,16 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
-    <!--    <uses-permission
+    <!--
+    <uses-permission
             android:name="android.permission.AUTHENTICATE_ACCOUNTS"
             android:maxSdkVersion="22" />
          <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
          <uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
          <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
-     -->
-    <!--  <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>-->
-
-    <uses-permission android:name="com.samsung.android.iap.permission.BILLING" />
+    -->
+    <!-- <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/> -->
+    <uses-permission android:name="com.android.vending.BILLING" />
 
     <application
         android:allowBackup="true"
@@ -37,6 +35,10 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppThemeDayNight">
+        <service
+            android:name=".services.ApplyCloudChangesService"
+            android:enabled="true"
+            android:exported="true"></service>
 
         <meta-data
             android:name="firebase_performance_logcat_enabled"
@@ -57,13 +59,11 @@
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
-
         <service
             android:name=".services.DownloadCloudMessagesService"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
-
         <service
             android:name=".CheckSubscriptionService"
             android:enabled="true"
@@ -224,18 +224,17 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
         <service
             android:name=".account.AuthenticatorService"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
+
             <meta-data
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
-
         <!--
  Set custom default icon. This is used when no icon is set for incoming notification messages.
      See README(https://goo.gl/l4GJaQ) for more.
@@ -250,33 +249,6 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/colorAccent" />
-
-        <!--        <service
-                    android:name="account.AuthenticatorService">
-                    <intent-filter>
-                        <action android:name="android.accounts.AccountAuthenticator"/>
-                    </intent-filter>
-                    <meta-data
-                        android:name="android.accounts.AccountAuthenticator"
-                        andrresource="@xml/authenticator" />
-                </service>
-        <!-
-                <provider
-                    android:name="account.StubProvider"
-                    android:authorities=".provider"
-                    android:exported="false"
-                    android:syncable="true"/>
-                <service
-                    android:name=".account.SyncService"
-                    android:exported="true"
-                    android:process=":sync">
-                    <intent-filter>
-                        <action android:name="android.content.SyncAdapter"/>
-                    </intent-filter>
-                    <meta-data android:name="android.content.SyncAdapter"
-                        android:resource="@xml/sync_adapter" />
-                </service>
-                -->
     </application>
 
 </manifest>

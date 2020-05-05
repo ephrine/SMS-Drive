@@ -5,11 +5,9 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.PowerManager;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -44,7 +42,7 @@ public class CloudSMS2DBService extends JobIntentService {
     public static final int JOB_ID = 3;
     ArrayList<HashMap<String, String>> CloudSms = new ArrayList<>();
     String TAG = "CloudSMS2DBService :";
-    SharedPreferences sharedPrefAppGeneral;
+    // SharedPreferences sharedPrefAppGeneral;
     /**
      * interface for clients that bind
      */
@@ -131,7 +129,7 @@ public class CloudSMS2DBService extends JobIntentService {
                 TAG + "::MyWakelockTag");
         wakeLock.acquire();
 
-        sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(this);
+        //  sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(this);
 
         if (getCurProcessName(getApplicationContext()).equals(getPackageName())) {
             // initialize the database
@@ -141,8 +139,8 @@ public class CloudSMS2DBService extends JobIntentService {
 
                     .build();
         }
-        SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
-        editor.putString(getString(R.string.BG_Task_Status), "1").apply();
+        //    SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
+        //    editor.putString(getString(R.string.BG_Task_Status), "1").apply();
         setNotificationCloudRefresh();
 
         AddSmsDB asd = new AddSmsDB();
@@ -210,8 +208,8 @@ public class CloudSMS2DBService extends JobIntentService {
         }
 
         protected String doInBackground(String... args) {
-            SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
-            editor.putString(getString(R.string.BG_Task_Status), "1").apply();
+            //  SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
+            //  editor.putString(getString(R.string.BG_Task_Status), "1").apply();
 
 
             String xml = "";
@@ -302,8 +300,8 @@ public class CloudSMS2DBService extends JobIntentService {
             }
 
 
-            SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
-            editor.putString(getString(R.string.BG_Task_Status), "0").apply();
+            //      SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
+            //    editor.putString(getString(R.string.BG_Task_Status), "0").apply();
             CloudSms.clear();
             notificationManager.cancel(002);
             try {

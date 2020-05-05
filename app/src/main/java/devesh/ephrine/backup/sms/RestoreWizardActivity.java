@@ -207,8 +207,9 @@ public class RestoreWizardActivity extends AppCompatActivity {
         if (isDefaultSmsApp() && !isRestoreInProgress) {
             LLButtonsR.setVisibility(View.GONE);
             isRestoreInProgress = true;
-            RestoreProgressTextView.setVisibility(View.VISIBLE);
-            RestoreProgressTextView.setText("Preparing.....");
+            RestoreProgressTxView("Preparing.....");
+            //   RestoreProgressTextView.setVisibility(View.VISIBLE);
+
             //  DownloadCloud();
             new RestoreTask().execute("url1", "url2", "url3");
           /*  runOnUiThread(new Runnable() {
@@ -301,7 +302,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
         }
         //  RestoreProgressTextView.setText("Done");
 //RestoreWizardActivity.this.finish();
-        RestoreProgressTextView.setText("Success: Restored Messages ");
+        RestoreProgressTxView("Success: Restored Messages ");
     }
 
     void GetThread(DataSnapshot postSnapshot, String threadName) {
@@ -435,6 +436,17 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
     }
 
+    public void RestoreProgressTxView(String text) {
+        try {
+            RestoreProgressTextView.setText(text);
+        } catch (Exception e) {
+            Log.e(TAG, "ERROR " + e);
+            Crashlytics.logException(e);
+
+
+        }
+    }
+
     class RestoreTask extends AsyncTask<String, String, String> {
         File localFile;
         Gson gson;
@@ -460,7 +472,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
         }
 
         void DownloadCloud() {
-            RestoreProgressTextView.setText("Downloading....");
+            RestoreProgressTxView("Downloading....");
 
 
             user = FirebaseAuth.getInstance().getCurrentUser();
@@ -551,7 +563,8 @@ public class RestoreWizardActivity extends AppCompatActivity {
                         double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
                         //displaying percentage in progress dialog
                         //   yourProgressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
-                        RestoreProgressTextView.setText("Downloading: " + ((int) progress) + "%...");
+                        RestoreProgressTxView("Downloading: " + ((int) progress) + "%...");
+
 
                     }
                 });
@@ -728,7 +741,8 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
         void sms1() {
             // Write a message to the database
-            RestoreProgressTextView.setText("Preparing Messages...");
+            RestoreProgressTxView("Preparing Messages...");
+            // RestoreProgressTextView.setText("Preparing Messages...");
             Uri smsUri = Uri.parse("content://sms/inbox");
             Cursor cursor = getContentResolver().query(smsUri, null, null, null, null);
 
@@ -738,8 +752,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
             Log.d(TAG, "sms1: Cursor Count: " + i);
             while (cursor.moveToNext()) {
                 ii++;
-
-                RestoreProgressTextView.setText("Preparing Inbox Messages: " + ii + "/" + i);
+                RestoreProgressTxView("Preparing Inbox Messages: " + ii + "/" + i);
 
 
                 HashMap<String, String> sms = new HashMap<>();
@@ -852,7 +865,8 @@ public class RestoreWizardActivity extends AppCompatActivity {
         }
 
         void sms2() {
-            RestoreProgressTextView.setText("Preparing Outbox Messages...");
+            RestoreProgressTxView("Preparing Outbox Messages...");
+
 
             List<String> lstSms = new ArrayList<String>();
             Uri smsUri = Uri.parse("content://sms/sent");
@@ -864,7 +878,8 @@ public class RestoreWizardActivity extends AppCompatActivity {
             Log.d(TAG, "sms1 sent: Cursor Count: " + i);
             while (cursor.moveToNext()) {
                 ii++;
-                RestoreProgressTextView.setText("Preparing Outbox Messages: " + ii + "/" + i);
+                RestoreProgressTxView("Preparing Outbox Messages: " + ii + "/" + i);
+
 
                 HashMap<String, String> sms = new HashMap<>();
 
@@ -977,7 +992,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
         }
 
         void sortCloudSMS(ArrayList<HashMap<String, String>> c, ArrayList<HashMap<String, String>> d) {
-            RestoreProgressTextView.setText("Preparing to Restore Messages");
+            RestoreProgressTxView("Preparing to Restore Messages");
 
             ArrayList<HashMap<String, String>> cloudsms = new ArrayList<>();
             cloudsms = c;
@@ -997,8 +1012,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
                 String msg = cloudsms.get(i).get(Function.KEY_MSG);
                 String phone = cloudsms.get(i).get(Function.KEY_PHONE);
                 String timestamp = cloudsms.get(i).get(Function.KEY_TIMESTAMP);
-
-                RestoreProgressTextView.setText("Restoring Messages: " + i + "/" + tc);
+                RestoreProgressTxView("Restoring Messages: " + i + "/" + tc);
 
                 HashMap<String, String> c1 = new HashMap<>();
                 c1 = cloudsms.get(i);

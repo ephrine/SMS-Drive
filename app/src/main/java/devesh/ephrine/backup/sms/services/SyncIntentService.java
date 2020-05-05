@@ -13,7 +13,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
 import android.os.Process;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -21,6 +20,7 @@ import androidx.core.app.JobIntentService;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -260,20 +260,26 @@ public class SyncIntentService extends JobIntentService {
                         }
                     }).start();
                     */
-                    UserUID = user.getPhoneNumber().replace("+", "x");
+                    if (isNetworkAvailable()) {
+                        UserUID = user.getPhoneNumber().replace("+", "x");
 
-                    BackupStorageDB = "SMSDrive/Users/" + UserUID + "/backup/file_cloud_sms.zip";
+                        BackupStorageDB = "SMSDrive/Users/" + UserUID + "/backup/file_cloud_sms.zip";
 
 
-                    try {
-                        tmpList.clear();
-                        tmpList = (LinkedHashSet<HashMap<String, String>>) Function.readCachedFile(mContext, "orgsms");
-                    } catch (Exception e) {
-                        Log.d(TAG, "startSync: ERROR " + e);
-                        Crashlytics.logException(e);
+                        try {
+                            tmpList.clear();
+                            tmpList = (LinkedHashSet<HashMap<String, String>>) Function.readCachedFile(mContext, "orgsms");
+                        } catch (Exception e) {
+                            Log.d(TAG, "startSync: ERROR " + e);
+                            Crashlytics.logException(e);
+                        }
+
+                        sms1();
+
+                    } else {
+                        cancelAllNotification();
+                        stopSelf();
                     }
-
-                    sms1();
 
                 }
 
@@ -304,6 +310,12 @@ public class SyncIntentService extends JobIntentService {
                 Uri smsUri = Uri.parse("content://sms/inbox");
                 Cursor cursor = mContext.getContentResolver().query(smsUri, null, null, null, null);
 
+                if (cursor == null && cursorSent == null) {
+                    Log.d(TAG, "run: #453409 SELF STOP SYNC SERVICE");
+
+                    cancelAllNotification();
+                    stopSelf();
+                }
                 double i = cursor.getCount();
                 double i2 = cursorSent.getCount();
                 TOTAL_DEVICE_SMS = i + i2;
@@ -530,6 +542,7 @@ public class SyncIntentService extends JobIntentService {
                     if (ii == i) {
                         Log.d(TAG, "sms1 sent: END ---------" + ii + "\n SMS: ");
                         DownloadFromCloud();
+
                         //      SMSBackupDB = database.getReference("/users/" + UserUID + "/sms/");
 
                         //   Map<String, Object> jj = new HashMap<>();
@@ -558,6 +571,7 @@ public class SyncIntentService extends JobIntentService {
         // broadcastIntent.setClass(this, Restarter.class);
         // this.sendBroadcast(broadcastIntent);
         notificationManager.cancel(001);
+        cancelAllNotification();
         try {
             wakeLock.release();
         } catch (Exception e) {
@@ -619,63 +633,65 @@ public class SyncIntentService extends JobIntentService {
         builder.setContentText("Syncing with cloud")
                 .setProgress(0, 0, true);
         notificationManager.notify(001, builder.build());
-        new Thread(new Runnable() {
-            public void run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        if (isNetworkAvailable()) {
 
-                Log.d(TAG, "DownloadFromCloud");
-                StorageReference mStorageRef;
-                mStorageRef = FirebaseStorage.getInstance().getReference();
-                StorageReference riversRef = mStorageRef.child(BackupStorageDB);
-                localFile = null;
-                gson = new Gson();
+            new Thread(new Runnable() {
+                public void run() {
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
-                try {
-                    tmpList.clear();
-                    tmpList = (LinkedHashSet<HashMap<String, String>>) Function.readCachedFile(mContext, getString(R.string.file_device_sms));
-                    Log.d(TAG, "DownloadFromCloud: tmpList.clear() ");
-                } catch (Exception e) {
-                    Log.d(TAG, "DownloadFromCloud: ERROR " + e);
-                    Crashlytics.logException(e);
+                    Log.d(TAG, "DownloadFromCloud");
+                    StorageReference mStorageRef;
+                    mStorageRef = FirebaseStorage.getInstance().getReference();
+                    StorageReference riversRef = mStorageRef.child(BackupStorageDB);
+                    localFile = null;
+                    gson = new Gson();
 
-                }
+                    try {
+                        tmpList.clear();
+                        tmpList = (LinkedHashSet<HashMap<String, String>>) Function.readCachedFile(mContext, getString(R.string.file_device_sms));
+                        Log.d(TAG, "DownloadFromCloud: tmpList.clear() ");
+                    } catch (Exception e) {
+                        Log.d(TAG, "DownloadFromCloud: ERROR " + e);
+                        Crashlytics.logException(e);
 
-                try {
-                    localFile = File.createTempFile("smscloud", "backup");
-                    Log.d(TAG, "DownloadFromCloud: localFile smscloud.backup");
-                } catch (Exception e) {
-                    Log.d(TAG, "DownloadFromCloud: #ERROR " + e);
-                    Crashlytics.logException(e);
+                    }
 
-                }
-                riversRef.getFile(localFile)
-                        .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                            @Override
-                            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                                // Successfully downloaded data to local file
-                                Log.d(TAG, "onSuccess: DownloadFromCloud");
+                    try {
+                        localFile = File.createTempFile("smscloud", "backup");
+                        Log.d(TAG, "DownloadFromCloud: localFile smscloud.backup");
+                    } catch (Exception e) {
+                        Log.d(TAG, "DownloadFromCloud: #ERROR " + e);
+                        Crashlytics.logException(e);
+
+                    }
+                    riversRef.getFile(localFile)
+                            .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                                @Override
+                                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                    // Successfully downloaded data to local file
+                                    Log.d(TAG, "onSuccess: DownloadFromCloud");
 
 
-                                File unziped = unzipFile(localFile);
-                                Log.d(TAG, "onSuccess: Unziped: " + unziped.getPath());
-                                String JsonStr = ConvertFileToStrng(unziped);
-                                Type type = new TypeToken<LinkedHashSet<HashMap<String, String>>>() {
-                                }.getType();
+                                    File unziped = unzipFile(localFile);
+                                    Log.d(TAG, "onSuccess: Unziped: " + unziped.getPath());
+                                    String JsonStr = ConvertFileToStrng(unziped);
+                                    Type type = new TypeToken<LinkedHashSet<HashMap<String, String>>>() {
+                                    }.getType();
 
-                                //   JsonReader reader = new JsonReader(new StringReader(JsonStr));
-                                //   reader.setLenient(true);
+                                    //   JsonReader reader = new JsonReader(new StringReader(JsonStr));
+                                    //   reader.setLenient(true);
 
-                                LinkedHashSet<HashMap<String, String>> jj = gson.fromJson(JsonStr, type);
-                                smsList.addAll(jj);
+                                    LinkedHashSet<HashMap<String, String>> jj = gson.fromJson(JsonStr, type);
+                                    smsList.addAll(jj);
 
-                                LinkedHashSet<HashMap<String, String>> CleanHash = new LinkedHashSet<>(smsList);
-                                //     CleanHash.addAll(smsList);
-                                //CleanHash = RemoveDuplicateHashMaps(smsList);
+                                    LinkedHashSet<HashMap<String, String>> CleanHash = new LinkedHashSet<>(smsList);
+                                    //     CleanHash.addAll(smsList);
+                                    //CleanHash = RemoveDuplicateHashMaps(smsList);
 
-                                //CleanHash =  smsList;
-                                UploadToCloud(CleanHash);
+                                    //CleanHash =  smsList;
+                                    UploadToCloud(CleanHash);
 
-                                //Unzip File
+                                    //Unzip File
 
 
 
@@ -690,22 +706,28 @@ public class SyncIntentService extends JobIntentService {
                     }
                     */
 
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle failed download
-                        Log.d(TAG, "onFailure: ERROR " + exception);
-                        LinkedHashSet<HashMap<String, String>> CleanHash = new LinkedHashSet<>(smsList);
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            // Handle failed download
+                            Log.d(TAG, "onFailure: ERROR " + exception);
+                            LinkedHashSet<HashMap<String, String>> CleanHash = new LinkedHashSet<>(smsList);
 //CleanHash.addAll(smsList);
 
-                        UploadToCloud(CleanHash);
+                            UploadToCloud(CleanHash);
 
-                    }
-                });
+                        }
+                    });
 
-            }
-        }).start();
+                }
+            }).start();
+
+
+        } else {
+            cancelAllNotification();
+            stopSelf();
+        }
 
 
     }
@@ -757,139 +779,147 @@ public class SyncIntentService extends JobIntentService {
 
     public void UploadToCloud(final LinkedHashSet<HashMap<String, String>> sms) {
 
-        new Thread(new Runnable() {
-            public void run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                try {
-                    ArrayList<HashMap<String, String>> jj = new ArrayList<>(sms);
-                    Function.createCachedFile(mContext, getString(R.string.file_cloud_sms), jj);
-                    Log.d(TAG, "onDataChange: createCachedFile file_cloud_sms ");
+        if (isNetworkAvailable()) {
+            new Thread(new Runnable() {
+                public void run() {
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                    try {
+                        ArrayList<HashMap<String, String>> jj = new ArrayList<>(sms);
+                        Function.createCachedFile(mContext, getString(R.string.file_cloud_sms), jj);
+                        Log.d(TAG, "onDataChange: createCachedFile file_cloud_sms ");
 
-                } catch (Exception e) {
-                    Log.d(TAG, "onDataChange: ERROR #56 : " + e);
-                    Crashlytics.logException(e);
-
-                }
-                localFile.delete();
-
-                builder.setContentText("Performing Backup")
-                        .setProgress(0, 0, true);
-
-                notificationManager.notify(001, builder.build());
-
-                Log.d(TAG, "UploadToCloud");
-                Gson gson = new Gson();
-                String jsonSTR = gson.toJson(sms);
-
-                Type type = new TypeToken<ArrayList<HashMap<String, String>>>() {
-                }.getType();
-
-                ArrayList<HashMap<String, String>> tempCloudSMS = gson.fromJson(jsonSTR, type);
-
-                try {
-                    Function.createCachedFile(getApplicationContext(), getString(R.string.file_cloud_sms), tempCloudSMS);
-                    //  LinkedHashSet<HashMap<String, String>> tmpList = (LinkedHashSet<HashMap<String, String>>) Function.readCachedFile(getApplicationContext(), getString(R.string.file_device_sms));
-                    Log.d(TAG, "UploadToCloud:  Function.createCachedFile file_cloud_sms");
-                } catch (Exception e) {
-                    Log.d(TAG, "UploadToCloud: ERROR #4653 " + e);
-                    Crashlytics.logException(e);
-
-                }
-
-                File mfile = null;
-                try {
-                    mfile = File.createTempFile("mbackup", "json");
-                    Log.d(TAG, "UploadToCloud: mfile mbackup.json");
-                } catch (Exception e) {
-                    Log.d(TAG, "DownloadFromCloud: #ERROR " + e);
-                    Crashlytics.logException(e);
-
-                }
-
-                try {
-                    mfile.createNewFile();
-                    cache_temp1 = mfile;
-
-                    FileOutputStream fOut = new FileOutputStream(mfile);
-                    OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
-                    myOutWriter.append(jsonSTR);
-                    myOutWriter.close();
-                    fOut.flush();
-                    fOut.close();
-                    Log.d(TAG, "UploadToCloud:  mfile.createNewFile();");
-                } catch (IOException e) {
-                    Log.e("Exception", "File write failed: " + e.toString());
-                    Crashlytics.logException(e);
-
-                }
-
-                // Create ZIP
-                // String sourceFile = jsonSTRING;
-                File zip_file = null;
-                FileOutputStream fos = null;
-                OutputStream out;
-                try {
-                    Log.d(TAG, "UploadToCloud: zip_file backup.zip");
-                    zip_file = File.createTempFile("backup", "zip");
-                    //out = new FileOutputStream(Environment.getExternalStorageDirectory().getAbsolutePath()+"/backup.zip");
-                    out = new FileOutputStream(zip_file);
-                    //   out = new FileOutputStream("backup.zip");
-                    ZipOutputStream zipOut = new ZipOutputStream(out);
-                    File fileToZip = mfile;
-                    FileInputStream fis = new FileInputStream(fileToZip);
-                    ZipEntry zipEntry = new ZipEntry(fileToZip.getName());
-                    zipOut.putNextEntry(zipEntry);
-                    byte[] bytes = new byte[1024];
-                    int length;
-                    while ((length = fis.read(bytes)) >= 0) {
-                        zipOut.write(bytes, 0, length);
-                        Log.d(TAG, "UploadToCloud: zip_file backup.zip writing....");
+                    } catch (Exception e) {
+                        Log.d(TAG, "onDataChange: ERROR #56 : " + e);
+                        Crashlytics.logException(e);
 
                     }
-                    zipOut.close();
-                    fis.close();
-                    out.close();
+                    localFile.delete();
 
-                } catch (Exception e) {
-                    Log.d(TAG, "createZIP: ERROR #2345 " + e);
-                    Crashlytics.logException(e);
+                    builder.setContentText("Performing Backup")
+                            .setProgress(0, 0, true);
+
+                    notificationManager.notify(001, builder.build());
+
+                    Log.d(TAG, "UploadToCloud");
+                    Gson gson = new Gson();
+                    String jsonSTR = gson.toJson(sms);
+
+                    Type type = new TypeToken<ArrayList<HashMap<String, String>>>() {
+                    }.getType();
+
+                    ArrayList<HashMap<String, String>> tempCloudSMS = gson.fromJson(jsonSTR, type);
+
+                    try {
+                        Function.createCachedFile(getApplicationContext(), getString(R.string.file_cloud_sms), tempCloudSMS);
+                        //  LinkedHashSet<HashMap<String, String>> tmpList = (LinkedHashSet<HashMap<String, String>>) Function.readCachedFile(getApplicationContext(), getString(R.string.file_device_sms));
+                        Log.d(TAG, "UploadToCloud:  Function.createCachedFile file_cloud_sms");
+                    } catch (Exception e) {
+                        Log.d(TAG, "UploadToCloud: ERROR #4653 " + e);
+                        Crashlytics.logException(e);
+
+                    }
+
+                    File mfile = null;
+                    try {
+                        mfile = File.createTempFile("mbackup", "json");
+                        Log.d(TAG, "UploadToCloud: mfile mbackup.json");
+                    } catch (Exception e) {
+                        Log.d(TAG, "DownloadFromCloud: #ERROR " + e);
+                        Crashlytics.logException(e);
+
+                    }
+
+                    try {
+                        mfile.createNewFile();
+                        cache_temp1 = mfile;
+
+                        FileOutputStream fOut = new FileOutputStream(mfile);
+                        OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
+                        myOutWriter.append(jsonSTR);
+                        myOutWriter.close();
+                        fOut.flush();
+                        fOut.close();
+                        Log.d(TAG, "UploadToCloud:  mfile.createNewFile();");
+                    } catch (IOException e) {
+                        Log.e("Exception", "File write failed: " + e.toString());
+                        Crashlytics.logException(e);
+
+                    }
+
+                    // Create ZIP
+                    // String sourceFile = jsonSTRING;
+                    File zip_file = null;
+                    FileOutputStream fos = null;
+                    OutputStream out;
+                    try {
+                        Log.d(TAG, "UploadToCloud: zip_file backup.zip");
+                        zip_file = File.createTempFile("backup", "zip");
+                        //out = new FileOutputStream(Environment.getExternalStorageDirectory().getAbsolutePath()+"/backup.zip");
+                        out = new FileOutputStream(zip_file);
+                        //   out = new FileOutputStream("backup.zip");
+                        ZipOutputStream zipOut = new ZipOutputStream(out);
+                        File fileToZip = mfile;
+                        FileInputStream fis = new FileInputStream(fileToZip);
+                        ZipEntry zipEntry = new ZipEntry(fileToZip.getName());
+                        zipOut.putNextEntry(zipEntry);
+                        byte[] bytes = new byte[1024];
+                        int length;
+                        while ((length = fis.read(bytes)) >= 0) {
+                            zipOut.write(bytes, 0, length);
+                            Log.d(TAG, "UploadToCloud: zip_file backup.zip writing....");
+
+                        }
+                        zipOut.close();
+                        fis.close();
+                        out.close();
+
+                    } catch (Exception e) {
+                        Log.d(TAG, "createZIP: ERROR #2345 " + e);
+                        Crashlytics.logException(e);
+
+                    }
+                    cache_temp2 = zip_file;
+                    BackupStorageDB = "SMSDrive/Users/" + UserUID + "/backup/file_cloud_sms.zip";
+
+                    StorageReference mStorageRef;
+                    mStorageRef = FirebaseStorage.getInstance().getReference();
+                    StorageReference riversRef = mStorageRef.child(BackupStorageDB);
+
+                    File cfile = zip_file;
+                    Uri file = Uri.fromFile(cfile);
+
+                    UploadTask uploadTask = riversRef.putFile(file);
+
+                    uploadTask.addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            // Handle unsuccessful uploads
+                            notificationManager.cancel(001);
+                            Log.d(TAG, "onFailure: ERROR #4676587 " + exception);
+                            cache_temp1.delete();
+                            cache_temp2.delete();
+                        }
+                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
+                            // ...
+                            Log.d(TAG, "onSuccess: SUCCESS UPLOAD ZIP");
+                            FinalWork(sms);
+
+                        }
+                    });
+
 
                 }
-                cache_temp2 = zip_file;
-                BackupStorageDB = "SMSDrive/Users/" + UserUID + "/backup/file_cloud_sms.zip";
+            }).start();
+        } else {
+            cancelAllNotification();
+            stopSelf();
 
-                StorageReference mStorageRef;
-                mStorageRef = FirebaseStorage.getInstance().getReference();
-                StorageReference riversRef = mStorageRef.child(BackupStorageDB);
-
-                File cfile = zip_file;
-                Uri file = Uri.fromFile(cfile);
-
-                UploadTask uploadTask = riversRef.putFile(file);
-
-                uploadTask.addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle unsuccessful uploads
-                        notificationManager.cancel(001);
-                        Log.d(TAG, "onFailure: ERROR #4676587 " + exception);
-                        cache_temp1.delete();
-                        cache_temp2.delete();
-                    }
-                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
-                        // ...
-                        Log.d(TAG, "onSuccess: SUCCESS UPLOAD ZIP");
-                        FinalWork(sms);
-
-                    }
-                });
+        }
 
 
-            }
-        }).start();
 
 
       /*  InputStream stream = null;
@@ -1164,6 +1194,46 @@ public class SyncIntentService extends JobIntentService {
 
 // notificationId is a unique int for each notification that you must define
         notificationManager.notify(001, builder.build());
+
+
+    }
+
+
+    private boolean isNetworkAvailable() {
+        return true;
+       /* try {
+            InetAddress ipAddr = InetAddress.getByName("google.com");
+            //You can replace it with your name
+            return !ipAddr.equals("");
+
+        } catch (Exception e) {
+            return false;
+        }
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        */
+    }
+
+    void cancelAllNotification() {
+        Log.d(TAG, "cancelAllNotification: NO INTERNET !!");
+        if (notificationManager != null) {
+            Log.d(TAG, "cancelAllNotification: CLEARING ALL NOTIFICATION");
+
+            try {
+                notificationManager.cancel(001);
+            } catch (Exception e) {
+                Log.e(TAG, "cancelNotification: ERROR #5423 ", e);
+            }
+
+            try {
+                notificationManager.cancel(002);
+            } catch (Exception e) {
+                Log.e(TAG, "cancelNotification: ERROR #32424 ", e);
+            }
+
+        }
 
 
     }

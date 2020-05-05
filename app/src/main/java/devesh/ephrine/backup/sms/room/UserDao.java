@@ -19,6 +19,9 @@ public interface UserDao {
     @Query("SELECT * FROM Sms WHERE phone IN (:phn)")
     List<Sms> loadAllByPhoneNo(String phn);
 
+    @Query("DELETE FROM Sms WHERE uid = :uid")
+    void deleteByUid(int uid);
+
     /*  @Query("SELECT * FROM Sms WHERE first_name LIKE :first AND " +
             "last_name LIKE :last LIMIT 1")
     User findByName(String first, String last);
@@ -28,6 +31,11 @@ public interface UserDao {
 
     @Delete
     void delete(Sms sms);
+
+    // void delete(int uid);
+
+    @Query("DELETE FROM Sms")
+    void deleteAll();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAllr(Sms sms);

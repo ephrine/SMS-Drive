@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Telephony;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -39,6 +41,7 @@ import devesh.ephrine.backup.sms.room.Sms;
 
 
 public class ThreadSmsActivity extends AppCompatActivity {
+    public static Boolean isDeleteMsgMode;
     //  final String DBRoot = "SMSDrive/";
     ArrayList<HashMap<String, String>> SmsThreadHashMap = new ArrayList<>();
     String id;
@@ -51,8 +54,6 @@ public class ThreadSmsActivity extends AppCompatActivity {
     FirebaseDatabase database;
     RecyclerView recyclerView;
     LinearLayoutManager layoutManager;
-
-
     String name;
     String address;
     EditText new_message;
@@ -64,14 +65,15 @@ public class ThreadSmsActivity extends AppCompatActivity {
     ArrayList<HashMap<String, String>> tmpList = new ArrayList<HashMap<String, String>>();
     LoadSms loadsmsTask;
     LoadCloudSms loadCloudSmsTask;
-
     String storage;
-    LinearLayout NewMsgBoxLL;
+    //LinearLayout NewMsgBoxLL;
     ArrayList<HashMap<String, String>> CloudSMS;
     ArrayList<HashMap<String, String>> SortSMS = new ArrayList<>();
     ProgressBar progressBarLoading;
     ProgressBar progressBarHorizontal;
     AppDatabase db;
+    LinearLayout LLDeleteMSG;
+    ArrayList<Sms> toDelete = new ArrayList<>();
     private Handler handler = new Handler();
 
     @Override
@@ -89,12 +91,12 @@ public class ThreadSmsActivity extends AppCompatActivity {
         storage = intent.getStringExtra("storage");
 
         //  listView = (ListView) findViewById(R.id.listView);
-        new_message = (EditText) findViewById(R.id.newTextBox);
+        //   new_message = (EditText) findViewById(R.id.newTextBox);
 //        send_message = (ImageButton) findViewById(R.id.send_message);
 
-        NewMsgBoxLL = (LinearLayout) findViewById(R.id.msgTextBoxView);
+        //  NewMsgBoxLL = (LinearLayout) findViewById(R.id.msgTextBoxView);
 
-        setContentView(R.layout.sms_activity_thread);
+        // setContentView(R.layout.sms_activity_thread);
         getSupportActionBar().setTitle(name);
 
         recyclerView = findViewById(R.id.SmsThreadRecycleView);
@@ -105,6 +107,9 @@ public class ThreadSmsActivity extends AppCompatActivity {
         progressBarHorizontal = findViewById(R.id.progressBar2Horizontal45);
         progressBarHorizontal.setVisibility(View.VISIBLE);
 
+        LLDeleteMSG = findViewById(R.id.LLDeleteMSG);
+        LLDeleteMSG.setVisibility(View.GONE);
+        isDeleteMsgMode = false;
         //   DataSnapshot g=SmsThreadHashMap.get(id);
         // Log.d(TAG, "onCreate: Datasnapshot: "+g.toString());
         mAuth = FirebaseAuth.getInstance();
@@ -119,14 +124,14 @@ public class ThreadSmsActivity extends AppCompatActivity {
             Log.d(TAG, "onStart: User UID:" + UserUID);
             if (storage.equals("D")) {
                 startLoadingDeviceSms();
-                NewMsgBoxLL = (LinearLayout) findViewById(R.id.msgTextBoxView);
+                // NewMsgBoxLL = (LinearLayout) findViewById(R.id.msgTextBoxView);
 
-                NewMsgBoxLL.setVisibility(View.VISIBLE);
+                // NewMsgBoxLL.setVisibility(View.VISIBLE);
             } else {
                 startLoadingCloudSms();
-                NewMsgBoxLL = (LinearLayout) findViewById(R.id.msgTextBoxView);
+                //  NewMsgBoxLL = (LinearLayout) findViewById(R.id.msgTextBoxView);
 
-                NewMsgBoxLL.setVisibility(View.GONE);
+                // NewMsgBoxLL.setVisibility(View.GONE);
             }
 
             //  DownloadThread();
@@ -138,12 +143,43 @@ public class ThreadSmsActivity extends AppCompatActivity {
             startActivity(intent1);
         }
 
-        if (!isDefaultApp()) {
+       /* if (!isDefaultApp()) {
             NewMsgBoxLL.setVisibility(View.GONE);
         } else {
             NewMsgBoxLL.setVisibility(View.VISIBLE);
         }
+        */
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (storage.equals("D")) {
+
+        } else {
+
+            // MenuInflater inflater = getMenuInflater();
+            // inflater.inflate(R.menu.thread_sms_activity_menu, menu);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.MENU_deletemsg:
+                Log.d(TAG, "onOptionsItemSelected: Menu: Delete Message");
+                LLDeleteMSG.setVisibility(View.VISIBLE);
+                isDeleteMsgMode = true;
+                return true;
+           /* case R.id.help:
+                showHelp();
+                return true;
+                */
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     public void startLoadingDeviceSms() {
@@ -165,16 +201,17 @@ public class ThreadSmsActivity extends AppCompatActivity {
         Toast.makeText(this, "Loading....", Toast.LENGTH_SHORT).show();
 
         db = Room.databaseBuilder(getApplicationContext(),
-                AppDatabase.class, getString(R.string.DATABASE_CLOUD_SMS_DB)).build();
+                AppDatabase.class, getString(R.string.DATABASE_CLOUD_SMS_DB)).allowMainThreadQueries()
+                .fallbackToDestructiveMigration().build();
         //  CloudSMS=db.userDao().loadAllByPhoneNo("address");
-
-        final Runnable r = new Runnable() {
+        LoadCloudSms1 loadCloudSmsTask1 = new LoadCloudSms1();
+        loadCloudSmsTask1.execute();
+  /*      final Runnable r = new Runnable() {
             public void run() {
 
                 try {
 
-                    LoadCloudSms1 loadCloudSmsTask1 = new LoadCloudSms1();
-                    loadCloudSmsTask1.execute();
+
                 } catch (Exception e) {
                     Log.e(TAG, "startLoadingCloudSms: Room #ERROR 56465 ", e);
                     Crashlytics.logException(e);
@@ -186,7 +223,7 @@ public class ThreadSmsActivity extends AppCompatActivity {
             }
         };
         handler.postDelayed(r, 0);
-
+*/
 
 /*
             try {
@@ -250,28 +287,7 @@ public class ThreadSmsActivity extends AppCompatActivity {
 */
     }
 
-
-    void loadCloudMsgRecycleView() {
-        Collections.sort(SortSMS, new MapComparator(Function.KEY_TIMESTAMP, "asc"));
-
-        layoutManager = new LinearLayoutManager(ThreadSmsActivity.this);
-
-        recyclerView.removeAllViews();
-        //  recyclerView.removeAllViewsInLayout();
-        recyclerView.setHasFixedSize(true);
-
-        // use a linear layout manager
-        recyclerView.setLayoutManager(layoutManager);
-        // specify an adapter (see also next example)
-
-        ThreadSmsAdapter mAdapter = new ThreadSmsAdapter(ThreadSmsActivity.this, SortSMS);
-
-        recyclerView.setAdapter(mAdapter);
-        layoutManager.scrollToPosition(smsList.size() - 1); // yourList is the ArrayList that you are passing to your RecyclerView Adapter.
-
-    }
-
-    public void SendMSG(View v) {
+   /* public void SendMSG(View v) {
 
         new_message = (EditText) findViewById(R.id.newTextBox);
 
@@ -303,6 +319,27 @@ public class ThreadSmsActivity extends AppCompatActivity {
         } else {
             Log.d(TAG, "SendMSG: MSG text too short");
         }
+
+    }
+    */
+
+    void loadCloudMsgRecycleView() {
+        Collections.sort(SortSMS, new MapComparator(Function.KEY_TIMESTAMP, "asc"));
+
+        layoutManager = new LinearLayoutManager(ThreadSmsActivity.this);
+
+        recyclerView.removeAllViews();
+        //  recyclerView.removeAllViewsInLayout();
+        recyclerView.setHasFixedSize(true);
+
+        // use a linear layout manager
+        recyclerView.setLayoutManager(layoutManager);
+        // specify an adapter (see also next example)
+
+        ThreadSmsAdapter mAdapter = new ThreadSmsAdapter(ThreadSmsActivity.this, SortSMS);
+
+        recyclerView.setAdapter(mAdapter);
+        layoutManager.scrollToPosition(smsList.size() - 1); // yourList is the ArrayList that you are passing to your RecyclerView Adapter.
 
     }
 
@@ -381,6 +418,88 @@ public class ThreadSmsActivity extends AppCompatActivity {
         progressBarHorizontal.setProgress(progress);
     }
 
+    public void cancelDeleteMSG(View v) {
+        LLDeleteMSG.setVisibility(View.GONE);
+        isDeleteMsgMode = false;
+        setCloudRecycleView();
+    }
+    //ArrayList<String> toDelete2=new ArrayList<>();
+
+    public void confirmDeleteMsg(View v) {
+        int total = toDelete.size();
+        for (int i = 0; i < total; i++) {
+//int del=toDelete.get(i).uid;
+
+            db.userDao().deleteByUid(toDelete.get(i).uid);
+            Log.d(TAG, "confirmDeleteMsg: Deleting..");
+        }
+        LLDeleteMSG.setVisibility(View.GONE);
+        isDeleteMsgMode = false;
+        LoadCloudSms1 loadCloudSmsTask1 = new LoadCloudSms1();
+        loadCloudSmsTask1.execute();
+    }
+
+    public void addToDeleteList(HashMap<String, String> sms) {
+        Sms s = new Sms();
+        s.ID = sms.get(Function._ID);
+        s.KEY_READ = sms.get(Function.KEY_READ);
+        s.KEY_TIMESTAMP = sms.get(Function.KEY_TIMESTAMP);
+        s.KEY_TYPE = sms.get(Function.KEY_TYPE);
+        s.KEY_PHONE = sms.get(Function.KEY_PHONE);
+        s.KEY_THREAD_ID = sms.get(Function.KEY_THREAD_ID);
+        s.KEY_MSG = sms.get(Function.KEY_MSG);
+        s.KEY_NAME = sms.get(Function.KEY_NAME);
+        s.KEY_TIME = sms.get(Function.KEY_TIME);
+        s.uid = Integer.parseInt(sms.get("uid"));
+        toDelete.add(s);
+
+        //   toDelete2.add(sms.get("uid"));
+
+        Log.d(TAG, "addToDeleteList: ADDED to Delete List: " + toDelete.toString());
+
+    }
+
+    public void removeFromDeleteList(HashMap<String, String> sms) {
+        Sms s = new Sms();
+        s.ID = sms.get(Function._ID);
+        s.KEY_READ = sms.get(Function.KEY_READ);
+        s.KEY_TIMESTAMP = sms.get(Function.KEY_TIMESTAMP);
+        s.KEY_TYPE = sms.get(Function.KEY_TYPE);
+        s.KEY_PHONE = sms.get(Function.KEY_PHONE);
+        s.KEY_THREAD_ID = sms.get(Function.KEY_THREAD_ID);
+        s.KEY_MSG = sms.get(Function.KEY_MSG);
+        s.KEY_NAME = sms.get(Function.KEY_NAME);
+        s.KEY_TIME = sms.get(Function.KEY_TIME);
+        s.uid = Integer.parseInt(sms.get("uid"));
+
+        toDelete.remove(s);
+
+        //  toDelete2.remove(sms.get("uid"));
+        Log.d(TAG, "addToDeleteList: REMOVED from Delete List: " + toDelete.toString());
+
+    }
+
+    void setCloudRecycleView() {
+        layoutManager = new LinearLayoutManager(ThreadSmsActivity.this);
+
+        recyclerView.removeAllViews();
+        //                      recyclerView.removeAllViewsInLayout();
+        recyclerView.setHasFixedSize(true);
+
+        // use a linear layout manager
+        recyclerView.setLayoutManager(layoutManager);
+        // specify an adapter (see also next example)
+
+        ThreadSmsAdapter mAdapter = new ThreadSmsAdapter(ThreadSmsActivity.this, SortSMS);
+
+        recyclerView.setAdapter(mAdapter);
+        layoutManager.setStackFromEnd(true);
+
+        layoutManager.scrollToPosition(smsList.size() - 1); // yourList is the ArrayList that you are passing to your RecyclerView Adapter.
+
+    }
+
+    //--- ASYNC
     class LoadSms extends AsyncTask<String, Void, String> {
         @Override
         protected void onPreExecute() {
@@ -593,10 +712,13 @@ public class ThreadSmsActivity extends AppCompatActivity {
                     hm.put(Function._ID, smsL.get(i).ID);
                     hm.put(Function.KEY_READ, smsL.get(i).KEY_READ);
                     hm.put(Function.KEY_TIMESTAMP, smsL.get(i).KEY_TIMESTAMP);
+                    hm.put(Function.KEY_TIME, smsL.get(i).KEY_TIME);
                     hm.put(Function.KEY_TYPE, smsL.get(i).KEY_TYPE);
                     hm.put(Function.KEY_PHONE, smsL.get(i).KEY_PHONE);
                     hm.put(Function.KEY_MSG, smsL.get(i).KEY_MSG);
                     hm.put(Function.KEY_NAME, smsL.get(i).KEY_NAME);
+                    hm.put("uid", String.valueOf(smsL.get(i).uid));
+
                     SortSMS.add(hm);
 
                 /*

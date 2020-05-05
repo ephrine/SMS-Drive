@@ -84,6 +84,10 @@ android {
                        storePassword keypassword
                        keyAlias = keyalias
                        keyPassword keypassword
+					   
+					   // Optional, specify signing versions used
+       v1SigningEnabled true
+       v2SigningEnabled true
                    }
                }
                */
@@ -94,8 +98,8 @@ android {
         applicationId "devesh.ephrine.backup.sms"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 25
-        versionName "0.0.5 Beta Version"
+        versionCode 26
+        versionName "0.0.6 Beta Version"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
 
@@ -143,30 +147,29 @@ android {
     productFlavors {
         master {
             dimension "appstore"
-            versionName "0.0.5 Beta Version"
+            versionName "0.0.6 Beta Version"
             //  applicationId "devesh.ephrine.backup.sms"
             resValue "string", "AppFlavour", "\"" + "master" + "\""
             resValue "string", "AppVersionName", "\"" + versionName + "\""
         }
         galaxy {
             dimension "appstore"
-            versionName "0.0.5 Beta (Samsung)"
+            versionName "0.0.6 Beta (Samsung)"
             //     applicationId "devesh.ephrine.backup.sms"
             resValue "string", "AppFlavour", "\"" + "galaxy" + "\""
             resValue "string", "AppVersionName", "\"" + versionName + "\""
-           // archivesBaseName = "galaxy-app"
+            // archivesBaseName = "galaxy-app"
 
         }
         huawei {
             dimension "appstore"
-            versionName "0.0.5 Beta (Huawei)"
+            versionName "0.0.6 Beta (Huawei)"
             //   applicationId "devesh.ephrine.backup.sms"
             resValue "string", "AppFlavour", "\"" + "huawei" + "\""
             resValue "string", "AppVersionName", "\"" + versionName + "\""
         }
 
     }
-
 
 
 }
@@ -202,7 +205,7 @@ dependencies {
     //  implementation 'com.google.code.gson:gson:2.8.6'
 
     //Google in-app Billing
-    masterImplementation 'com.anjlab.android.iab.v3:library:+'
+    implementation 'com.anjlab.android.iab.v3:library:+'
 
     implementation 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
 

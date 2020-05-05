@@ -19,6 +19,16 @@
         android:layout_above="@id/bottom_navigation"
         android:orientation="vertical">
 
+        <TextView
+            android:id="@+id/textView3InternetError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/holo_orange_dark"
+            android:text="Please Connect to Internet !"
+            android:textAlignment="center"
+            android:textColor="@android:color/white"
+            android:textStyle="bold" />
+
         <LinearLayout
             android:id="@+id/LLBGmsgprocessing"
             android:layout_width="match_parent"

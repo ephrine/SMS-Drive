@@ -60,7 +60,8 @@ public class Function {
     public static String converToTime(String timestamp) {
         long datetime = Long.parseLong(timestamp);
         Date date = new Date(datetime);
-        DateFormat formatter = new SimpleDateFormat("dd/MM HH:mm");
+        //  DateFormat formatter = new SimpleDateFormat("dd/MM HH:mm");
+        DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
         return formatter.format(date);
     }
 

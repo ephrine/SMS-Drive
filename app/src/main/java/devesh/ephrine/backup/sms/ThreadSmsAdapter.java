@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -71,10 +72,11 @@ public class ThreadSmsAdapter extends RecyclerView.Adapter<ThreadSmsAdapter.MyVi
         // - replace the contents of the view with that element
         //  holder.SmsTimeTx.setText(SmsThreadHashMap.get(position).get("time"));
         Log.d(TAG, "onBindViewHolder: Get MSG: " + SmsThreadHashMap.get(position).toString());
+        holder.CheckMarkIMG.setVisibility(View.GONE);
 
         HashMap<String, String> song = new HashMap<String, String>();
         song = SmsThreadHashMap.get(position);
-
+        holder.LLSmsItem.setTag(position);
         //1 =Inbox
         // 0=Outbox
         if (SmsThreadHashMap.get(position).get(Function.KEY_TYPE).equals("1")) {
@@ -83,18 +85,60 @@ public class ThreadSmsAdapter extends RecyclerView.Adapter<ThreadSmsAdapter.MyVi
             holder.OutboxMSGCard.setVisibility(View.GONE);
 
             holder.SmsMsgTx.setText(song.get(Function.KEY_MSG));
-            holder.SmsTimeTx.setText(song.get(Function.KEY_TIME));
+            //holder.SmsTimeTx.setText(song.get(Function.KEY_TIME));
+            String time = Function.converToTime(song.get(Function.KEY_TIMESTAMP));
+            holder.SmsTimeTx.setText(time);
         } else {
 
             holder.InboxMSGCard.setVisibility(View.GONE);
             holder.OutboxMSGCard.setVisibility(View.VISIBLE);
 
             holder.SmsOutBoxMsgTx.setText(song.get(Function.KEY_MSG));
-            holder.SmsOutBoxTimeTx.setText(song.get(Function.KEY_TIME));
+            String time = Function.converToTime(song.get(Function.KEY_TIMESTAMP));
 
+            //     holder.SmsOutBoxTimeTx.setText(song.get(Function.KEY_TIME));
+            holder.SmsOutBoxTimeTx.setText(time);
         }
 
         Log.d(TAG, "onBindViewHolder: " + song.get(Function.KEY_MSG));
+
+        holder.LLSmsItem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //view.getTag();
+                Log.d(TAG, "onClick: " + view.getTag());
+                Boolean ii = ThreadSmsActivity.isDeleteMsgMode;
+                if (ii) {
+                    String tag = String.valueOf(view.getTag());
+
+                    int p = Integer.parseInt(tag);
+                    Log.d(TAG, "Clicked: \n" + SmsThreadHashMap.get(p));
+
+                    if (holder.CheckMarkIMG.getVisibility() == View.VISIBLE) {
+                        //UnSelected
+                        holder.CheckMarkIMG.setVisibility(View.GONE);
+                        if (mContext instanceof ThreadSmsActivity) {
+                            Log.d(TAG, "onClick: ChatActivity()");
+                            ((ThreadSmsActivity) mContext).removeFromDeleteList(SmsThreadHashMap.get(p));
+                            ;
+
+                        }
+                    } else {
+                        holder.CheckMarkIMG.setVisibility(View.VISIBLE);
+                        //Selected
+                        if (mContext instanceof ThreadSmsActivity) {
+                            Log.d(TAG, "onClick: ChatActivity()");
+                            ((ThreadSmsActivity) mContext).addToDeleteList(SmsThreadHashMap.get(p));
+                            ;
+
+                        }
+
+                    }
+
+                }
+
+            }
+        });
 
       /*  if(position==getItemCount()-1){
 holder.bottomSpace.setVisibility(View.VISIBLE);
@@ -155,16 +199,18 @@ holder.bottomSpace.setVisibility(View.VISIBLE);
 
         TextView SmsOutBoxMsgTx;
         TextView SmsOutBoxTimeTx;
+        ImageView CheckMarkIMG;
 
         //  Space bottomSpace;
 
         public MyViewHolder(View v) {
             super(v);
+            LLSmsItem = v.findViewById(R.id.ScreenSmsThread1);
+            CheckMarkIMG = v.findViewById(R.id.imageView2CheckMark);
 
             //Inbox
             SmsMsgTx = v.findViewById(R.id.textViewSmsMSG1);
             SmsTimeTx = v.findViewById(R.id.textView2SmsDateTime1);
-            LLSmsItem = v.findViewById(R.id.ScreenSmsThread1);
             InboxMSGCard = v.findViewById(R.id.cardViewinbox);
 
             //Outbox
