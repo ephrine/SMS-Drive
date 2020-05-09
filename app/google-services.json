@@ -181,6 +181,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "868741407839-0ub56r531m3mjmmjrm1co6v8qdmffi8r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "devesh.ephrine.backup.sms",
+            "certificate_hash": "431662419165de2ee33edf6aebf70f72883dee1f"
+          }
+        },
+        {
           "client_id": "868741407839-6s26jmtmfoci8ir0rhhjcgull2cd5rai.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

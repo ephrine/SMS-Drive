@@ -26,10 +26,15 @@ import com.microsoft.appcenter.AppCenter;
 import com.microsoft.appcenter.analytics.Analytics;
 import com.microsoft.appcenter.crashes.Crashes;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import devesh.ephrine.backup.sms.broadcastreceiver.MyBroadcastReceiver;
+import devesh.ephrine.backup.sms.pushnotification.EpNotificationActivity;
+import devesh.ephrine.backup.sms.pushnotification.EpNotificationsConstants;
 import io.fabric.sdk.android.Fabric;
 
 public class StartActivity extends AppCompatActivity {
@@ -43,6 +48,7 @@ public class StartActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 123;
     private static final int DEFAULT_SMS_CODE = 1;
     final String TAG = "StartActivity ";
+
     final Boolean isDefaultSmsApp = true;
     FirebaseUser currentUser;
     // Instance fields
@@ -66,25 +72,84 @@ public class StartActivity extends AppCompatActivity {
          * Add the account and account type, no password or user data
          * If successful, return the Account object, otherwise report an error.
          */
-        if (accountManager.addAccountExplicitly(newAccount, null, null)) {
-            /*
+       /*  if (accountManager.addAccountExplicitly(newAccount, null, null)) {
+
              * If you don't set android:syncable="true" in
              * in your <provider> element in the manifest,
              * then call context.setIsSyncable(account, AUTHORITY, 1)
              * here.
-             */
-        } else {
+
+        } else {*/
             /*
              * The account exists or some other error occurred. Log this, report it,
              * or handle it internally.
-             */
-        }
+
+        }*/
 
     }
-
+boolean openNotificationActivity;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+openNotificationActivity=false;
+        if (getIntent().getExtras() != null) {
+            String url = null;
+            String title = null;
+            String desc = null;
+            String time = null;
+
+            LinkedHashSet<HashMap<String, String>> notificationsDataHash = new LinkedHashSet<>();
+
+            for (String key : getIntent().getExtras().keySet()) {
+                String value = getIntent().getExtras().getString(key);
+                Log.d(TAG, "FCM DATALOAD \nKey: " + key + " Value: " + value);
+
+                if (key.equals(EpNotificationsConstants.EP_FCM_URL)) {
+                    url = value;
+                }
+                if (key.equals(EpNotificationsConstants.EP_FCM_TITLE)) {
+                    title = value;
+                }
+                if (key.equals(EpNotificationsConstants.EP_FCM_DESC)) {
+                    desc = value;
+                }
+
+
+            }
+            time = String.valueOf(System.currentTimeMillis());
+            if (title != null) {
+
+                HashMap<String, String> data = new HashMap<>();
+                data.put(EpNotificationsConstants.EP_FCM_URL, url);
+                data.put(EpNotificationsConstants.EP_FCM_TITLE, title);
+                data.put(EpNotificationsConstants.EP_FCM_DESC, desc);
+                data.put("time", time);
+
+                try {
+                    notificationsDataHash = (LinkedHashSet<HashMap<String, String>>) Function.readCachedFile(this, getString(R.string.FCM_Notifications_Data));
+                   
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.e(TAG, "onMessageReceived: ERROR #5234 ", e);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                    Log.e(TAG, "onMessageReceived: ERROR #65 ", e);
+                }
+
+                notificationsDataHash.add(data);
+
+                try {
+                    Function.createCachedNotificationFile(this, getString(R.string.FCM_Notifications_Data), notificationsDataHash);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                openNotificationActivity=true;
+
+            }
+
+
+        }
+
         Fabric.with(this, new Crashlytics());
 
         AppCenter.start(getApplication(), BuildConfig.MS_AppCenter_Key,
@@ -171,6 +236,7 @@ public class StartActivity extends AppCompatActivity {
         }
 */
 
+
     }
 
     @Override
@@ -182,8 +248,13 @@ public class StartActivity extends AppCompatActivity {
 
     void appstart() {
         Crashlytics.setUserIdentifier(currentUser.getUid());
+        Intent intent;
+        if(openNotificationActivity){
+            intent= new Intent(StartActivity.this, EpNotificationActivity.class);
+}else{
+            intent= new Intent(StartActivity.this, MainActivity.class);
+        }
 
-        Intent intent = new Intent(StartActivity.this, MainActivity.class);
         startActivity(intent);
         StartActivity.this.finish();
 

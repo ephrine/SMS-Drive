@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 
 /**
@@ -163,6 +164,13 @@ public class Function {
 
 
     public static void createCachedFile(Context context, String key, ArrayList<HashMap<String, String>> dataList) throws IOException {
+        FileOutputStream fos = context.openFileOutput(key, Context.MODE_PRIVATE);
+        ObjectOutputStream oos = new ObjectOutputStream(fos);
+        oos.writeObject(dataList);
+        oos.close();
+        fos.close();
+    }
+    public static void createCachedNotificationFile(Context context, String key, LinkedHashSet<HashMap<String, String>> dataList) throws IOException {
         FileOutputStream fos = context.openFileOutput(key, Context.MODE_PRIVATE);
         ObjectOutputStream oos = new ObjectOutputStream(fos);
         oos.writeObject(dataList);

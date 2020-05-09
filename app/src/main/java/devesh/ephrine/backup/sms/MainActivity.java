@@ -57,6 +57,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.HttpsCallableResult;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.gson.Gson;
 import com.lifeofcoding.cacheutlislibrary.CacheUtils;
@@ -81,6 +83,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import devesh.ephrine.backup.sms.pushnotification.EpNotificationActivity;
 import devesh.ephrine.backup.sms.room.AppDatabase;
 import devesh.ephrine.backup.sms.room.Sms;
 import devesh.ephrine.backup.sms.services.CloudSMS2DBService;
@@ -260,6 +263,8 @@ public class MainActivity extends AppCompatActivity {
         Fabric.with(this, new Crashlytics());
         AppCenter.start(getApplication(), BuildConfig.MS_AppCenter_Key,
                 Analytics.class, Crashes.class);
+
+        FirebaseMessagingServiceAct();
 
         sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
         sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
@@ -512,7 +517,6 @@ public class MainActivity extends AppCompatActivity {
         ///  FirebaseUser user = mAuth.getCurrentUser();
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
-
         } else {
             Intent intent = new Intent(this, StartActivity.class);
             //  String message = editText.getText().toString();
@@ -557,15 +561,10 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "onOptionsItemSelected: Settings Menu");
                 return true;
 
-            case R.id.newmsg:
-                if (isDefaultSmsApp) {
+            case R.id.Menu_notification:
+                Intent intent1 = new Intent(this, EpNotificationActivity.class);
+               startActivity(intent1);
 
-                    //       Intent intent1 = new Intent(this, NewMessageActivity.class);
-                    //     startActivity(intent1);
-
-                } else {
-                    Toast.makeText(this, "Please set SMS Drive as your Default Messenger to send new message", Toast.LENGTH_SHORT).show();
-                }
                 Log.d(TAG, "onOptionsItemSelected: New Message Menu");
                 return true;
 
@@ -574,6 +573,13 @@ public class MainActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
+    /**
+     * Called if InstanceID token is updated. This may occur if the security of
+     * the previous token had been compromised. Note that this is called when the InstanceID token
+     * is initially generated so this is where you would retrieve the token.
+     */
+
 
     //Download SMS from Database
   /*  void DownloadSMS() {
@@ -1868,6 +1874,28 @@ public class MainActivity extends AppCompatActivity {
 
         mySwipeRefreshLayout.setRefreshing(false);
 
+    }
+
+    final String FirebaseMesagingTAG = "FB";
+    void FirebaseMessagingServiceAct(){
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w(FirebaseMesagingTAG, "getInstanceId failed", task.getException());
+                            return;
+                        }
+
+                        // Get new Instance ID token
+                        String token = task.getResult().getToken();
+
+                        // Log and toast
+                        String msg = getString(R.string.msg_token_fmt, token);
+                        Log.d(FirebaseMesagingTAG, msg);
+                        // Toast.makeText(StartActivity.this, msg, Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     //---------------- LoadSms Async Task

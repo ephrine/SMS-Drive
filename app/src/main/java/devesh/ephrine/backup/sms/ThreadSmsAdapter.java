@@ -120,7 +120,7 @@ public class ThreadSmsAdapter extends RecyclerView.Adapter<ThreadSmsAdapter.MyVi
                         if (mContext instanceof ThreadSmsActivity) {
                             Log.d(TAG, "onClick: ChatActivity()");
                             ((ThreadSmsActivity) mContext).removeFromDeleteList(SmsThreadHashMap.get(p));
-                            ;
+
 
                         }
                     } else {

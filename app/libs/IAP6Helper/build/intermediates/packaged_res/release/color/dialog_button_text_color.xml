@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:color="@color/dialog_button_text" android:state_pressed="true" />
-    <item android:color="@color/dialog_button_text" android:state_enabled="true" android:state_focused="true" />
-    <item android:color="#660074d4" android:state_enabled="false" />
-    <item android:color="@color/dialog_button_text" />
-</selector>

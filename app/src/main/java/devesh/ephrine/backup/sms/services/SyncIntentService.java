@@ -1144,9 +1144,9 @@ public class SyncIntentService extends JobIntentService {
             // Writes bytes from the specified byte array to this file output stream
             //  fos.write(s.getBytes());
 
-        } catch (FileNotFoundException e) {
+        } /*catch (FileNotFoundException e) {
             System.out.println("File not found" + e);
-        } catch (IOException ioe) {
+        } */catch (IOException ioe) {
             System.out.println("Exception while writing file " + ioe);
         } finally {
             // close the streams using close method

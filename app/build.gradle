@@ -73,7 +73,13 @@ if (!kk.exists()) {
 keypath=kk
 } */
 
+def AppVersionName="0.0.7"
+
 android {
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 
 
     compileSdkVersion 29
@@ -98,8 +104,8 @@ android {
         applicationId "devesh.ephrine.backup.sms"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 26
-        versionName "0.0.6 Beta Version"
+        versionCode 27
+        versionName ""+AppVersionName+" Beta Version"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
 
@@ -129,6 +135,7 @@ android {
                         "room.expandProjection": "true"]
             }
         }
+
     }
 
 
@@ -147,14 +154,14 @@ android {
     productFlavors {
         master {
             dimension "appstore"
-            versionName "0.0.6 Beta Version"
+            versionName ""+AppVersionName+" Beta Version"
             //  applicationId "devesh.ephrine.backup.sms"
             resValue "string", "AppFlavour", "\"" + "master" + "\""
             resValue "string", "AppVersionName", "\"" + versionName + "\""
         }
         galaxy {
             dimension "appstore"
-            versionName "0.0.6 Beta (Samsung)"
+            versionName ""+AppVersionName+" Beta (Samsung)"
             //     applicationId "devesh.ephrine.backup.sms"
             resValue "string", "AppFlavour", "\"" + "galaxy" + "\""
             resValue "string", "AppVersionName", "\"" + versionName + "\""
@@ -163,7 +170,7 @@ android {
         }
         huawei {
             dimension "appstore"
-            versionName "0.0.6 Beta (Huawei)"
+            versionName ""+AppVersionName+" Beta (Huawei)"
             //   applicationId "devesh.ephrine.backup.sms"
             resValue "string", "AppFlavour", "\"" + "huawei" + "\""
             resValue "string", "AppVersionName", "\"" + versionName + "\""
@@ -184,13 +191,15 @@ dependencies {
     implementation 'com.google.firebase:firebase-storage:+'
     implementation 'com.google.firebase:firebase-auth:+'
     implementation 'com.firebaseui:firebase-ui-auth:+'
-    implementation 'com.google.firebase:firebase-messaging:+'
+    //implementation 'com.google.firebase:firebase-messaging:+'
     implementation 'com.crashlytics.sdk.android:crashlytics:+'
     implementation 'com.google.firebase:firebase-config:+'
     implementation 'com.google.firebase:firebase-functions:+'
+    implementation 'com.google.firebase:firebase-messaging:+'
+   // implementation 'com.google.firebase:firebase-inappmessaging-display:+'
+
 // Add the dependency for the Performance Monitoring library
     //  implementation 'com.google.firebase:firebase-perf:19.0.6'
-
     //  implementation 'androidx.work:work-runtime:2.4.0-alpha01'
 
 
@@ -258,5 +267,11 @@ dependencies {
 
     //Samsung Galaxy In-App-purchases
     galaxyImplementation project(':IAP6Helper')
+
+    //Chrome Custom Tab
+    implementation 'androidx.browser:browser:+'
+
+    implementation 'com.google.guava:guava:27.0.1-android'
+
 
 }
