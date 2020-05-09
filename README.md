@@ -19,6 +19,8 @@ Step 3: Create a file  <code>smsdrive.local.properties</code> in parent director
 >sign.key.path=C:\\\YOUR_KEY_PATH <br>
 >google.services.json=https:\\\www.YOUR-WEBSITE.com\KEY ##Optional <br>
 >g.license.key=YOUR_GOOGLE_LICENSE_KEY_FROM_PLAY_STORE_CONSOLE ##optional<br>
+>msappcenter=0000<br>
+>gplaysubscriptionid1=0000<br>
 
 Step 4: Build & Run
 
