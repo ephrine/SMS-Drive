@@ -90,7 +90,7 @@ body {
     background-image: linear-gradient(to bottom, #62289d, #040999);
 min-height: 100px;
    /* background-color: #62289d !important;*/
-
+color: #fff;
    z-index: 1;
    overflow: hidden;
 }
@@ -151,6 +151,23 @@ text-align: center !important;
 color: #fff;
 }
 }
+
+.para4mobile{
+    width: 80%;
+    color: #fff;
+    text-align: justify;
+
+}
+@media (max-width: 575.98px) {
+    .para4mobile {
+        text-align: justify;
+        width: 90%;
+color: #fff;
+}
+}
+
+
+
 /*---------------------------------*/
 /*Custom Bootstrap CSS*/
 

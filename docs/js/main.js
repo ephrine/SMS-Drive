@@ -73,7 +73,7 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
    //document.getElementById("subheader1").setAttribute("style", "text-align:center: padding-top:50px;");
 
   //document.getElementById("subheader1").setAttribute("class", " box-header-mobile ");
-  document.getElementById("col1mobile").setAttribute("style", " color: #fff; text-align: center;");
+  document.getElementById("col1mobile").setAttribute("style", " color: #fff; ");
   document.getElementById("col1desktop").setAttribute("style", "display:none;");
 
 
@@ -84,3 +84,24 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
     document.getElementById("col1desktop").setAttribute("style", "color: #fff; text-align: right;");
 
 }
+
+
+$('.owl-carousel').owlCarousel({
+    loop:true,
+    margin:10,
+    nav:true,
+    responsiveClass:true,
+    stagePadding: 50,
+
+    responsive:{
+        0:{
+            items:1
+        },
+        600:{
+            items:3
+        },
+        1000:{
+            items:5
+        }
+    }
+})
