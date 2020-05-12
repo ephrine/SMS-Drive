@@ -168,6 +168,42 @@ color: #fff;
 
 
 
+@media (max-width: 575.98px) {
+    .footer-block {
+        text-align: center;
+      padding: 0px;
+        
+}
+}
+
+.footer-left{
+    text-align: left;
+    float: left;
+padding: 20px;
+}
+@media (max-width: 575.98px) {
+    .footer-left {
+        text-align: center;
+      float: none;
+padding: 20px;
+        
+}
+}
+
+.footer-right{
+    text-align: right;
+    float: right;
+padding: 20px;
+}
+@media (max-width: 575.98px) {
+    .footer-right {
+        text-align: center;
+      float: none;
+      
+        padding: 0px;
+}
+}
+
 /*---------------------------------*/
 /*Custom Bootstrap CSS*/
 
