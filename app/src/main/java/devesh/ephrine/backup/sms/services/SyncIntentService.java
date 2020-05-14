@@ -453,6 +453,12 @@ public class SyncIntentService extends JobIntentService {
                 double ii = 0;
                 double progress;
                 Log.d(TAG, "sms1 sent: Cursor Count: " + i);
+                if(i==0){
+                    Log.d(TAG, "sms1: Outbox EMPTY LOL !!");
+                    DownloadFromCloud();
+
+
+                }
                 while (cursor.moveToNext()) {
                     ii++;
 
@@ -1176,7 +1182,7 @@ public class SyncIntentService extends JobIntentService {
                 .setPriority(NotificationCompat.FLAG_ONGOING_EVENT);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "Auto Backup & Sync";
+            CharSequence name = "Backup, Restore & Sync";
             String description = "Syncing Messages..";
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
             NotificationChannel channel = new NotificationChannel("001", name, importance);

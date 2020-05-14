@@ -8,7 +8,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.provider.Telephony;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
@@ -16,6 +18,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.room.Room;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
@@ -25,6 +28,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import devesh.ephrine.backup.sms.room.AppDatabase;
+import devesh.ephrine.backup.sms.room.UserDao;
+import devesh.ephrine.backup.sms.services.DownloadCloudMessagesService;
 import io.fabric.sdk.android.Fabric;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -292,6 +301,24 @@ public class SettingsActivity extends AppCompatActivity {
                 PrefDisablePowerSave.setVisible(false);
             }
 
+            Preference ChangeDefaultSMSApp = findPreference("changedefaultsmsapp");
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                ChangeDefaultSMSApp.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                    public boolean onPreferenceClick(Preference preference) {
+                        //open browser or intent here
+                        Intent intent = new Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS);
+                        startActivity(intent);
+
+                        return true;
+                    }
+                });
+            }else {
+                ChangeDefaultSMSApp.setVisible(false);
+
+            }
+
+
 
             Preference PrefContact = findPreference("contact");
             PrefContact.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -513,6 +540,14 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
         void DeleteBackup() {
+            AppDatabase db;
+            db = Room.databaseBuilder(getContext().getApplicationContext(),
+                    AppDatabase.class, getString(R.string.DATABASE_CLOUD_SMS_DB))
+                    //.setJournalMode(RoomDatabase.JournalMode.AUTOMATIC)
+.allowMainThreadQueries()
+                    .build();
+
+
             Toast.makeText(getContext(), "Delete SMS Backup: Deleting...", Toast.LENGTH_SHORT).show();
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if (user != null) {
@@ -526,11 +561,25 @@ public class SettingsActivity extends AppCompatActivity {
                 mStorageRef = FirebaseStorage.getInstance().getReference();
                 StorageReference riversRef = mStorageRef.child(BackupStorageDB);
                 riversRef.delete();
+                db.userDao().nukeTable();
+                ArrayList<HashMap<String, String>> CloudThreadSms = new ArrayList<>();
+
+                try {
+                    Function.createCachedFile(getContext().getApplicationContext(), getString(R.string.file_cloud_thread), CloudThreadSms);
+
+                }catch (Exception e){
+                    Log.e(TAG, "DeleteBackup: ERROR #456 ",e );
+                }
+
                 Toast.makeText(getContext(), "Delete SMS Backup: Successful", Toast.LENGTH_SHORT).show();
+
             }
 
 
         }
+
+
+
 
 
     }

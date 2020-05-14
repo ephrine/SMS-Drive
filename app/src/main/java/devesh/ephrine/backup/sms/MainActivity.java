@@ -11,8 +11,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.MergeCursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -97,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
     final int PERMISSION_ALL = 00000001;
     final int PERMISSION_CONTACT = 00000002;
     final Boolean isDefaultSmsApp = true;
+    final String FirebaseMesagingTAG = "FB";
     //   final String DBRoot = "SMSDrive/";
     public HashMap<String, ArrayList<HashMap<String, String>>> iThread;
     DatabaseReference SMSBackupDB;
@@ -114,9 +118,7 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<HashMap<String, String>> thread;
     SharedPreferences sharedPrefAutoBackup;
     SharedPreferences sharedPrefAppGeneral;
-
     boolean SMSAutoBackup;
-
     boolean isSubscribed;
     ProgressBar loadingCircle;
     LoadSms loadsmsTask;
@@ -261,8 +263,26 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate: FLAVOUR: " + flavour);
 
         Fabric.with(this, new Crashlytics());
-        AppCenter.start(getApplication(), BuildConfig.MS_AppCenter_Key,
-                Analytics.class, Crashes.class);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            // Register Callback - Call this in your app start!
+            CheckNetwork network = new CheckNetwork(getApplicationContext());
+            network.registerNetworkCallback();
+
+            // Check network connection
+            // Internet Connected
+            // Not Connected
+
+        }
+
+        boolean isAnalyticDataCollectionEnable = false;
+        Resources res = getResources();
+        isAnalyticDataCollectionEnable = res.getBoolean(R.bool.FIREBASE_ANALYTICS_DATA_COLLECTION);
+        if (isAnalyticDataCollectionEnable) {
+
+            AppCenter.start(getApplication(), BuildConfig.MS_AppCenter_Key,
+                    Analytics.class, Crashes.class);
+        }
 
         FirebaseMessagingServiceAct();
 
@@ -563,7 +583,7 @@ public class MainActivity extends AppCompatActivity {
 
             case R.id.Menu_notification:
                 Intent intent1 = new Intent(this, EpNotificationActivity.class);
-               startActivity(intent1);
+                startActivity(intent1);
 
                 Log.d(TAG, "onOptionsItemSelected: New Message Menu");
                 return true;
@@ -1835,7 +1855,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean isNetworkAvailable() {
-        return true;
+        boolean isConnected = false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            // Register Callback - Call this in your app start!
+       //     CheckNetwork network = new CheckNetwork(getApplicationContext());
+       //     network.registerNetworkCallback();
+
+            // Check network connection
+            // Internet Connected
+            // Not Connected
+            isConnected = CheckNetwork.isNetworkConnected;
+        } else {
+
+            ConnectivityManager cm =
+                    (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+            try {
+                NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+                //NetworkInfo activeNetwork1 = cm.NetworkCallback();
+                isConnected = activeNetwork != null &&
+                        activeNetwork.isConnectedOrConnecting();
+            } catch (Exception e) {
+                Log.e(TAG, "isNetworkAvailable: ERROR #54 ", e);
+            }
+
+
+        }
+        Log.d(TAG, "isNetworkAvailable: isConnected: " + isConnected);
+
+        return isConnected;
 
      /*     ConnectivityManager connectivityManager = ((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
         return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
@@ -1876,8 +1923,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    final String FirebaseMesagingTAG = "FB";
-    void FirebaseMessagingServiceAct(){
+    void FirebaseMessagingServiceAct() {
         FirebaseInstanceId.getInstance().getInstanceId()
                 .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
                     @Override

@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
@@ -152,8 +153,15 @@ openNotificationActivity=false;
 
         Fabric.with(this, new Crashlytics());
 
-        AppCenter.start(getApplication(), BuildConfig.MS_AppCenter_Key,
-                Analytics.class, Crashes.class);
+        boolean isAnalyticDataCollectionEnable=false;
+        Resources res = getResources();
+        isAnalyticDataCollectionEnable=res.getBoolean(R.bool.FIREBASE_ANALYTICS_DATA_COLLECTION);
+        if(isAnalyticDataCollectionEnable){
+
+            AppCenter.start(getApplication(), BuildConfig.MS_AppCenter_Key,
+                    Analytics.class, Crashes.class);
+        }
+
         setContentView(R.layout.activity_start);
         getSupportActionBar().hide();
         mAuth = FirebaseAuth.getInstance();
@@ -207,7 +215,15 @@ openNotificationActivity=false;
 
         background.start();
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            // Register Callback - Call this in your app start!
+            CheckNetwork network = new CheckNetwork(getApplicationContext());
+            network.registerNetworkCallback();
 
+            // Check network connection
+            // Internet Connected
+            // Not Connected
+        }
 
 /*
         if (currentUser != null) {

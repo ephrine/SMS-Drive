@@ -306,7 +306,7 @@ try {
                     @Override
                     public void onFailure(@NonNull Exception exception) {
                         // Handle failed download
-                        Log.d(TAG, "onFailure: ERROR #546766 " + exception + " \n message: " + exception.getMessage());
+                        Log.d(TAG, "onFailure: ERROR #546766 " + exception + " \n message: " + exception.getMessage()+" Location:"+BackupStorageDB);
 
 
                         Log.d(TAG, "onFailure: ERROR CloudSms.clear();");

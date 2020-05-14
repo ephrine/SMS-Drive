@@ -1,8 +1,12 @@
 package devesh.ephrine.backup.sms;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -19,6 +23,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.crashlytics.android.Crashlytics;
@@ -207,8 +213,10 @@ public class RestoreWizardActivity extends AppCompatActivity {
         if (isDefaultSmsApp() && !isRestoreInProgress) {
             LLButtonsR.setVisibility(View.GONE);
             isRestoreInProgress = true;
-            RestoreProgressTxView("Preparing.....");
-            //   RestoreProgressTextView.setVisibility(View.VISIBLE);
+            setNotification();
+
+            RestoreUpdateNotification("Preparing.....");
+             //  RestoreProgressTextView.setVisibility(View.VISIBLE);
 
             //  DownloadCloud();
             new RestoreTask().execute("url1", "url2", "url3");
@@ -289,11 +297,26 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
 
     public void finalout() {
+        if (notificationManager != null) {
+            Log.d(TAG, "cancelAllNotification: CLEARING ALL NOTIFICATION");
+
+            try {
+                notificationManager.cancel(001);
+            } catch (Exception e) {
+                Log.e(TAG, "cancelNotification: ERROR #5423 ", e);
+            }
+
+
+
+        }
+
+        CreateNotification("Restore Complete","Cloud Messages hav been Saved on Device");
         try {
             lottieSyncing.setVisibility(View.GONE);
             lottieDoneAnim.setVisibility(View.VISIBLE);
             lottieDoneAnim.playAnimation();
             Toast.makeText(RestoreWizardActivity.this, "Success: Restored Messages", Toast.LENGTH_LONG).show();
+            RestoreUpdateNotification("Success: Restored Messages ");
 
         } catch (Exception e) {
             Log.d(TAG, "finalout: ERROR #56657 " + e);
@@ -301,8 +324,8 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
         }
         //  RestoreProgressTextView.setText("Done");
-//RestoreWizardActivity.this.finish();
-        RestoreProgressTxView("Success: Restored Messages ");
+RestoreWizardActivity.this.finish();
+
     }
 
     void GetThread(DataSnapshot postSnapshot, String threadName) {
@@ -436,15 +459,96 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
     }
 
-    public void RestoreProgressTxView(String text) {
-        try {
-            RestoreProgressTextView.setText(text);
+    public void RestoreUpdateNotification(String text) {
+        /*try {
+     RestoreProgressTextView.setText(text);
         } catch (Exception e) {
             Log.e(TAG, "ERROR " + e);
             Crashlytics.logException(e);
+        }
+        */
+        builder.setContentText(text);
 
+// notificationId is a unique int for each notification that you must define
+        notificationManager.notify(001, builder.build());
+
+    }
+
+
+    NotificationManagerCompat notificationManager;
+    NotificationCompat.Builder builder;
+    int PROGRESS_MAX = 100;
+    int PROGRESS_CURRENT = 0;
+    void setNotification() {
+
+        builder = new NotificationCompat.Builder(this, "001")
+                .setSmallIcon(R.drawable.app_logo)
+                .setContentTitle("Restoring Messages")
+                .setContentText("Restoring Cloud Message on Device....")
+                .setOngoing(true)
+                .setProgress(PROGRESS_MAX, PROGRESS_CURRENT, true)
+                .setNotificationSilent()
+                .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                .setPriority(NotificationCompat.FLAG_ONGOING_EVENT);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Backup, Restore & Sync";
+            String description = "Syncing Messages..";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("001", name, importance);
+            channel.setDescription(description);
+
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
 
         }
+
+        notificationManager = NotificationManagerCompat.from(this);
+        builder.setContentText("Preparing...");
+
+// notificationId is a unique int for each notification that you must define
+        notificationManager.notify(001, builder.build());
+
+
+    }
+    void CreateNotification(String title, String message) {
+
+
+        // Create an explicit intent for an Activity in your app
+        Intent intent = new Intent(this, StartActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "02")
+                .setSmallIcon(R.drawable.logo_notification_mono)
+                .setContentTitle(title)
+                .setContentIntent(pendingIntent)
+                .setColor(getResources().getColor(R.color.colorAccent))
+                .setContentText(message)
+                .setSound(null, AudioManager.STREAM_NOTIFICATION)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(RestoreWizardActivity.this);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            String CHANNEL_ID = "02";
+            CharSequence name = getString(R.string.app_name);
+            String Description = "Restore";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel mChannel;
+            mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
+            mChannel.setDescription(Description);
+            mChannel.enableVibration(true);
+
+            notificationManager.createNotificationChannel(mChannel);
+        }
+        // notificationId is a unique int for each notification that you must define
+        notificationManager.notify(02, builder.build());
+
+
     }
 
     class RestoreTask extends AsyncTask<String, String, String> {
@@ -459,20 +563,23 @@ public class RestoreWizardActivity extends AppCompatActivity {
         }
 
         protected void onProgressUpdate(String... progress) {
+            Log.d(TAG, "onProgressUpdate: RestoreTask(): "+progress[0]);
+           // RestoreUpdateNotification(progress[0]);
+            //RestoreProgressTextView.setText(progress[0]);
 
-            Log.d(TAG, "onProgressUpdate: RestoreTask()");
+
         }
 
         protected void onPostExecute(String result) {
-            //    lottieSyncing.setVisibility(View.GONE);
-            //    lottieDoneAnim.setVisibility(View.VISIBLE);
-            //   lottieDoneAnim.playAnimation();
-            //  Toast.makeText(RestoreWizardActivity.this, "Success: Restored Messages", Toast.LENGTH_LONG).show();
+           //     lottieSyncing.setVisibility(View.GONE);
+        //        lottieDoneAnim.setVisibility(View.VISIBLE);
+        //      lottieDoneAnim.playAnimation();
+           //   Toast.makeText(RestoreWizardActivity.this, "Success: Restored Messages", Toast.LENGTH_LONG).show();
             Log.d(TAG, "onPostExecute: RestoreTask()");
         }
 
         void DownloadCloud() {
-            RestoreProgressTxView("Downloading....");
+            RestoreUpdateNotification("Downloading....");
 
 
             user = FirebaseAuth.getInstance().getCurrentUser();
@@ -537,13 +644,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
 
 
-                    /*
-                     try {
-                        Function.createCachedFile(getApplicationContext(),getString(R.string.file_cloud_sms),jj);
-                    }catch (Exception e){
-                        Log.d(TAG, "onSuccess: ERROR "+e);
-                    }
-                    */
+
 
                             }
                         }).addOnFailureListener(new OnFailureListener() {
@@ -552,7 +653,18 @@ public class RestoreWizardActivity extends AppCompatActivity {
                         // Handle failed download
                         Log.d(TAG, "onFailure: ERROR " + exception);
                         //  sms1();
+                        if (notificationManager != null) {
+                            Log.d(TAG, "cancelAllNotification: CLEARING ALL NOTIFICATION");
 
+                            try {
+                                notificationManager.cancel(001);
+                            } catch (Exception e) {
+                                Log.e(TAG, "cancelNotification: ERROR #5423 ", e);
+                            }
+
+
+
+                        }
 
                     }
 
@@ -563,81 +675,14 @@ public class RestoreWizardActivity extends AppCompatActivity {
                         double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
                         //displaying percentage in progress dialog
                         //   yourProgressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
-                        RestoreProgressTxView("Downloading: " + ((int) progress) + "%...");
+                        RestoreUpdateNotification("Downloading: " + ((int) progress) + "%...");
 
 
                     }
                 });
 
 
-  /*
-            SMSBackupDB = database.getReference("/users/" + UserUID + "/sms/backup");
-            Log.d(TAG, "DownloadCloud: UserID:" + UserUID);
-            SMSBackupDB.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    // This method is called once with the initial value and again
-                    // whenever data at this location is updated.
-                    //String value = dataSnapshot.getValue(String.class);
-                    // Log.d(TAG, "Value is: " + value);
-
-                    if (dataSnapshot.exists()) {
-
-                        long total = dataSnapshot.getChildrenCount();
-                        long i;
-                        i = 0;
-                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                            // TODO: handle the post
-                            i = i + 1;
-
-                            String threadName = postSnapshot.getKey();
-                            Log.d(TAG, "onDataChange: threadName: " + threadName);
-
-                            String phone = postSnapshot.child(Function.KEY_PHONE).getValue(String.class);
-
-                            String name = postSnapshot.child(Function.KEY_NAME).getValue(String.class);
-                            String _id = postSnapshot.child(Function._ID).getValue(String.class);
-                            String thread_id = postSnapshot.child(Function.KEY_THREAD_ID).getValue(String.class);
-                            String msg = postSnapshot.child(Function.KEY_MSG).getValue(String.class);
-                            String type = postSnapshot.child(Function.KEY_TYPE).getValue(String.class);
-                            String timestamp = postSnapshot.child(Function.KEY_TIMESTAMP).getValue(String.class);
-                            String time = postSnapshot.child(Function.KEY_TIME).getValue(String.class);
-
-                            HashMap<String, String> SMS = new HashMap<>();
-                            SMS.put(Function._ID, _id);
-                            SMS.put(Function.KEY_THREAD_ID, thread_id);
-                            SMS.put(Function.KEY_PHONE, phone);
-                            SMS.put(Function.KEY_MSG, msg);
-                            SMS.put(Function.KEY_TYPE, type);
-                            SMS.put(Function.KEY_TIMESTAMP, timestamp);
-                            SMS.put(Function.KEY_TIME, time);
-                            SMS.put(Function.KEY_NAME, name);
-                            CloudSms.add(SMS);
-                            Log.d(TAG, "onDataChange: msg:" + SMS + "\n-------------------------\n");
-
-
-                            //   GetThread(postSnapshot, threadName);
-                            Log.d(TAG, "i:" + i + "\n Total:" + total);
-                            if (i == total) {
-                                sms1();
-                            }
-                        }
-
-                    } else {
-                        sms1();
-                    }
-
-                }
-
-                @Override
-                public void onCancelled(DatabaseError error) {
-                    // Failed to read value
-                    Log.w(TAG, "Failed to read value.", error.toException());
-                }
-            });
-*/
-
-            }
+    }
 
         }
 
@@ -741,8 +786,9 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
         void sms1() {
             // Write a message to the database
-            RestoreProgressTxView("Preparing Messages...");
+            RestoreUpdateNotification("Preparing Messages...");
             // RestoreProgressTextView.setText("Preparing Messages...");
+
             Uri smsUri = Uri.parse("content://sms/inbox");
             Cursor cursor = getContentResolver().query(smsUri, null, null, null, null);
 
@@ -752,7 +798,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
             Log.d(TAG, "sms1: Cursor Count: " + i);
             while (cursor.moveToNext()) {
                 ii++;
-                RestoreProgressTxView("Preparing Inbox Messages: " + ii + "/" + i);
+                RestoreUpdateNotification("Preparing Inbox Messages: " + ii + "/" + i);
 
 
                 HashMap<String, String> sms = new HashMap<>();
@@ -865,8 +911,8 @@ public class RestoreWizardActivity extends AppCompatActivity {
         }
 
         void sms2() {
-            RestoreProgressTxView("Preparing Outbox Messages...");
-
+            RestoreUpdateNotification("Preparing Outbox Messages...");
+onProgressUpdate("Preparing Outbox Messages...");
 
             List<String> lstSms = new ArrayList<String>();
             Uri smsUri = Uri.parse("content://sms/sent");
@@ -878,9 +924,9 @@ public class RestoreWizardActivity extends AppCompatActivity {
             Log.d(TAG, "sms1 sent: Cursor Count: " + i);
             while (cursor.moveToNext()) {
                 ii++;
-                RestoreProgressTxView("Preparing Outbox Messages: " + ii + "/" + i);
+                RestoreUpdateNotification("Preparing Outbox Messages: " + ii + "/" + i);
 
-
+                onProgressUpdate("Preparing Outbox Messages: " + ii + "/" + i);
                 HashMap<String, String> sms = new HashMap<>();
 
                 String body = cursor.getString(cursor.getColumnIndex("body"));
@@ -992,7 +1038,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
         }
 
         void sortCloudSMS(ArrayList<HashMap<String, String>> c, ArrayList<HashMap<String, String>> d) {
-            RestoreProgressTxView("Preparing to Restore Messages");
+            RestoreUpdateNotification("Preparing to Restore Messages");
 
             ArrayList<HashMap<String, String>> cloudsms = new ArrayList<>();
             cloudsms = c;
@@ -1012,8 +1058,8 @@ public class RestoreWizardActivity extends AppCompatActivity {
                 String msg = cloudsms.get(i).get(Function.KEY_MSG);
                 String phone = cloudsms.get(i).get(Function.KEY_PHONE);
                 String timestamp = cloudsms.get(i).get(Function.KEY_TIMESTAMP);
-                RestoreProgressTxView("Restoring Messages: " + i + "/" + tc);
-
+                RestoreUpdateNotification("Restoring Messages: " + i + "/" + tc);
+              //  onProgressUpdate("Restoring Messages: " + i + "/" + tc);
                 HashMap<String, String> c1 = new HashMap<>();
                 c1 = cloudsms.get(i);
                 if (devicesms.contains(c1)) {
@@ -1070,7 +1116,6 @@ public class RestoreWizardActivity extends AppCompatActivity {
 //                    finalout();
                 }
             }
-
             finalout();
         }
 
