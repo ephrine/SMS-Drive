@@ -9,11 +9,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
 import android.os.Process;
 import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.JobIntentService;
@@ -63,6 +66,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import devesh.ephrine.backup.sms.CheckNetwork;
 import devesh.ephrine.backup.sms.CheckSubscriptionService;
 import devesh.ephrine.backup.sms.Function;
 import devesh.ephrine.backup.sms.MapComparator;
@@ -150,6 +154,12 @@ public class SyncIntentService extends JobIntentService {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         Fabric.with(getApplicationContext(), new Crashlytics());
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            // Register Callback - Call this in your app start!
+            CheckNetwork network = new CheckNetwork(getApplicationContext());
+            network.registerNetworkCallback();
+
+        }
         //  myTrace = FirebasePerformance.getInstance().newTrace("SyncIntentService");
         //   myTrace.start();
 
@@ -186,7 +196,9 @@ public class SyncIntentService extends JobIntentService {
 
         Log.d(TAG, "onCreate: SyncIntentService() #9086");
 
-        startSync();
+            startSync();
+
+
 
     }
 
@@ -455,7 +467,15 @@ public class SyncIntentService extends JobIntentService {
                 Log.d(TAG, "sms1 sent: Cursor Count: " + i);
                 if(i==0){
                     Log.d(TAG, "sms1: Outbox EMPTY LOL !!");
-                    DownloadFromCloud();
+                   if(isNetworkAvailable()){
+                       DownloadFromCloud();
+                   }else{
+                       Log.d(TAG, "onCreate: NO INTERNET !");
+cancelAllNotification();
+
+stopSelf();
+                   }
+
 
 
                 }
@@ -547,7 +567,15 @@ public class SyncIntentService extends JobIntentService {
 
                     if (ii == i) {
                         Log.d(TAG, "sms1 sent: END ---------" + ii + "\n SMS: ");
-                        DownloadFromCloud();
+
+                        if(isNetworkAvailable()){
+                            DownloadFromCloud();
+                        }else{
+                            Log.d(TAG, "onCreate: NO INTERNET !");
+                            cancelAllNotification();
+
+                            stopSelf();
+                        }
 
                         //      SMSBackupDB = database.getReference("/users/" + UserUID + "/sms/");
 
@@ -695,6 +723,8 @@ public class SyncIntentService extends JobIntentService {
                                     //CleanHash = RemoveDuplicateHashMaps(smsList);
 
                                     //CleanHash =  smsList;
+
+
                                     UploadToCloud(CleanHash);
 
                                     //Unzip File
@@ -1205,22 +1235,7 @@ public class SyncIntentService extends JobIntentService {
     }
 
 
-    private boolean isNetworkAvailable() {
-        return true;
-       /* try {
-            InetAddress ipAddr = InetAddress.getByName("google.com");
-            //You can replace it with your name
-            return !ipAddr.equals("");
 
-        } catch (Exception e) {
-            return false;
-        }
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
-        */
-    }
 
     void cancelAllNotification() {
         Log.d(TAG, "cancelAllNotification: NO INTERNET !!");
@@ -1242,6 +1257,68 @@ public class SyncIntentService extends JobIntentService {
         }
 
 
+    }
+
+    private boolean isNetworkAvailable() {
+        boolean isConnected = false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            // Register Callback - Call this in your app start!
+            //     CheckNetwork network = new CheckNetwork(getApplicationContext());
+            //     network.registerNetworkCallback();
+
+            // Check network connection
+            // Internet Connected
+            // Not Connected
+            isConnected = CheckNetwork.isNetworkConnected;
+        } else {
+
+            ConnectivityManager cm =
+                    (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+            try {
+                NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+                //NetworkInfo activeNetwork1 = cm.NetworkCallback();
+                isConnected = activeNetwork != null &&
+                        activeNetwork.isConnectedOrConnecting();
+            } catch (Exception e) {
+                Log.e(TAG, "isNetworkAvailable: ERROR #54 ", e);
+            }
+
+
+        }
+        Log.d(TAG, "isNetworkAvailable: isConnected: " + isConnected);
+
+        return isConnected;
+
+     /*     ConnectivityManager connectivityManager = ((ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
+        return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
+
+           boolean haveConnectedWifi = false;
+        boolean haveConnectedMobile = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+        for (NetworkInfo ni : netInfo) {
+            if (ni.getTypeName().equalsIgnoreCase("WIFI"))
+                if (ni.isConnected())
+                    haveConnectedWifi = true;
+            if (ni.getTypeName().equalsIgnoreCase("MOBILE"))
+                if (ni.isConnected())
+                    haveConnectedMobile = true;
+        }
+        return haveConnectedWifi || haveConnectedMobile;
+       try {
+            InetAddress ipAddr = InetAddress.getByName("google.com");
+            //You can replace it with your name
+            return !ipAddr.equals("");
+
+        } catch (Exception e) {
+            return false;
+        }
+       ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        */
     }
 
 

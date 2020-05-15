@@ -269,10 +269,6 @@ public class MainActivity extends AppCompatActivity {
             CheckNetwork network = new CheckNetwork(getApplicationContext());
             network.registerNetworkCallback();
 
-            // Check network connection
-            // Internet Connected
-            // Not Connected
-
         }
 
         boolean isAnalyticDataCollectionEnable = false;
@@ -853,6 +849,13 @@ public class MainActivity extends AppCompatActivity {
                         public void onRefresh() {
                             Log.i(TAG, "onRefresh called from SwipeRefreshLayout");
 
+                            if (!isNetworkAvailable()) {
+                                textNoInternerError.setVisibility(View.VISIBLE);
+                                Log.d(TAG, "onCreate: NO INTERNET !");
+                            } else {
+                                textNoInternerError.setVisibility(View.GONE);
+                            }
+
                             // This method performs the actual data-refresh operation.
                             // The method calls setRefreshing(false) when it's finished.
                             loadsmsTask = new LoadSms();
@@ -865,6 +868,8 @@ public class MainActivity extends AppCompatActivity {
                             LoadRecycleView();
                             downloadCloudSMS();
                             refreshLastSync();
+
+
                             Log.d(TAG, "onRefresh: Swipe Down ! Refreshing..");
                         }
                     }
@@ -1853,6 +1858,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return false;
     }
+
 
     private boolean isNetworkAvailable() {
         boolean isConnected = false;

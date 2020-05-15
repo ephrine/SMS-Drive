@@ -6,6 +6,8 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.IBinder;
@@ -48,6 +50,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import devesh.ephrine.backup.sms.CheckNetwork;
 import devesh.ephrine.backup.sms.Function;
 import devesh.ephrine.backup.sms.MapComparator;
 import devesh.ephrine.backup.sms.R;
@@ -154,9 +157,15 @@ try {
     @Override
     public void onCreate() {
         super.onCreate();
+
         //    myTrace = FirebasePerformance.getInstance().newTrace("SyncIntentService");
         //    myTrace.start();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            // Register Callback - Call this in your app start!
+            CheckNetwork network = new CheckNetwork(getApplicationContext());
+            network.registerNetworkCallback();
 
+        }
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 TAG + "::MyWakelockTag");
@@ -345,81 +354,7 @@ try {
 
 
 
-/*
-        CloudSMSDB = database.getReference("/users/" + UserUID + "/sms/backup");
-        CloudSMSDB.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
 
-                if (dataSnapshot.exists()) {
-
-
-                    long t = dataSnapshot.getChildrenCount();
-                    int i = 0;
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                        HashMap<String, String> msg = new HashMap<>();
-                        msg.put(Function._ID, postSnapshot.child(Function._ID).getValue(String.class));
-                        msg.put(Function.KEY_THREAD_ID, postSnapshot.child(Function.KEY_THREAD_ID).getValue(String.class));
-                        msg.put(Function.KEY_NAME, postSnapshot.child(Function.KEY_NAME).getValue(String.class));
-                        msg.put(Function.KEY_PHONE, postSnapshot.child(Function.KEY_PHONE).getValue(String.class));
-                        msg.put(Function.KEY_MSG, postSnapshot.child(Function.KEY_MSG).getValue(String.class));
-                        msg.put(Function.KEY_TYPE, postSnapshot.child(Function.KEY_TYPE).getValue(String.class));
-                        msg.put(Function.KEY_TIMESTAMP, postSnapshot.child(Function.KEY_TIMESTAMP).getValue(String.class));
-                        msg.put(Function.KEY_TIME, postSnapshot.child(Function.KEY_TIME).getValue(String.class));
-
-                        CloudSms.add(msg);
-                        Log.d(TAG, "onDataChange: Downloading CloudSMS....." + i);
-                        if (i == t - 1) {
-                            Log.d(TAG, "onDataChange: END of CLOUD SMS");
-                            Collections.sort(CloudSms, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging sms by timestamp decending
-
-                            try {
-                                Function.createCachedFile(DownloadCloudMessagesService.this, getString(R.string.file_cloud_sms), CloudSms);
-                                Log.d(TAG, "onDataChange: createCachedFile file_cloud_sms ");
-
-                            } catch (Exception e) {
-                                Log.d(TAG, "onDataChange: ERROR #56 : " + e);
-                            }
-                            CloudThreadSms = CloudSms;
-                            Collections.sort(CloudThreadSms, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging sms by timestamp decending
-                            ArrayList<HashMap<String, String>> purified = Function.removeDuplicates(CloudThreadSms); // Removing duplicates from inbox & sent
-                            CloudThreadSms.clear();
-                            CloudThreadSms.addAll(purified);
-                            try {
-                                Function.createCachedFile(DownloadCloudMessagesService.this, getString(R.string.file_cloud_thread), CloudSms);
-                                Log.d(TAG, "onDataChange: createCachedFile file_cloud_thread ");
-                            } catch (Exception e) {
-                                Log.d(TAG, "onDataChange: ERROR #5600 : " + e);
-                            }
-
-                        }
-                        i++;
-
-                    }
-                    textView5CloudEmpty.setVisibility(View.GONE);
-
-                } else {
-                    Log.d(TAG, "onDataChange: Backup not Exists !! #021");
-                    textView5CloudEmpty.setVisibility(View.VISIBLE);
-                    try {
-                        Function.createCachedFile(DownloadCloudMessagesService.this, getString(R.string.file_cloud_thread), CloudSms);
-                        Log.d(TAG, "onDataChange: createCachedFile file_cloud_thread ");
-                    } catch (Exception e) {
-                        Log.d(TAG, "onDataChange: ERROR #5600 : " + e);
-                    }
-                }
-
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w(TAG, "Failed to read value.", error.toException());
-            }
-        });
-
-        */
 
         }
     }
@@ -546,20 +481,38 @@ try {
     }
 
     private boolean isNetworkAvailable() {
-        return true;
-      /*     try {
-            InetAddress ipAddr = InetAddress.getByName("google.com");
-            //You can replace it with your name
-            return !ipAddr.equals("");
 
-        } catch (Exception e) {
-            return false;
+
+
+        boolean isConnected = false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            // Register Callback - Call this in your app start!
+            //     CheckNetwork network = new CheckNetwork(getApplicationContext());
+            //     network.registerNetworkCallback();
+
+            // Check network connection
+            // Internet Connected
+            // Not Connected
+            isConnected = CheckNetwork.isNetworkConnected;
+        } else {
+
+            ConnectivityManager cm =
+                    (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+            try {
+                NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+                //NetworkInfo activeNetwork1 = cm.NetworkCallback();
+                isConnected = activeNetwork != null &&
+                        activeNetwork.isConnectedOrConnecting();
+            } catch (Exception e) {
+                Log.e(TAG, "isNetworkAvailable: ERROR #54 ", e);
+            }
+
+
         }
-     ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
-        */
+        Log.d(TAG, "isNetworkAvailable: isConnected: " + isConnected);
+
+        return isConnected;
+
     }
 
     void cancelAllNotification() {
