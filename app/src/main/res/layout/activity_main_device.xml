@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".MainActivity">
 
 
@@ -22,18 +23,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="5dp">
+                android:padding="2dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
+                    android:layout_gravity="left"
                     android:layout_marginLeft="5dp"
                     android:layout_weight="1"
-                    android:text="View Subscribe Plan"
+                    android:text="Subscribe Premium Plan for Auto Sync"
                     android:textAlignment="center"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    android:textColor="@color/fui_linkColor" />
+                    android:textColor="@color/fui_linkColor"
+                    android:textSize="14sp" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -42,7 +44,8 @@
 
             android:id="@+id/LLSyncCardView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:visibility="visible">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -69,11 +72,18 @@
                     android:text="Sync Now" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-
+        <!--  This is your template view
+        <com.google.android.ads.nativetemplates.TemplateView
+            android:id="@+id/my_template"
+            app:gnt_template_type="@layout/gnt_small_template_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />-->
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swipeRefresh"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
+
+
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/devicesmsrecycle"

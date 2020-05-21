@@ -18,9 +18,6 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.amulyakhare.textdrawable.TextDrawable;
-import com.amulyakhare.textdrawable.util.ColorGenerator;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -30,7 +27,7 @@ import devesh.ephrine.backup.sms.R;
 
 public class EpNotificationAdapter extends RecyclerView.Adapter<EpNotificationAdapter.MyViewHolder> {
 
-   public String TAG = String.valueOf(R.string.app_name);
+    public String TAG = String.valueOf(R.string.app_name);
     public Context mContext;
 
     ArrayList<HashMap<String, String>> notificationData = new ArrayList<>();
@@ -53,7 +50,6 @@ public class EpNotificationAdapter extends RecyclerView.Adapter<EpNotificationAd
                                            int viewType) {
 
 
-
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.ep_notification_recycleview_item, parent, false);
 
@@ -74,18 +70,17 @@ public class EpNotificationAdapter extends RecyclerView.Adapter<EpNotificationAd
         HashMap<String, String> song = new HashMap<String, String>();
         song = notificationData.get(position);
         Log.d(TAG, "onBindViewHolder: Song " + song);
-String title=song.get(EpNotificationsConstants.EP_FCM_TITLE);
-String desc=song.get(EpNotificationsConstants.EP_FCM_DESC);
-String timex=song.get("time");
-String url=song.get(EpNotificationsConstants.EP_FCM_URL);
+        String title = song.get(EpNotificationsConstants.EP_FCM_TITLE);
+        String desc = song.get(EpNotificationsConstants.EP_FCM_DESC);
+        String timex = song.get("time");
+        String url = song.get(EpNotificationsConstants.EP_FCM_URL);
 
         holder.title.setText(title);
         holder.LLNotificationItem.setTag(position);
         holder.desc.setText(desc);
 
 
-
-holder.time.setText(Function.converToTime(timex));
+        holder.time.setText(Function.converToTime(timex));
         holder.LLNotificationItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -93,31 +88,30 @@ holder.time.setText(Function.converToTime(timex));
 
                 String tag = view.getTag().toString();
                 int i = Integer.parseInt(tag);
-                if(notificationData.get(i).get(EpNotificationsConstants.EP_FCM_URL)!=null){
+                if (notificationData.get(i).get(EpNotificationsConstants.EP_FCM_URL) != null) {
                     String url = notificationData.get(i).get(EpNotificationsConstants.EP_FCM_URL);
 
                     ((EpNotificationActivity) mContext).openBrowser(url);
                 }
 
 
-
             }
         });
 
 
-      //  String uri = "@drawable/myresource";  // where myresource (without the extension) is the file
+        //  String uri = "@drawable/myresource";  // where myresource (without the extension) is the file
 
-    //    int imageResource = mContext.getResources().getIdentifier(uri, null, mContext.getPackageName());
-if(url!=null){
-    if(url.contains("play.google.com") || url.contains("galaxy.store") || url.contains("apps.samsung.com")) {
+        //    int imageResource = mContext.getResources().getIdentifier(uri, null, mContext.getPackageName());
+        if (url != null) {
+            if (url.contains("play.google.com") || url.contains("galaxy.store") || url.contains("apps.samsung.com")) {
 
-        Drawable res = mContext.getResources().getDrawable(R.drawable.ic_system_update_50dp);
-        holder.imgThumb.setImageDrawable(res);
+                Drawable res = mContext.getResources().getDrawable(R.drawable.ic_system_update_50dp);
+                holder.imgThumb.setImageDrawable(res);
 
-    }else {
+            } else {
 
-        Drawable res = mContext.getResources().getDrawable(R.drawable.ic_event_note);
-        holder.imgThumb.setImageDrawable(res);
+                Drawable res = mContext.getResources().getDrawable(R.drawable.ic_event_note);
+                holder.imgThumb.setImageDrawable(res);
 
   /*      String firstLetter;
         firstLetter = String.valueOf(title.charAt(0));
@@ -127,12 +121,12 @@ if(url!=null){
                 .buildRound(firstLetter, color);
         holder.imgThumb.setImageDrawable(drawable);
 */
-    }
+            }
 
 
-}else{
-    Drawable res = mContext.getResources().getDrawable(R.drawable.ic_event_note);
-    holder.imgThumb.setImageDrawable(res);
+        } else {
+            Drawable res = mContext.getResources().getDrawable(R.drawable.ic_event_note);
+            holder.imgThumb.setImageDrawable(res);
 
   /*  String firstLetter;
     firstLetter = String.valueOf(title.charAt(0));
@@ -142,9 +136,7 @@ if(url!=null){
             .buildRound(firstLetter, color);
     holder.imgThumb.setImageDrawable(drawable);
 */
-}
-
-
+        }
 
 
     }
@@ -185,7 +177,7 @@ if(url!=null){
             LLNotificationItem = v.findViewById(R.id.LLNotificationItem354);
             imgThumb = v.findViewById(R.id.imageView5645);
             desc = v.findViewById(R.id.textView4578Desc);
-            time=v.findViewById(R.id.textView895Time);
+            time = v.findViewById(R.id.textView895Time);
 
 
         }

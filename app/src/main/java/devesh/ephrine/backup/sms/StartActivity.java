@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -17,12 +18,16 @@ import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.multidex.MultiDex;
+import androidx.preference.PreferenceManager;
 
 import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.microsoft.appcenter.AppCenter;
 import com.microsoft.appcenter.analytics.Analytics;
 import com.microsoft.appcenter.crashes.Crashes;
@@ -36,6 +41,7 @@ import java.util.List;
 import devesh.ephrine.backup.sms.broadcastreceiver.MyBroadcastReceiver;
 import devesh.ephrine.backup.sms.pushnotification.EpNotificationActivity;
 import devesh.ephrine.backup.sms.pushnotification.EpNotificationsConstants;
+import devesh.ephrine.backup.sms.services.DownloadCloudMessagesService;
 import io.fabric.sdk.android.Fabric;
 
 public class StartActivity extends AppCompatActivity {
@@ -54,7 +60,9 @@ public class StartActivity extends AppCompatActivity {
     FirebaseUser currentUser;
     // Instance fields
     Account mAccount;
+    boolean openNotificationActivity;
     private FirebaseAuth mAuth;
+    SharedPreferences sharedPrefAppGeneral;
 
     /**
      * Create a new dummy account for the sync adapter
@@ -88,11 +96,12 @@ public class StartActivity extends AppCompatActivity {
         }*/
 
     }
-boolean openNotificationActivity;
+    FirebaseDatabase database;
+    DatabaseReference instanceIDDB;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-openNotificationActivity=false;
+        openNotificationActivity = false;
         if (getIntent().getExtras() != null) {
             String url = null;
             String title = null;
@@ -128,7 +137,7 @@ openNotificationActivity=false;
 
                 try {
                     notificationsDataHash = (LinkedHashSet<HashMap<String, String>>) Function.readCachedFile(this, getString(R.string.FCM_Notifications_Data));
-                   
+
                 } catch (IOException e) {
                     e.printStackTrace();
                     Log.e(TAG, "onMessageReceived: ERROR #5234 ", e);
@@ -144,19 +153,20 @@ openNotificationActivity=false;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                openNotificationActivity=true;
+                openNotificationActivity = true;
 
             }
 
 
         }
+        sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
 
         Fabric.with(this, new Crashlytics());
 
-        boolean isAnalyticDataCollectionEnable=false;
+        boolean isAnalyticDataCollectionEnable = false;
         Resources res = getResources();
-        isAnalyticDataCollectionEnable=res.getBoolean(R.bool.FIREBASE_ANALYTICS_DATA_COLLECTION);
-        if(isAnalyticDataCollectionEnable){
+        isAnalyticDataCollectionEnable = res.getBoolean(R.bool.FIREBASE_ANALYTICS_DATA_COLLECTION);
+        if (isAnalyticDataCollectionEnable) {
 
             AppCenter.start(getApplication(), BuildConfig.MS_AppCenter_Key,
                     Analytics.class, Crashes.class);
@@ -166,6 +176,9 @@ openNotificationActivity=false;
         getSupportActionBar().hide();
         mAuth = FirebaseAuth.getInstance();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
+// Write a message to the database
+        database = FirebaseDatabase.getInstance();
 
 
         Thread background = new Thread() {
@@ -265,10 +278,10 @@ openNotificationActivity=false;
     void appstart() {
         Crashlytics.setUserIdentifier(currentUser.getUid());
         Intent intent;
-        if(openNotificationActivity){
-            intent= new Intent(StartActivity.this, EpNotificationActivity.class);
-}else{
-            intent= new Intent(StartActivity.this, MainActivity.class);
+        if (openNotificationActivity) {
+            intent = new Intent(StartActivity.this, EpNotificationActivity.class);
+        } else {
+            intent = new Intent(StartActivity.this, MainActivity.class);
         }
 
         startActivity(intent);
@@ -296,8 +309,18 @@ openNotificationActivity=false;
 
             if (resultCode == RESULT_OK) {
                 // Successfully signed in
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                String UserUID=user.getPhoneNumber().replace("+","x");
+                String instanceID= FirebaseInstanceId.getInstance().getId();
+                SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
+                editor.putString(getString(R.string.App_InstanceID), instanceID).apply();
+                instanceIDDB = database.getReference("users/"+UserUID+"/smsdrive/instanceid");
+                instanceIDDB.setValue(instanceID);
+
+
                 if (isDefaultSmsApp) {
-                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+
 
                   /*  AccountManager accountManager = AccountManager.get(this); //this is Activity
                     Account account = new Account(user.getPhoneNumber(),"devesh.ephrine.backup.sms.ACCOUNT");
@@ -313,6 +336,7 @@ openNotificationActivity=false;
                     // FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                     Intent intent = new Intent(this, MainActivity.class);
                     //   CreateSyncAccount(this);
+                    intent.putExtra("firstopen","1");
 
                     //  String message = editText.getText().toString();
                     //intent.putExtra(EXTRA_MESSAGE, message);

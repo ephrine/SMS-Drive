@@ -26,7 +26,10 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
+
+import devesh.ephrine.backup.sms.room.Sms;
 
 /**
  * Created by SHAJIB on 7/10/2017.
@@ -115,6 +118,34 @@ public class Function {
         return gpList;
     }
 
+    public static List<Sms> removeDuplicates1(List<Sms> smsList) {
+        List<Sms> gpList = new ArrayList<>();
+        double total = smsList.size();
+        double progress;
+        for (int i = 0; i < smsList.size(); i++) {
+
+            progress = i / total * 100;
+            Log.d(TAG, "removeDuplicates1: " + progress + "% | " + i + "/" + total);
+            boolean available = false;
+            for (int j = 0; j < gpList.size(); j++) {
+                if (gpList.get(j).KEY_PHONE != null) {
+                    if (gpList.get(j).KEY_PHONE.equals(smsList.get(i).KEY_PHONE)) {
+                        available = true;
+                        break;
+                    }
+                }
+
+            }
+
+            if (!available) {
+                gpList.add(smsList.get(i));
+            }
+
+        }
+        return gpList;
+    }
+
+
     public static boolean sendSMS(String toPhoneNumber, String smsMessage) {
         try {
             SmsManager smsManager = SmsManager.getDefault();
@@ -170,6 +201,7 @@ public class Function {
         oos.close();
         fos.close();
     }
+
     public static void createCachedNotificationFile(Context context, String key, LinkedHashSet<HashMap<String, String>> dataList) throws IOException {
         FileOutputStream fos = context.openFileOutput(key, Context.MODE_PRIVATE);
         ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -200,6 +232,48 @@ public class Function {
         Log.d(TAG, "Currency Code: " + currency.getCurrencyCode());
         Log.d(TAG, "Symbol: " + currency.getSymbol());
         Log.d(TAG, "Default Fraction Digits: " + currency.getDefaultFractionDigits());
+
+    }
+
+    public static List<Sms> ConvertArraylist2ListSms(ArrayList<HashMap<String, String>> al) {
+        Log.d(TAG, "ConvertArraylist2ListSms: START");
+        int al_t = al.size();
+        List<Sms> smsc = new ArrayList<>();
+        for (int i = 0; i < al_t; i++) {
+            Log.d(TAG, "ConvertArraylist2ListSms: FOR LOOP: " + i + "/" + al_t);
+            Sms sms = new Sms();
+            sms.KEY_PHONE = al.get(i).get(KEY_PHONE);
+            sms.KEY_MSG = al.get(i).get(KEY_MSG);
+            sms.KEY_TYPE = al.get(i).get(KEY_TYPE);
+            sms.KEY_TIMESTAMP = al.get(i).get(KEY_TIMESTAMP);
+
+            smsc.add(sms);
+
+        }
+
+        Log.d(TAG, "ConvertArraylist2ListSms: END");
+        return smsc;
+    }
+
+    public static ArrayList<HashMap<String, String>> ConvertListSms2Arraylist(List<Sms> ls) {
+        Log.d(TAG, "ConvertListSms2Arraylist: START");
+        int total = ls.size();
+        LinkedHashSet<HashMap<String, String>> al = new LinkedHashSet<>();
+        for (int i = 0; i < total; i++) {
+            Log.d(TAG, "ConvertListSms2Arraylist: FOR LOOP: " + i + "/" + total);
+            HashMap<String, String> map = new HashMap<>();
+
+            map.put(KEY_MSG, ls.get(i).KEY_MSG);
+            map.put(KEY_PHONE, ls.get(i).KEY_PHONE);
+            map.put(KEY_TYPE, ls.get(i).KEY_TYPE);
+            map.put(KEY_TIMESTAMP, ls.get(i).KEY_TIMESTAMP);
+
+            al.add(map);
+
+        }
+        // ArrayList<HashMap<String, String>> al2=new ArrayList<>(al);
+        Log.d(TAG, "ConvertListSms2Arraylist: END");
+        return new ArrayList<>(al);
 
     }
 

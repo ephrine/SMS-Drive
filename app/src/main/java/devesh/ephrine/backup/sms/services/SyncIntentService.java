@@ -16,7 +16,7 @@ import android.os.Build;
 import android.os.PowerManager;
 import android.os.Process;
 import android.util.Log;
-import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.JobIntentService;
@@ -30,8 +30,11 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -71,6 +74,7 @@ import devesh.ephrine.backup.sms.CheckSubscriptionService;
 import devesh.ephrine.backup.sms.Function;
 import devesh.ephrine.backup.sms.MapComparator;
 import devesh.ephrine.backup.sms.R;
+import devesh.ephrine.backup.sms.StartActivity;
 import io.fabric.sdk.android.Fabric;
 
 import static devesh.ephrine.backup.sms.Function.KEY_THREAD_ID;
@@ -173,12 +177,13 @@ public class SyncIntentService extends JobIntentService {
         if (sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0") != null) {
             String sub = sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0");
 
-            try {
+           try {
                 isSubscribed = sub.equals("1");
             } catch (Exception e) {
                 Log.e(TAG, "onCreate: ERROR #6545 ", e);
                 isSubscribed = false;
             }
+
         } else {
             isSubscribed = false;
         }
@@ -196,8 +201,9 @@ public class SyncIntentService extends JobIntentService {
 
         Log.d(TAG, "onCreate: SyncIntentService() #9086");
 
-            startSync();
 
+        CheckMultiAppUsage();
+        startSync();
 
 
     }
@@ -252,12 +258,11 @@ public class SyncIntentService extends JobIntentService {
 
         isFinished = false;
         //  getSMS();
-        if (isSubscribed) {
 
-            if (ContextCompat.checkSelfPermission(mContext,
-                    Manifest.permission.READ_SMS)
-                    == PackageManager.PERMISSION_GRANTED) {
-                if (user != null && isSubscribed) {
+        if (ContextCompat.checkSelfPermission(mContext,
+                Manifest.permission.READ_SMS)
+                == PackageManager.PERMISSION_GRANTED) {
+            if (user != null) {
 
        /*             new Thread(new Runnable() {
                         public void run() {
@@ -272,33 +277,30 @@ public class SyncIntentService extends JobIntentService {
                         }
                     }).start();
                     */
-                    if (isNetworkAvailable()) {
-                        UserUID = user.getPhoneNumber().replace("+", "x");
+                if (isNetworkAvailable()) {
+                    UserUID = user.getPhoneNumber().replace("+", "x");
 
-                        BackupStorageDB = "SMSDrive/Users/" + UserUID + "/backup/file_cloud_sms.zip";
+                    BackupStorageDB = "SMSDrive/Users/" + UserUID + "/backup/file_cloud_sms.zip";
 
 
-                        try {
-                            tmpList.clear();
-                            tmpList = (LinkedHashSet<HashMap<String, String>>) Function.readCachedFile(mContext, "orgsms");
-                        } catch (Exception e) {
-                            Log.d(TAG, "startSync: ERROR " + e);
-                            Crashlytics.logException(e);
-                        }
-
-                        sms1();
-
-                    } else {
-                        cancelAllNotification();
-                        stopSelf();
+                    try {
+                        tmpList.clear();
+                        tmpList = (LinkedHashSet<HashMap<String, String>>) Function.readCachedFile(mContext, "orgsms");
+                    } catch (Exception e) {
+                        Log.d(TAG, "startSync: ERROR " + e);
+                        Crashlytics.logException(e);
                     }
 
+                    sms1();
+
+                } else {
+                    cancelAllNotification();
+                    stopSelf();
                 }
 
             }
 
         }
-
 
     }
 
@@ -371,15 +373,15 @@ public class SyncIntentService extends JobIntentService {
 
                     HashMap<String, String> msgg = new HashMap<>();
 
-                    msgg.put(Function._ID, _id);
+  /*                  msgg.put(Function._ID, _id);
                     msgg.put(KEY_THREAD_ID, thread_id);
+                    msgg.put(Function.KEY_TIME, Function.converToTime(timestamp));
+                    msgg.put(Function.KEY_NAME, name);
+*/
                     msgg.put(Function.KEY_PHONE, phone);
                     msgg.put(Function.KEY_MSG, msg);
                     msgg.put(Function.KEY_TYPE, type);
                     msgg.put(Function.KEY_TIMESTAMP, timestamp);
-                    msgg.put(Function.KEY_TIME, Function.converToTime(timestamp));
-                    msgg.put(Function.KEY_NAME, name);
-
 
                     smsList.add(msgg);
 
@@ -465,17 +467,16 @@ public class SyncIntentService extends JobIntentService {
                 double ii = 0;
                 double progress;
                 Log.d(TAG, "sms1 sent: Cursor Count: " + i);
-                if(i==0){
+                if (i == 0) {
                     Log.d(TAG, "sms1: Outbox EMPTY LOL !!");
-                   if(isNetworkAvailable()){
-                       DownloadFromCloud();
-                   }else{
-                       Log.d(TAG, "onCreate: NO INTERNET !");
-cancelAllNotification();
+                    if (isNetworkAvailable()) {
+                        DownloadFromCloud();
+                    } else {
+                        Log.d(TAG, "onCreate: NO INTERNET !");
+                        cancelAllNotification();
 
-stopSelf();
-                   }
-
+                        stopSelf();
+                    }
 
 
                 }
@@ -529,13 +530,13 @@ stopSelf();
 
                     msgg.put(Function._ID, _id);
                     msgg.put(KEY_THREAD_ID, thread_id);
+                    msgg.put(Function.KEY_TIME, Function.converToTime(timestamp));
+                    msgg.put(Function.KEY_NAME, name);
+
                     msgg.put(Function.KEY_PHONE, phone);
                     msgg.put(Function.KEY_MSG, msg);
                     msgg.put(Function.KEY_TYPE, type);
                     msgg.put(Function.KEY_TIMESTAMP, timestamp);
-                    msgg.put(Function.KEY_TIME, Function.converToTime(timestamp));
-                    msgg.put(Function.KEY_NAME, name);
-
 
                     smsList.add(msgg);
 
@@ -568,9 +569,9 @@ stopSelf();
                     if (ii == i) {
                         Log.d(TAG, "sms1 sent: END ---------" + ii + "\n SMS: ");
 
-                        if(isNetworkAvailable()){
+                        if (isNetworkAvailable()) {
                             DownloadFromCloud();
-                        }else{
+                        } else {
                             Log.d(TAG, "onCreate: NO INTERNET !");
                             cancelAllNotification();
 
@@ -1182,7 +1183,7 @@ stopSelf();
 
         } /*catch (FileNotFoundException e) {
             System.out.println("File not found" + e);
-        } */catch (IOException ioe) {
+        } */ catch (IOException ioe) {
             System.out.println("Exception while writing file " + ioe);
         } finally {
             // close the streams using close method
@@ -1233,8 +1234,6 @@ stopSelf();
 
 
     }
-
-
 
 
     void cancelAllNotification() {
@@ -1319,6 +1318,58 @@ stopSelf();
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
         */
+    }
+
+    void CheckMultiAppUsage(){
+        String AppInstanceID=sharedPrefAppGeneral.getString(getString(R.string.App_InstanceID),"");
+        DatabaseReference AppInstanceIDDB = database.getReference("/users/"+UserUID+"/smsdrive/instanceid");
+// Read from the database
+        AppInstanceIDDB.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // This method is called once with the initial value and again
+                // whenever data at this location is updated.
+                String AppInstanceIDReged = dataSnapshot.getValue(String.class);
+                Log.d(TAG, "DB AppInstanceID: " + AppInstanceIDReged);
+
+                if(AppInstanceIDReged.equals(AppInstanceID)){
+                    Log.d(TAG, "onDataChange: App installed on single device");
+                }else {
+                    if(isSubscribed){
+                        Log.d(TAG, "onDataChange: App installed on multiple device with subscription");
+                    }else{
+                        Log.d(TAG, "onDataChange: App installed on multiple device with non-subscription");
+                        FirebaseAuth.getInstance().signOut();
+                        deleteAppData();
+
+                    }
+                }
+
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w(TAG, "Failed to read value.", error.toException());
+            }
+        });
+    }
+
+    private void deleteAppData() {
+        try {
+            // clearing app data
+            String packageName =getApplicationContext().getPackageName();
+            Runtime runtime = Runtime.getRuntime();
+            runtime.exec("pm clear " + packageName);
+            Log.i(TAG, "App Data Cleared !!");
+
+            Intent intent = new Intent(this, StartActivity.class);
+            startActivity(intent);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 

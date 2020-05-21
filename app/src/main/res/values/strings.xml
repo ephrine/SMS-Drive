@@ -72,5 +72,9 @@
     <string name="FCM_Notifications_Data" translatable="false">fcmdatapayload</string>
 
     <string name="GalaxyUpdateURL" translatable="false">http://apps.samsung.com/appquery/appDetail.as?appId=devesh.ephrine.backup.sms</string>
+    <string name="DATABASE_THREAD_SMS_DB">threadsmsdatabase</string>
+
+    <string name="disable_ads">Personalise in-app Ads</string>
+    <string name="App_InstanceID">appinstanceid</string>
 
 </resources>

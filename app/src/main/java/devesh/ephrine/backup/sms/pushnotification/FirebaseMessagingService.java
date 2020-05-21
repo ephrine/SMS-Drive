@@ -3,7 +3,6 @@ package devesh.ephrine.backup.sms.pushnotification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.util.Log;
@@ -12,17 +11,12 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.google.firebase.messaging.RemoteMessage;
-import com.lifeofcoding.cacheutlislibrary.CacheUtils;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 
 import devesh.ephrine.backup.sms.Function;
-import devesh.ephrine.backup.sms.MainActivity;
 import devesh.ephrine.backup.sms.R;
 import devesh.ephrine.backup.sms.StartActivity;
 
@@ -40,20 +34,20 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         // TODO(developer): Handle FCM messages here.
         // Not getting messages here? See why this may be: https://goo.gl/39bRNJ
         Log.d(TAG, "From: " + remoteMessage.getFrom());
-        String url=null;
-        String title=null;
-        String desc=null;
-        String time=null;
+        String url = null;
+        String title = null;
+        String desc = null;
+        String time = null;
 
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
 
             url = remoteMessage.getData().get(EpNotificationsConstants.EP_FCM_URL);
-            title=remoteMessage.getData().get(EpNotificationsConstants.EP_FCM_TITLE);
-            desc =remoteMessage.getData().get(EpNotificationsConstants.EP_FCM_DESC);
+            title = remoteMessage.getData().get(EpNotificationsConstants.EP_FCM_TITLE);
+            desc = remoteMessage.getData().get(EpNotificationsConstants.EP_FCM_DESC);
 
-            time=String.valueOf(System.currentTimeMillis());
+            time = String.valueOf(System.currentTimeMillis());
             Log.d(TAG, "onMessageReceived: GOT URL " + url);
             if (/* Check if data needs to be processed by long running job */ true) {
                 // For long-running tasks (10 seconds or more) use Firebase Job Dispatcher.
@@ -75,27 +69,27 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         // message, here is where that should be initiated. See sendNotification method below.
 
 
-        HashMap<String, String> data=new HashMap<>();
-        data.put(EpNotificationsConstants.EP_FCM_URL,url);
-        data.put(EpNotificationsConstants.EP_FCM_TITLE,title);
-        data.put(EpNotificationsConstants.EP_FCM_DESC,desc);
-        data.put("time",time);
+        HashMap<String, String> data = new HashMap<>();
+        data.put(EpNotificationsConstants.EP_FCM_URL, url);
+        data.put(EpNotificationsConstants.EP_FCM_TITLE, title);
+        data.put(EpNotificationsConstants.EP_FCM_DESC, desc);
+        data.put("time", time);
 
         try {
-            notificationsDataHash=(LinkedHashSet<HashMap<String, String>>) Function.readCachedFile(this, getString(R.string.FCM_Notifications_Data));
-             } catch (IOException e) {
+            notificationsDataHash = (LinkedHashSet<HashMap<String, String>>) Function.readCachedFile(this, getString(R.string.FCM_Notifications_Data));
+        } catch (IOException e) {
             e.printStackTrace();
             Log.e(TAG, "onMessageReceived: ERROR #5234 ", e);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
-            Log.e(TAG, "onMessageReceived: ERROR #65 ",e );
+            Log.e(TAG, "onMessageReceived: ERROR #65 ", e);
         }
         notificationsDataHash.add(data);
         try {
-            Function.createCachedNotificationFile(this,getString(R.string.FCM_Notifications_Data),notificationsDataHash);
+            Function.createCachedNotificationFile(this, getString(R.string.FCM_Notifications_Data), notificationsDataHash);
         } catch (IOException e) {
             e.printStackTrace();
-            Log.e(TAG, "onMessageReceived: ERROR #2343 ",e );
+            Log.e(TAG, "onMessageReceived: ERROR #2343 ", e);
         }
 
 

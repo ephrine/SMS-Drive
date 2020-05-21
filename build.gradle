@@ -8,6 +8,9 @@ buildscript {
         maven {
             url 'https://maven.fabric.io/public'
         }
+        maven {
+            url 'http://developer.huawei.com/repo/'
+        }
         
     }
     dependencies {
@@ -35,6 +38,9 @@ allprojects {
 
         maven {
             url 'https://maven.fabric.io/public'
+        }
+        maven {
+            url 'http://developer.huawei.com/repo/'
         }
     }
 

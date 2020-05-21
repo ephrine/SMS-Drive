@@ -11,6 +11,10 @@ def gplaysubscriptionid1
 def gplaylicensekey
 def MS_AppCenterKey
 
+def AdMobAppID
+def AdMobBanner1ID
+def AdMobIntID
+
 Properties properties = new Properties()
 
 def lp = new File('smsdrive.local.properties')
@@ -26,6 +30,9 @@ if (!lp.exists()) {
     gplaysubscriptionid1 = properties.getProperty('gplaysubscriptionid1')
     gplaylicensekey = properties.getProperty('g.license.key')
     MS_AppCenterKey = properties.getProperty('msappcenter')
+    AdMobAppID= properties.getProperty('admobappid')
+    AdMobBanner1ID= properties.getProperty('admobbanner1')
+    AdMobIntID= properties.getProperty('admobinitid')
 
 } else {
     project.logger.info('Located local.properties file')
@@ -35,7 +42,9 @@ if (!lp.exists()) {
     gplaysubscriptionid1 = properties.getProperty('gplaysubscriptionid1')
     gplaylicensekey = properties.getProperty('g.license.key')
     MS_AppCenterKey = properties.getProperty('msappcenter')
-
+    AdMobAppID= properties.getProperty('admobappid')
+    AdMobBanner1ID= properties.getProperty('admobbanner1')
+    AdMobIntID= properties.getProperty('admobinitid')
 
 }
 //def keypassword = properties.getProperty('sign.key.password')
@@ -73,7 +82,7 @@ if (!kk.exists()) {
 keypath=kk
 } */
 
-def AppVersionName="0.0.8"
+def AppVersionName = "0.0.9"
 
 android {
     compileOptions {
@@ -104,8 +113,8 @@ android {
         applicationId "devesh.ephrine.backup.sms"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 28
-        versionName ""+AppVersionName+" Beta Version"
+        versionCode 29
+        versionName "" + AppVersionName + " Beta Version"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
 
@@ -120,7 +129,11 @@ android {
 
         buildConfigField "String", "MS_AppCenter_Key", "\"" + MS_AppCenterKey + "\""
 
-        //  resValue "string", "AdMob_AppId", "\"" + "none" + "\""
+        resValue "string", "AdMob_AppId", "\"" + AdMobAppID + "\""
+
+        resValue "string", "AdMob_BannerId1", "\"" + AdMobBanner1ID + "\""
+
+        resValue "string", "AdMob_InitId", "\"" + AdMobIntID + "\""
 
         resValue "string", "AppVersionCode", "\"" + versionCode + "\""
 
@@ -154,14 +167,14 @@ android {
     productFlavors {
         master {
             dimension "appstore"
-            versionName ""+AppVersionName+" Beta Version"
+            versionName "" + AppVersionName + " Beta Version"
             //  applicationId "devesh.ephrine.backup.sms"
             resValue "string", "AppFlavour", "\"" + "master" + "\""
             resValue "string", "AppVersionName", "\"" + versionName + "\""
         }
         galaxy {
             dimension "appstore"
-            versionName ""+AppVersionName+" Beta (Samsung)"
+            versionName "" + AppVersionName + " Beta (Samsung)"
             //     applicationId "devesh.ephrine.backup.sms"
             resValue "string", "AppFlavour", "\"" + "galaxy" + "\""
             resValue "string", "AppVersionName", "\"" + versionName + "\""
@@ -170,8 +183,8 @@ android {
         }
         huawei {
             dimension "appstore"
-            versionName ""+AppVersionName+" Beta (Huawei)"
-            //   applicationId "devesh.ephrine.backup.sms"
+            versionName "" + AppVersionName + " Beta (Huawei)"
+            applicationId "devesh.ephrine.backup.sms.huawei"
             resValue "string", "AppFlavour", "\"" + "huawei" + "\""
             resValue "string", "AppVersionName", "\"" + versionName + "\""
         }
@@ -191,13 +204,13 @@ dependencies {
     implementation 'com.google.firebase:firebase-storage:+'
     implementation 'com.google.firebase:firebase-auth:+'
     implementation 'com.firebaseui:firebase-ui-auth:+'
-    //implementation 'com.google.firebase:firebase-messaging:+'
     implementation 'com.crashlytics.sdk.android:crashlytics:+'
     implementation 'com.google.firebase:firebase-config:+'
     implementation 'com.google.firebase:firebase-functions:+'
     implementation 'com.google.firebase:firebase-messaging:+'
-   // implementation 'com.google.firebase:firebase-inappmessaging-display:+'
-
+    // implementation 'com.google.firebase:firebase-inappmessaging-display:+'
+    implementation 'com.google.android.gms:play-services-ads:+'
+  //  implementation 'com.google.firebase:firebase-ads:+'
 // Add the dependency for the Performance Monitoring library
     //  implementation 'com.google.firebase:firebase-perf:19.0.6'
     //  implementation 'androidx.work:work-runtime:2.4.0-alpha01'
@@ -245,15 +258,15 @@ dependencies {
     //  implementation group: 'net.sf.jsignature.io-tools', name: 'easystream', version: '1.2.15'
 
 //Room Library
-    implementation "androidx.room:room-runtime:+"
-    annotationProcessor "androidx.room:room-compiler:+"
+    implementation "androidx.room:room-runtime:2.2.5"
+    annotationProcessor "androidx.room:room-compiler:2.2.5"
     // For Kotlin use kapt instead of annotationProcessor
 
     // optional - Kotlin Extensions and Coroutines support for Room
-    implementation "androidx.room:room-ktx:+"
+    implementation "androidx.room:room-ktx:2.2.5"
 
     // optional - RxJava support for Room
-    implementation "androidx.room:room-rxjava2:+"
+    implementation "androidx.room:room-rxjava2:2.2.5"
 
     // optional - Guava support for Room, including Optional and ListenableFuture
     implementation "androidx.room:room-guava:+"
@@ -268,10 +281,14 @@ dependencies {
     //Samsung Galaxy In-App-purchases
     galaxyImplementation project(':IAP6Helper')
 
+    huaweiImplementation 'com.huawei.hms:iap:4.0.0.300'
+
     //Chrome Custom Tab
     implementation 'androidx.browser:browser:+'
 
     implementation 'com.google.guava:guava:27.0.1-android'
+
+    implementation project(':nativetemplates')
 
 
 }

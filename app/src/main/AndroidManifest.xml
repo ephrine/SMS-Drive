@@ -35,7 +35,8 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppThemeDayNight">
-        <activity android:name=".pushnotification.EpNotificationActivity"
+        <activity
+            android:name=".pushnotification.EpNotificationActivity"
             android:label="Notifications"
             android:parentActivityName=".MainActivity">
 
@@ -259,8 +260,15 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="@string/default_notification_channel_id" />
-<!-- Firebase Analytics Data Collection-->
-        <meta-data android:name="firebase_analytics_collection_enabled" android:value="@bool/FIREBASE_ANALYTICS_DATA_COLLECTION" />
+        <!-- Firebase Analytics Data Collection-->
+        <meta-data
+            android:name="firebase_analytics_collection_enabled"
+            android:value="@bool/FIREBASE_ANALYTICS_DATA_COLLECTION" />
+
+        <!--Admob-->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="@string/AdMob_AppId"/>
     </application>
 
 </manifest>

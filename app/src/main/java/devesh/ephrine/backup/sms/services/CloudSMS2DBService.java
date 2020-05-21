@@ -21,10 +21,12 @@ import com.lifeofcoding.cacheutlislibrary.CacheUtils;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
 import devesh.ephrine.backup.sms.Function;
+import devesh.ephrine.backup.sms.MapComparator;
 import devesh.ephrine.backup.sms.R;
 import devesh.ephrine.backup.sms.room.AppDatabase;
 import devesh.ephrine.backup.sms.room.Sms;
@@ -56,6 +58,8 @@ public class CloudSMS2DBService extends JobIntentService {
      */
     boolean mAllowRebind;
     AppDatabase db;
+    AppDatabase ThreadSmsDB;
+
     PowerManager.WakeLock wakeLock;
     NotificationManagerCompat notificationManager;
     NotificationCompat.Builder nmbuilder;
@@ -136,9 +140,14 @@ public class CloudSMS2DBService extends JobIntentService {
             db = Room.databaseBuilder(getApplicationContext(),
                     AppDatabase.class, getString(R.string.DATABASE_CLOUD_SMS_DB))
                     //.setJournalMode(RoomDatabase.JournalMode.AUTOMATIC)
+                    .build();
 
+            ThreadSmsDB = Room.databaseBuilder(getApplicationContext(),
+                    AppDatabase.class, getString(R.string.DATABASE_THREAD_SMS_DB)).fallbackToDestructiveMigration()
                     .build();
         }
+
+
         //    SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
         //    editor.putString(getString(R.string.BG_Task_Status), "1").apply();
         setNotificationCloudRefresh();
@@ -195,6 +204,7 @@ public class CloudSMS2DBService extends JobIntentService {
 
     }
 
+
     class AddSmsDB extends AsyncTask<String, Void, String> {
         final String TAG = "CloudSMS2DBService ";
 
@@ -232,7 +242,7 @@ public class CloudSMS2DBService extends JobIntentService {
             notificationManager.notify(002, nmbuilder.build());
 
             try {
-                for (int j = 0; j <= CloudSms.size(); j++) {
+                for (int j = 0; j < CloudSms.size(); j++) {
 
                     progress = j / t * 100;
                     String prg = new DecimalFormat("##.##").format(progress);
@@ -244,15 +254,16 @@ public class CloudSMS2DBService extends JobIntentService {
 
                         Sms u = new Sms();
                         //u.uid= 1;
-                        u.ID = CloudSms.get(j).get(Function._ID);
-                        u.KEY_THREAD_ID = CloudSms.get(j).get(Function.KEY_THREAD_ID);
+   /*                       u.ID = CloudSms.get(j).get(Function._ID);
+                      u.KEY_THREAD_ID = CloudSms.get(j).get(Function.KEY_THREAD_ID);
                         u.KEY_NAME = CloudSms.get(j).get(Function.KEY_NAME);
+                        u.KEY_TIME = CloudSms.get(j).get(Function.KEY_TIME);
+                        u.KEY_READ = CloudSms.get(j).get(Function.KEY_READ);
+*/
                         u.KEY_PHONE = CloudSms.get(j).get(Function.KEY_PHONE);
                         u.KEY_MSG = CloudSms.get(j).get(Function.KEY_MSG);
                         u.KEY_TYPE = CloudSms.get(j).get(Function.KEY_TYPE);
                         u.KEY_TIMESTAMP = CloudSms.get(j).get(Function.KEY_TIMESTAMP);
-                        u.KEY_TIME = CloudSms.get(j).get(Function.KEY_TIME);
-                        u.KEY_READ = CloudSms.get(j).get(Function.KEY_READ);
 
                         slist.add(u);
                         //db.close();
@@ -260,7 +271,7 @@ public class CloudSMS2DBService extends JobIntentService {
                     } catch (Exception e) {
                         Log.e(TAG, "doInBackground: ERROR #04732 " + e);
                         Crashlytics.logException(e);
-                        notificationManager.cancel(002);
+                    //    notificationManager.cancel(002);
 
                     }
 
@@ -269,7 +280,7 @@ public class CloudSMS2DBService extends JobIntentService {
             } catch (Exception e) {
                 Log.e(TAG, "doInBackground: #45642 ", e);
                 Crashlytics.logException(e);
-                stopSelf();
+             //   stopSelf();
             }
 
             try {
@@ -279,39 +290,52 @@ public class CloudSMS2DBService extends JobIntentService {
                 Log.e(TAG, "doInBackground: ERROR #76542 ", e);
             }
 
-  /*          db.userDao().insertAll(u);
-            db.userDao().getAll();
-            List<Sms> ll=db.userDao().getAll();
-            Log.d(TAG, "onCreate: "+ll.get(0).KEY_MSG);
-*/
+            List<Sms> ls = db.userDao().getAll();
+            Log.d(TAG, "doInBackground: db.userDao().getAll() :" + ls.toString());
+
+                Log.d(TAG, "doInBackground: List<Sms> lsClean = Function.removeDuplicates1(ls);");
+                ArrayList<HashMap<String, String>> CloudSMS = Function.ConvertListSms2Arraylist(ls);
+            Collections.sort(CloudSMS, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging sms by timestamp decending
+            List<Sms> lsClean = Function.ConvertArraylist2ListSms(CloudSMS);
+            List<Sms>  FinalSmsThread=Function.removeDuplicates1(lsClean);
+
+
+            //    List<Sms> FinalSmsThread = Function.ConvertArraylist2ListSms(CloudSMS);
+                Log.d(TAG, "doInBackground: FinalSmsThread: " + FinalSmsThread.toString());
+                ThreadSmsDB.userDao().insertAllThread(FinalSmsThread);
+                Log.d(TAG, "doInBackground: END");
+
+
+
             return "Done";
+
+        }
+            @Override
+            protected void onPostExecute (String xml){
+                Log.d(TAG, "onPostExecute");
+                try {
+                    wakeLock.release();
+                } catch (Exception e) {
+                    Log.e(TAG, "onPostExecute: ERROR #35271 ", e);
+                }
+                if (db != null) {
+                    db.close();
+                }
+
+
+                //      SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
+                //    editor.putString(getString(R.string.BG_Task_Status), "0").apply();
+                CloudSms.clear();
+                notificationManager.cancel(002);
+                try {
+                    //     myTrace.stop();
+                } catch (Exception e) {
+                    Log.e(TAG, "onDestroy: ERROR #564 ", e);
+                }
+                stopSelf();
+            }
         }
 
-        @Override
-        protected void onPostExecute(String xml) {
-            Log.d(TAG, "onPostExecute");
-            try {
-                wakeLock.release();
-            } catch (Exception e) {
-                Log.e(TAG, "onPostExecute: ERROR #35271 ", e);
-            }
-            if (db != null) {
-                db.close();
-            }
 
-
-            //      SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
-            //    editor.putString(getString(R.string.BG_Task_Status), "0").apply();
-            CloudSms.clear();
-            notificationManager.cancel(002);
-            try {
-                //     myTrace.stop();
-            } catch (Exception e) {
-                Log.e(TAG, "onDestroy: ERROR #564 ", e);
-            }
-            stopSelf();
-        }
     }
 
-
-}

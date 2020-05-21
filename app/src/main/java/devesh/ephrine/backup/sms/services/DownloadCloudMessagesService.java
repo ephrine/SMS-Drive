@@ -144,9 +144,10 @@ try {
     Log.e(TAG, "onDestroy: ",e );
     Crashlytics.logException(e);
 }*/
-        notificationManager.cancel(002);
 
         try {
+            notificationManager.cancel(002);
+
             //      myTrace.stop();
         } catch (Exception e) {
             Log.e(TAG, "onDestroy: ERROR #564 ", e);
@@ -196,108 +197,106 @@ try {
 
         isSubscribed = sub.equals("1");
 
+        if (isNetworkAvailable()) {
+            Log.d(TAG, "downloadCloudSMS:  downloadCloudSMS() isSubscribed");
+            setNotificationCloudRefresh();
+            BackupStorageDB = "SMSDrive/Users/" + UserUID + "/backup/file_cloud_sms.zip";
 
-        if (isSubscribed) {
-            if (isNetworkAvailable()) {
-                Log.d(TAG, "downloadCloudSMS:  downloadCloudSMS() isSubscribed");
-                setNotificationCloudRefresh();
-                BackupStorageDB = "SMSDrive/Users/" + UserUID + "/backup/file_cloud_sms.zip";
+            StorageReference mStorageRef;
+            mStorageRef = FirebaseStorage.getInstance().getReference();
+            StorageReference riversRef = mStorageRef.child(BackupStorageDB);
+            localFile = null;
+            gson = new Gson();
 
-                StorageReference mStorageRef;
-                mStorageRef = FirebaseStorage.getInstance().getReference();
-                StorageReference riversRef = mStorageRef.child(BackupStorageDB);
-                localFile = null;
-                gson = new Gson();
+            ArrayList<HashMap<String, String>> tmpList = null;
+            try {
+                tmpList.clear();
+                tmpList = (ArrayList<HashMap<String, String>>) Function.readCachedFile(this, getString(R.string.file_device_sms));
 
-                ArrayList<HashMap<String, String>> tmpList = null;
-                try {
-                    tmpList.clear();
-                    tmpList = (ArrayList<HashMap<String, String>>) Function.readCachedFile(this, getString(R.string.file_device_sms));
+            } catch (Exception e) {
+                Log.d(TAG, "DownloadFromCloud: ERROR " + e);
+                Crashlytics.logException(e);
 
-                } catch (Exception e) {
-                    Log.d(TAG, "DownloadFromCloud: ERROR " + e);
-                    Crashlytics.logException(e);
+            }
 
-                }
+            try {
+                localFile = File.createTempFile("smscloud", "backup");
+            } catch (Exception e) {
+                Log.d(TAG, "DownloadFromCloud: #ERROR " + e);
+                Crashlytics.logException(e);
 
-                try {
-                    localFile = File.createTempFile("smscloud", "backup");
-                } catch (Exception e) {
-                    Log.d(TAG, "DownloadFromCloud: #ERROR " + e);
-                    Crashlytics.logException(e);
+            }
+            riversRef.getFile(localFile)
+                    .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                            // Successfully downloaded data to local file
+                            Log.d(TAG, "onSuccess: DownloadFromCloud");
 
-                }
-                riversRef.getFile(localFile)
-                        .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                            @Override
-                            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                                // Successfully downloaded data to local file
-                                Log.d(TAG, "onSuccess: DownloadFromCloud");
+                            new Thread(new Runnable() {
+                                public void run() {
+                                    File unziped = unzipFile(localFile);
+                                    Log.d(TAG, "onSuccess: Unziped: " + unziped.getPath());
+                                    String JsonStr = ConvertFileToStrng(unziped);
+                                    Type type = new TypeToken<ArrayList<HashMap<String, String>>>() {
+                                    }.getType();
 
-                                new Thread(new Runnable() {
-                                    public void run() {
-                                        File unziped = unzipFile(localFile);
-                                        Log.d(TAG, "onSuccess: Unziped: " + unziped.getPath());
-                                        String JsonStr = ConvertFileToStrng(unziped);
-                                        Type type = new TypeToken<ArrayList<HashMap<String, String>>>() {
-                                        }.getType();
+                                    ArrayList<HashMap<String, String>> jj = gson.fromJson(JsonStr, type);
+                                    CloudSms.addAll(jj);
 
-                                        ArrayList<HashMap<String, String>> jj = gson.fromJson(JsonStr, type);
-                                        CloudSms.addAll(jj);
+                                    //  ArrayList<HashMap<String, String>> CleanHash = new ArrayList<>();
+                                    //  CleanHash = RemoveDuplicateHashMaps(CloudSms);
 
-                                        //  ArrayList<HashMap<String, String>> CleanHash = new ArrayList<>();
-                                        //  CleanHash = RemoveDuplicateHashMaps(CloudSms);
+                                    //  CloudSms.clear();
+                                    // CloudSms = CleanHash;
+                                    //CleanHash =  smsList;
+                                    //    UploadToCloud(CleanHash);
 
-                                        //  CloudSms.clear();
-                                        // CloudSms = CleanHash;
-                                        //CleanHash =  smsList;
-                                        //    UploadToCloud(CleanHash);
+                                    //Unzip File
 
-                                        //Unzip File
+                                    Log.d(TAG, "onDataChange: END of CLOUD SMS");
+                                    //  Collections.sort(CloudSms, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging sms by timestamp decending
+                                    try {
+                                        Function.createCachedFile(DownloadCloudMessagesService.this, getString(R.string.file_cloud_sms), jj);
+                                        Log.d(TAG, "onDataChange: createCachedFile file_cloud_sms ");
 
-                                        Log.d(TAG, "onDataChange: END of CLOUD SMS");
-                                        //  Collections.sort(CloudSms, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging sms by timestamp decending
-                                        try {
-                                            Function.createCachedFile(DownloadCloudMessagesService.this, getString(R.string.file_cloud_sms), jj);
-                                            Log.d(TAG, "onDataChange: createCachedFile file_cloud_sms ");
-
-                                        } catch (Exception e) {
-                                            Log.d(TAG, "onDataChange: ERROR #56 : " + e);
-                                            Crashlytics.logException(e);
-
-                                        }
-                                        CloudThreadSms = CloudSms;
-                                        ArrayList<HashMap<String, String>> purified = Function.removeDuplicates(CloudThreadSms); // Removing duplicates from inbox & sent
-                                        Collections.sort(CloudThreadSms, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging sms by timestamp decending
-                                        CloudThreadSms.clear();
-                                        CloudThreadSms.addAll(purified);
-                                        try {
-                                            Function.createCachedFile(DownloadCloudMessagesService.this, getString(R.string.file_cloud_thread), CloudSms);
-                                            Log.d(TAG, "onDataChange: createCachedFile file_cloud_thread ");
-                                            //   stopSelf();
-                                            //    Intent intentStop = new Intent(DownloadCloudMessagesService.this, DownloadCloudMessagesService.class);
-                                            //  CloudSMS2DBService.enqueueWork(getApplicationContext(), new Intent());
-
-                                            //  Intent intent = new Intent(DownloadCloudMessagesService.this, CloudSMS2DBService.class);
-
-                                            //  String message = editText.getText().toString();
-                                            //intent.putExtra(EXTRA_MESSAGE, message);
-
-                                            //      notificationManager.cancel(002);
-                                            // startService(intent);
-                                            AddtoDatabaseTask();
-                                            //stopSelf();
-                                        } catch (Exception e) {
-                                            Log.d(TAG, "onDataChange: ERROR #5600 : " + e);
-                                            Crashlytics.logException(e);
-                                            stopSelf();
-                                            //       wakeLock.release();
-
-                                        }
-
+                                    } catch (Exception e) {
+                                        Log.d(TAG, "onDataChange: ERROR #56 : " + e);
+                                        Crashlytics.logException(e);
 
                                     }
-                                }).start();
+                                    CloudThreadSms = CloudSms;
+                                    ArrayList<HashMap<String, String>> purified = Function.removeDuplicates(CloudThreadSms); // Removing duplicates from inbox & sent
+                                    Collections.sort(CloudThreadSms, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging sms by timestamp decending
+                                    CloudThreadSms.clear();
+                                    CloudThreadSms.addAll(purified);
+                                    try {
+                                        Function.createCachedFile(DownloadCloudMessagesService.this, getString(R.string.file_cloud_thread), CloudSms);
+                                        Log.d(TAG, "onDataChange: createCachedFile file_cloud_thread ");
+                                        //   stopSelf();
+                                        //    Intent intentStop = new Intent(DownloadCloudMessagesService.this, DownloadCloudMessagesService.class);
+                                        //  CloudSMS2DBService.enqueueWork(getApplicationContext(), new Intent());
+
+                                        //  Intent intent = new Intent(DownloadCloudMessagesService.this, CloudSMS2DBService.class);
+
+                                        //  String message = editText.getText().toString();
+                                        //intent.putExtra(EXTRA_MESSAGE, message);
+
+                                        //      notificationManager.cancel(002);
+                                        // startService(intent);
+                                        AddtoDatabaseTask();
+                                        //stopSelf();
+                                    } catch (Exception e) {
+                                        Log.d(TAG, "onDataChange: ERROR #5600 : " + e);
+                                        Crashlytics.logException(e);
+                                        stopSelf();
+                                        //       wakeLock.release();
+
+                                    }
+
+
+                                }
+                            }).start();
 
 
 
@@ -310,53 +309,49 @@ try {
                     }
                     */
 
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle failed download
-                        Log.d(TAG, "onFailure: ERROR #546766 " + exception + " \n message: " + exception.getMessage()+" Location:"+BackupStorageDB);
-
-
-                        Log.d(TAG, "onFailure: ERROR CloudSms.clear();");
-                        CloudSms.clear();
-                        CloudThreadSms.clear();
-                        try {
-                            Function.createCachedFile(DownloadCloudMessagesService.this, getString(R.string.file_cloud_sms), CloudSms);
-
-                            Function.createCachedFile(DownloadCloudMessagesService.this, getString(R.string.file_cloud_thread), CloudThreadSms);
-                            Log.d(TAG, "onDataChange: createCachedFile file_cloud_thread ");
-                            // stopSelf();
-                        } catch (Exception e) {
-                            Log.d(TAG, "onDataChange: ERROR #5600 : " + e);
-                            Crashlytics.logException(e);
-                            // stopSelf();
                         }
-                        AddtoDatabaseTask();
-                        //   wakeLock.release();
-                        //   notificationManager.cancel(002);
+                    }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle failed download
+                    Log.d(TAG, "onFailure: ERROR #546766 " + exception + " \n message: " + exception.getMessage() + " Location:" + BackupStorageDB);
 
-                        //    Intent intent = new Intent(DownloadCloudMessagesService.this, CloudSMS2DBService.class);
 
-                        //  String message = editText.getText().toString();
-                        //intent.putExtra(EXTRA_MESSAGE, message);
-                        // startActivity(intent);
-                        //    UploadToCloud(smsList);
+                    Log.d(TAG, "onFailure: ERROR CloudSms.clear();");
+                    CloudSms.clear();
+                    CloudThreadSms.clear();
+                    try {
+                        Function.createCachedFile(DownloadCloudMessagesService.this, getString(R.string.file_cloud_sms), CloudSms);
+
+                        Function.createCachedFile(DownloadCloudMessagesService.this, getString(R.string.file_cloud_thread), CloudThreadSms);
+                        Log.d(TAG, "onDataChange: createCachedFile file_cloud_thread ");
                         // stopSelf();
-
+                    } catch (Exception e) {
+                        Log.d(TAG, "onDataChange: ERROR #5600 : " + e);
+                        Crashlytics.logException(e);
+                        // stopSelf();
                     }
-                });
+                    AddtoDatabaseTask();
+                    //   wakeLock.release();
+                    //   notificationManager.cancel(002);
 
-            } else {
-                cancelAllNotification();
-                stopSelf();
-            }
+                    //    Intent intent = new Intent(DownloadCloudMessagesService.this, CloudSMS2DBService.class);
 
+                    //  String message = editText.getText().toString();
+                    //intent.putExtra(EXTRA_MESSAGE, message);
+                    // startActivity(intent);
+                    //    UploadToCloud(smsList);
+                    // stopSelf();
 
+                }
+            });
 
-
-
+        } else {
+            cancelAllNotification();
+            stopSelf();
         }
+
+
     }
 
     File unzipFile(File zipfile) {
@@ -483,7 +478,6 @@ try {
     private boolean isNetworkAvailable() {
 
 
-
         boolean isConnected = false;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             // Register Callback - Call this in your app start!
@@ -599,15 +593,15 @@ try {
 
                         Sms u = new Sms();
                         //u.uid= 1;
-                        u.ID = CloudSms.get(j).get(Function._ID);
-                        u.KEY_THREAD_ID = CloudSms.get(j).get(Function.KEY_THREAD_ID);
-                        u.KEY_NAME = CloudSms.get(j).get(Function.KEY_NAME);
+//                        u.ID = CloudSms.get(j).get(Function._ID);
+                        //                      u.KEY_THREAD_ID = CloudSms.get(j).get(Function.KEY_THREAD_ID);
+                        //                    u.KEY_NAME = CloudSms.get(j).get(Function.KEY_NAME);
                         u.KEY_PHONE = CloudSms.get(j).get(Function.KEY_PHONE);
                         u.KEY_MSG = CloudSms.get(j).get(Function.KEY_MSG);
                         u.KEY_TYPE = CloudSms.get(j).get(Function.KEY_TYPE);
                         u.KEY_TIMESTAMP = CloudSms.get(j).get(Function.KEY_TIMESTAMP);
-                        u.KEY_TIME = CloudSms.get(j).get(Function.KEY_TIME);
-                        u.KEY_READ = CloudSms.get(j).get(Function.KEY_READ);
+                        //                    u.KEY_TIME = CloudSms.get(j).get(Function.KEY_TIME);
+                        //                  u.KEY_READ = CloudSms.get(j).get(Function.KEY_READ);
 
                         slist.add(u);
                         //db.close();

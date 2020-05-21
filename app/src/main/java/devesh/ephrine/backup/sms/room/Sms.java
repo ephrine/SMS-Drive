@@ -16,7 +16,7 @@ public class Sms {
         @ColumnInfo(name = "last_name")
         public String lastName;
         */
-    @ColumnInfo(name = "id")
+ /*   @ColumnInfo(name = "id")
     public String ID;
 
     @ColumnInfo(name = "thread_id")
@@ -25,6 +25,12 @@ public class Sms {
     @ColumnInfo(name = "name")
     public String KEY_NAME = "name";
 
+    @ColumnInfo(name = "time")
+    public String KEY_TIME = "time";
+
+    @ColumnInfo(name = "read")
+    public String KEY_READ = "read";
+ */
     @ColumnInfo(name = "phone")
     public String KEY_PHONE = "phone";
 
@@ -37,10 +43,5 @@ public class Sms {
     @ColumnInfo(name = "timestamp")
     public String KEY_TIMESTAMP = "timestamp";
 
-    @ColumnInfo(name = "time")
-    public String KEY_TIME = "time";
-
-    @ColumnInfo(name = "read")
-    public String KEY_READ = "read";
 
 }

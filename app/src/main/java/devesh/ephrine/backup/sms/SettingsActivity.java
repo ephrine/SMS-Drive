@@ -8,9 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.provider.Telephony;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
@@ -32,8 +30,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import devesh.ephrine.backup.sms.room.AppDatabase;
-import devesh.ephrine.backup.sms.room.UserDao;
-import devesh.ephrine.backup.sms.services.DownloadCloudMessagesService;
 import io.fabric.sdk.android.Fabric;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -134,7 +130,7 @@ public class SettingsActivity extends AppCompatActivity {
                 getPreferenceScreen().findPreference(getString(R.string.settings_sync_interval)).setEnabled(false);
 
                 prefSync.setEnabled(false);
-                prefSyncTitleSummary.setSummary("Need Subscription Plan for Sync");
+                prefSyncTitleSummary.setSummary("Need Subscription Plan for Auto-Sync");
             }
 
 
@@ -313,10 +309,12 @@ public class SettingsActivity extends AppCompatActivity {
                         return true;
                     }
                 });
-            }else {
+            } else {
                 ChangeDefaultSMSApp.setVisible(false);
 
             }
+
+
 
 
 
@@ -544,7 +542,7 @@ public class SettingsActivity extends AppCompatActivity {
             db = Room.databaseBuilder(getContext().getApplicationContext(),
                     AppDatabase.class, getString(R.string.DATABASE_CLOUD_SMS_DB))
                     //.setJournalMode(RoomDatabase.JournalMode.AUTOMATIC)
-.allowMainThreadQueries()
+                    .allowMainThreadQueries()
                     .build();
 
 
@@ -567,8 +565,8 @@ public class SettingsActivity extends AppCompatActivity {
                 try {
                     Function.createCachedFile(getContext().getApplicationContext(), getString(R.string.file_cloud_thread), CloudThreadSms);
 
-                }catch (Exception e){
-                    Log.e(TAG, "DeleteBackup: ERROR #456 ",e );
+                } catch (Exception e) {
+                    Log.e(TAG, "DeleteBackup: ERROR #456 ", e);
                 }
 
                 Toast.makeText(getContext(), "Delete SMS Backup: Successful", Toast.LENGTH_SHORT).show();
@@ -577,9 +575,6 @@ public class SettingsActivity extends AppCompatActivity {
 
 
         }
-
-
-
 
 
     }

@@ -22,15 +22,15 @@ import java.util.LinkedHashSet;
 import devesh.ephrine.backup.sms.BuildConfig;
 import devesh.ephrine.backup.sms.Flavours;
 import devesh.ephrine.backup.sms.Function;
-import devesh.ephrine.backup.sms.MainActivity;
 import devesh.ephrine.backup.sms.MapComparator;
 import devesh.ephrine.backup.sms.R;
 
 public class EpNotificationActivity extends AppCompatActivity {
     LinkedHashSet<HashMap<String, String>> notificationsDataHash = new LinkedHashSet<>();
     String TAG = "EpNotiAct";
-RecyclerView recyclerView;
-RecyclerView.LayoutManager layoutManager;
+    RecyclerView recyclerView;
+    RecyclerView.LayoutManager layoutManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,12 +38,12 @@ RecyclerView.LayoutManager layoutManager;
         recyclerView = findViewById(R.id.notificationRecycleView453);
         layoutManager = new LinearLayoutManager(this);
 
-      loadNotifications();
+        loadNotifications();
 
 
     }
 
-    void loadNotifications(){
+    void loadNotifications() {
         try {
             notificationsDataHash = (LinkedHashSet<HashMap<String, String>>) Function.readCachedFile(this, getString(R.string.FCM_Notifications_Data));
 
@@ -65,13 +65,12 @@ RecyclerView.LayoutManager layoutManager;
         recyclerView.setAdapter(mAdapter);
     }
 
-    public void openBrowser(String url){
-if(url.contains("https") || url.contains("http")){
+    public void openBrowser(String url) {
+        if (url.contains("https") || url.contains("http")) {
 
-}else {
-    url="https://"+url;
-}
-
+        } else {
+            url = "https://" + url;
+        }
 
 
         CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
@@ -84,32 +83,33 @@ if(BuildConfig.FLAVOR.equals(Flavours.FLAVOUR_MASTER)){
     customTabsIntent.intent.setPackage("com.android.chrome");
 }*/
         //customTabsIntent.intent.setPackage("com.android.chrome");
-        if(url.contains("play.google.com") || url.contains("galaxy.store") || url.contains("apps.samsung.com")){
+        if (url.contains("play.google.com") || url.contains("galaxy.store") || url.contains("apps.samsung.com")) {
 // App Update
-            if(BuildConfig.FLAVOR.equals(Flavours.FLAVOUR_GALAXY)) {
+            if (BuildConfig.FLAVOR.equals(Flavours.FLAVOUR_GALAXY)) {
                 //url = "https://galaxy.store/smsdrive";
-                url=getString(R.string.GalaxyUpdateURL);
+                url = getString(R.string.GalaxyUpdateURL);
             }
-            if(BuildConfig.FLAVOR.equals(Flavours.FLAVOUR_MASTER)){
+            if (BuildConfig.FLAVOR.equals(Flavours.FLAVOUR_MASTER)) {
 
             }
-        }else{
+        } else {
 //News & updates
-            if(isPackageInstalled("com.sec.android.app.sbrowser",getPackageManager())){
+            if (isPackageInstalled("com.sec.android.app.sbrowser", getPackageManager())) {
                 customTabsIntent.intent.setPackage("com.sec.android.app.sbrowser");
 
-            }else if(isPackageInstalled("com.android.chrome",getPackageManager())){
+            } else if (isPackageInstalled("com.android.chrome", getPackageManager())) {
                 customTabsIntent.intent.setPackage("com.android.chrome");
 
             }
         }
 
-        builder.setToolbarColor(ContextCompat.getColor(this,R.color.colorPrimary));
+        builder.setToolbarColor(ContextCompat.getColor(this, R.color.colorPrimary));
         builder.setShowTitle(true);
         builder.addDefaultShareMenuItem();
         builder.build().launchUrl((Activity) this, Uri.parse(url));
 
     }
+
     private boolean isPackageInstalled(String packageName, PackageManager packageManager) {
         try {
             packageManager.getPackageInfo(packageName, 0);
@@ -119,14 +119,14 @@ if(BuildConfig.FLAVOR.equals(Flavours.FLAVOUR_MASTER)){
         }
     }
 
-    public void clearNotificationsData(View v){
+    public void clearNotificationsData(View v) {
         notificationsDataHash.clear();
         try {
 
-            Function.createCachedNotificationFile(this,getString(R.string.FCM_Notifications_Data),notificationsDataHash);
+            Function.createCachedNotificationFile(this, getString(R.string.FCM_Notifications_Data), notificationsDataHash);
         } catch (IOException e) {
             e.printStackTrace();
-            Log.e(TAG, "onMessageReceived: ERROR #2343 ",e );
+            Log.e(TAG, "onMessageReceived: ERROR #2343 ", e);
         }
 
         loadNotifications();

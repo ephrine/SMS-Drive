@@ -98,19 +98,19 @@
 
     </PreferenceCategory>
 
-<PreferenceCategory app:title="Advance">
-    <Preference
-        android:summary="Some Devices has Aggressive Power Optimization &amp; Doze mode which can interfere in Auto-Sync Process. Use only if Necessary"
-        app:key="disablepowersave"
-        app:title="Disable Battery Optimization"
-        app:useSimpleSummaryProvider="true" />
-    <Preference
-        app:key="changedefaultsmsapp"
-        app:title="Change Default SMS App"
+    <PreferenceCategory app:title="Advance">
+        <Preference
+            android:summary="Some Devices has Aggressive Power Optimization &amp; Doze mode which can interfere in Auto-Sync Process. Use only if Necessary"
+            app:key="disablepowersave"
+            app:title="Disable Battery Optimization"
+            app:useSimpleSummaryProvider="true" />
+        <Preference
+            app:key="changedefaultsmsapp"
+            app:title="Change Default SMS App"
 
-        app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true" />
 
-</PreferenceCategory>
+    </PreferenceCategory>
 
     <PreferenceCategory app:title="About">
 

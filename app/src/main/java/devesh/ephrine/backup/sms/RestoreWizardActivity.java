@@ -83,6 +83,10 @@ public class RestoreWizardActivity extends AppCompatActivity {
     boolean isRestoreInProgress;
     TextView RestoreProgressTextView;
     LinearLayout LLButtonsR;
+    NotificationManagerCompat notificationManager;
+    NotificationCompat.Builder builder;
+    int PROGRESS_MAX = 100;
+    int PROGRESS_CURRENT = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -216,7 +220,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
             setNotification();
 
             RestoreUpdateNotification("Preparing.....");
-             //  RestoreProgressTextView.setVisibility(View.VISIBLE);
+            //  RestoreProgressTextView.setVisibility(View.VISIBLE);
 
             //  DownloadCloud();
             new RestoreTask().execute("url1", "url2", "url3");
@@ -295,7 +299,6 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
     }
 
-
     public void finalout() {
         if (notificationManager != null) {
             Log.d(TAG, "cancelAllNotification: CLEARING ALL NOTIFICATION");
@@ -307,10 +310,9 @@ public class RestoreWizardActivity extends AppCompatActivity {
             }
 
 
-
         }
 
-        CreateNotification("Restore Complete","Cloud Messages hav been Saved on Device");
+        CreateNotification("Restore Complete", "Cloud Messages hav been Saved on Device");
         try {
             lottieSyncing.setVisibility(View.GONE);
             lottieDoneAnim.setVisibility(View.VISIBLE);
@@ -324,7 +326,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
         }
         //  RestoreProgressTextView.setText("Done");
-RestoreWizardActivity.this.finish();
+        RestoreWizardActivity.this.finish();
 
     }
 
@@ -474,11 +476,6 @@ RestoreWizardActivity.this.finish();
 
     }
 
-
-    NotificationManagerCompat notificationManager;
-    NotificationCompat.Builder builder;
-    int PROGRESS_MAX = 100;
-    int PROGRESS_CURRENT = 0;
     void setNotification() {
 
         builder = new NotificationCompat.Builder(this, "001")
@@ -513,6 +510,7 @@ RestoreWizardActivity.this.finish();
 
 
     }
+
     void CreateNotification(String title, String message) {
 
 
@@ -563,18 +561,18 @@ RestoreWizardActivity.this.finish();
         }
 
         protected void onProgressUpdate(String... progress) {
-            Log.d(TAG, "onProgressUpdate: RestoreTask(): "+progress[0]);
-           // RestoreUpdateNotification(progress[0]);
+            Log.d(TAG, "onProgressUpdate: RestoreTask(): " + progress[0]);
+            // RestoreUpdateNotification(progress[0]);
             //RestoreProgressTextView.setText(progress[0]);
 
 
         }
 
         protected void onPostExecute(String result) {
-           //     lottieSyncing.setVisibility(View.GONE);
-        //        lottieDoneAnim.setVisibility(View.VISIBLE);
-        //      lottieDoneAnim.playAnimation();
-           //   Toast.makeText(RestoreWizardActivity.this, "Success: Restored Messages", Toast.LENGTH_LONG).show();
+            //     lottieSyncing.setVisibility(View.GONE);
+            //        lottieDoneAnim.setVisibility(View.VISIBLE);
+            //      lottieDoneAnim.playAnimation();
+            //   Toast.makeText(RestoreWizardActivity.this, "Success: Restored Messages", Toast.LENGTH_LONG).show();
             Log.d(TAG, "onPostExecute: RestoreTask()");
         }
 
@@ -642,10 +640,6 @@ RestoreWizardActivity.this.finish();
                                 }).start();
 
 
-
-
-
-
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                     @Override
@@ -661,7 +655,6 @@ RestoreWizardActivity.this.finish();
                             } catch (Exception e) {
                                 Log.e(TAG, "cancelNotification: ERROR #5423 ", e);
                             }
-
 
 
                         }
@@ -682,7 +675,7 @@ RestoreWizardActivity.this.finish();
                 });
 
 
-    }
+            }
 
         }
 
@@ -825,14 +818,15 @@ RestoreWizardActivity.this.finish();
 
                 HashMap<String, String> msgg = new HashMap<>();
 
-                msgg.put(Function._ID, _id);
+  /*              msgg.put(Function._ID, _id);
                 msgg.put(Function.KEY_THREAD_ID, thread_id);
-                msgg.put(Function.KEY_PHONE, phone);
-                msgg.put(Function.KEY_MSG, msg);
-                msgg.put(Function.KEY_TYPE, type);
-                msgg.put(Function.KEY_TIMESTAMP, timestamp);
                 msgg.put(Function.KEY_TIME, Function.converToTime(timestamp));
                 msgg.put(Function.KEY_NAME, name);
+*/
+                msgg.put(Function.KEY_MSG, msg);
+                msgg.put(Function.KEY_PHONE, phone);
+                msgg.put(Function.KEY_TIMESTAMP, timestamp);
+                msgg.put(Function.KEY_TYPE, type);
 
                 DeviceSMS.add(msgg);
 
@@ -912,7 +906,7 @@ RestoreWizardActivity.this.finish();
 
         void sms2() {
             RestoreUpdateNotification("Preparing Outbox Messages...");
-onProgressUpdate("Preparing Outbox Messages...");
+            onProgressUpdate("Preparing Outbox Messages...");
 
             List<String> lstSms = new ArrayList<String>();
             Uri smsUri = Uri.parse("content://sms/sent");
@@ -964,14 +958,15 @@ onProgressUpdate("Preparing Outbox Messages...");
 
                 HashMap<String, String> msgg = new HashMap<>();
 
-                msgg.put(Function._ID, _id);
+  /*              msgg.put(Function._ID, _id);
                 msgg.put(Function.KEY_THREAD_ID, thread_id);
-                msgg.put(Function.KEY_PHONE, phone);
-                msgg.put(Function.KEY_MSG, msg);
-                msgg.put(Function.KEY_TYPE, type);
-                msgg.put(Function.KEY_TIMESTAMP, timestamp);
                 msgg.put(Function.KEY_TIME, Function.converToTime(timestamp));
                 msgg.put(Function.KEY_NAME, name);
+*/
+                msgg.put(Function.KEY_TYPE, type);
+                msgg.put(Function.KEY_PHONE, phone);
+                msgg.put(Function.KEY_TIMESTAMP, timestamp);
+                msgg.put(Function.KEY_MSG, msg);
 
                 DeviceSMS.add(msgg);
 
@@ -1058,10 +1053,17 @@ onProgressUpdate("Preparing Outbox Messages...");
                 String msg = cloudsms.get(i).get(Function.KEY_MSG);
                 String phone = cloudsms.get(i).get(Function.KEY_PHONE);
                 String timestamp = cloudsms.get(i).get(Function.KEY_TIMESTAMP);
+                String type = cloudsms.get(i).get(Function.KEY_TYPE);
+                Log.d(TAG, "sortCloudSMS: cloud msg: " + cloudsms.get(i));
+
                 RestoreUpdateNotification("Restoring Messages: " + i + "/" + tc);
-              //  onProgressUpdate("Restoring Messages: " + i + "/" + tc);
                 HashMap<String, String> c1 = new HashMap<>();
-                c1 = cloudsms.get(i);
+                // c1 = cloudsms.get(i);
+                c1.put(Function.KEY_PHONE, phone);
+                c1.put(Function.KEY_TIMESTAMP, timestamp);
+                c1.put(Function.KEY_MSG, msg);
+                c1.put(Function.KEY_TYPE, type);
+
                 if (devicesms.contains(c1)) {
                     Log.d(TAG, "sortCloudSMS: Identical Messages: " + c1.get(Function.KEY_TIMESTAMP) + "-------------\n");
                 } else {
@@ -1078,38 +1080,47 @@ onProgressUpdate("Preparing Outbox Messages...");
                 //   Log.d(TAG, "sortCloudSMS: Sorting FOR LOOP: \nMSG:"+msg
                 // +"\nphone:"+phone+"\ntS:"+timestamp);
 
-  /*        if(msg!=null && phone!=null && timestamp!=null){
-                Log.d(TAG, "sortCloudSMS: Sorting MSG "+i+"Phone:"+phone);
-                for(int x=0;x<=t;x++){
-                    String msg1=devicesms.get(x).get(Function.KEY_MSG);
-                    String phone1=devicesms.get(x).get(Function.KEY_PHONE);
-                    String timestamp1=devicesms.get(x).get(Function.KEY_TIMESTAMP);
+/*               if(msg!=null && phone!=null && timestamp!=null){
+                    Log.d(TAG, "sortCloudSMS: Sorting MSG "+i+"Phone:"+phone);
+                    for(int x=0;x<=t;x++){
+                        String msg1=devicesms.get(x).get(Function.KEY_MSG);
+                        String phone1=devicesms.get(x).get(Function.KEY_PHONE);
+                        String timestamp1=devicesms.get(x).get(Function.KEY_TIMESTAMP);
+                        Log.d(TAG, "sortCloudSMS: device msg: "+devicesms.get(x));
+                        if(msg1!=null && phone1!=null && timestamp1!=null){
+                              Log.d(TAG, "sortCloudSMS: #3243: msg:"+msg1+"\nphone:"+phone1+"ts:"+timestamp1);
 
-                    if(msg1!=null && phone1!=null && timestamp1!=null){
-                     //   Log.d(TAG, "sortCloudSMS: #3243: msg:"+msg1+"\nphone:"+phone1+"ts:"+timestamp1);
+                            if(//msg.equals(msg1)
+                            //        &&
+                            phone.equals(phone1)
+                                    && timestamp.equals(timestamp1)){
+                                Log.d(TAG, "sortCloudSMS: Identical Messages: "+ phone1+"\n t:"+timestamp1);
+                            }else {
+                                saved=saved+1;
+                                // Save into Device
+                                Log.d(TAG, "sortCloudSMS: Saving on Device: "+phone1+"\n t:"+timestamp1+"\n saved:"+saved);
+                                String folder;
+                                if (cloudsms.get(i).get(Function.KEY_TYPE).equals("1")) {
+                                    folder = "inbox";
+                                } else {
+                                    folder = "outbox";
+                                }
+                                saveSms(cloudsms.get(i).get(Function.KEY_PHONE), cloudsms.get(i).get(Function.KEY_MSG), "1", cloudsms.get(i).get(Function.KEY_TIMESTAMP), folder);
 
-                        if(msg.equals(msg1)
-                                //&& phone.equals(phone1)
-                                && timestamp.equals(timestamp1)){
-                            Log.d(TAG, "sortCloudSMS: Identical Messages: "+ phone1+"\n t:"+timestamp1);
+                            }
                         }else {
-                            saved=saved+1;
-                            // Save into Device
-                            Log.d(TAG, "sortCloudSMS: Saving on Device: "+phone1+"\n t:"+timestamp1+"\n saved:"+saved);
+                            Log.e(TAG, "sortCloudSMS: Corrupted MSG !! ID:"+x );
                         }
-                    }else {
-                        Log.e(TAG, "sortCloudSMS: Corrupted MSG !! ID:"+x );
+
+
+
                     }
 
 
 
+                }else{
+                    Log.e(TAG, "sortCloudSMS: Corrupted Cloud Message"+i );
                 }
-
-
-
-            }else{
-                Log.e(TAG, "sortCloudSMS: Corrupted Cloud Message"+i );
-            }
 */
                 if (end == tc) {
                     Log.d(TAG, "\nsortCloudSMS: END OF SAVING -----------------");

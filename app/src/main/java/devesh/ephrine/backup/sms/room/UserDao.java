@@ -10,7 +10,9 @@ import java.util.List;
 
 @Dao
 public interface UserDao {
-    @Query("SELECT * FROM Sms")
+    // @Query("SELECT * FROM Sms")
+    //   List<Sms> getAll();
+    @Query("SELECT uid,type,msg,phone,timestamp FROM Sms")
     List<Sms> getAll();
 
     @Query("SELECT * FROM Sms WHERE uid IN (:userIds)")
@@ -39,6 +41,9 @@ public interface UserDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAllr(Sms sms);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertAllThread(List<Sms> sms);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAllr2(List<Sms> sms);

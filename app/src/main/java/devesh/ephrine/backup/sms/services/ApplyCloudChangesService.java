@@ -413,7 +413,7 @@ public class ApplyCloudChangesService extends JobIntentService {
 
     }
 
-    void deleteSelectedMSG(){
+    void deleteSelectedMSG() {
 
     }
 }

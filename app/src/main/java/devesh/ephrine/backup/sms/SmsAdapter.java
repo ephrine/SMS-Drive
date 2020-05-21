@@ -13,14 +13,19 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RatingBar;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.amulyakhare.textdrawable.util.ColorGenerator;
+import com.google.android.gms.ads.formats.NativeAd;
+import com.google.android.gms.ads.formats.UnifiedNativeAd;
+import com.google.android.gms.ads.formats.UnifiedNativeAdView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,10 +37,19 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.MyViewHolder> {
     public static final double SPACE_MB = 1024 * SPACE_KB;
     public static final double SPACE_GB = 1024 * SPACE_MB;
     public static final double SPACE_TB = 1024 * SPACE_GB;
+
+    // A menu item view type.
+    private static final int MENU_ITEM_VIEW_TYPE = 0;
+
+    // The unified native ad view type.
+    private static final int UNIFIED_NATIVE_AD_VIEW_TYPE = 1;
+
     public String TAG = String.valueOf(R.string.app_name);
     public Context mContext;
 
     ArrayList<HashMap<String, String>> SmsThreadHashMap = new ArrayList<>();
+  //  ArrayList<Object> SmsThreadHashMap = new ArrayList<>();
+
 
     String MsgStorage;
 
@@ -54,27 +68,28 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.MyViewHolder> {
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent,
                                            int viewType) {
-        // create a new view
-        // TextView v = (TextView) LayoutInflater.from(parent.getContext())
-        //       .inflate(R.layout.recycleview_Files_list, parent, false);
 
 
-        View v = LayoutInflater.from(parent.getContext())
+
+       View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.sms_recycleview_item, parent, false);
 
 
         // Give the view as it is
         MyViewHolder vh = new MyViewHolder(v);
+         return vh;
 
 
-        return vh;
+
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
+
+
     @Override
     public void onBindViewHolder(final MyViewHolder holder, final int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
+
 
         HashMap<String, String> song = new HashMap<String, String>();
         song = SmsThreadHashMap.get(position);
@@ -94,21 +109,22 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.MyViewHolder> {
             }
         }
 
-        String firstLetter;
+        try {
 
-        if (String.valueOf(song.get(Function.KEY_NAME).charAt(0)) != null) {
+            String firstLetter;
+            String.valueOf(song.get(Function.KEY_NAME).charAt(0));
             firstLetter = "0";
             Log.d(TAG, "onBindViewHolder: First Letter NULL : " + song.get(Function.KEY_NAME).charAt(0));
             firstLetter = String.valueOf(song.get(Function.KEY_NAME).charAt(0));
-        } else {
-            firstLetter = String.valueOf(song.get(Function.KEY_NAME).charAt(0));
-        }
-        ColorGenerator generator = ColorGenerator.MATERIAL;
-        int color = generator.getColor(getItem(position));
-        TextDrawable drawable = TextDrawable.builder()
-                .buildRound(firstLetter, color);
-        holder.imgThumb.setImageDrawable(drawable);
+            ColorGenerator generator = ColorGenerator.MATERIAL;
+            int color = generator.getColor(getItem(position));
+            TextDrawable drawable = TextDrawable.builder()
+                    .buildRound(firstLetter, color);
+            holder.imgThumb.setImageDrawable(drawable);
 
+        } catch (Exception e) {
+            Log.e(TAG, "onBindViewHolder: ERROR #567", e);
+        }
 
         holder.LLSmsList.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -143,6 +159,8 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.MyViewHolder> {
 
             }
         });
+    }
+
 /*
 
        holder.AddToLibraryChip.setOnClickListener(new View.OnClickListener() {
@@ -156,7 +174,6 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.MyViewHolder> {
         });  */
 
 
-    }
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override
@@ -173,6 +190,9 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.MyViewHolder> {
     public long getItemId(int position) {
         return position;
     }
+
+
+
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and

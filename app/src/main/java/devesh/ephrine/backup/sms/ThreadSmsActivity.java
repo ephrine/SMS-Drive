@@ -3,6 +3,7 @@ package devesh.ephrine.backup.sms;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.MergeCursor;
 import android.net.Uri;
@@ -22,16 +23,24 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.RequestConfiguration;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -75,29 +84,74 @@ public class ThreadSmsActivity extends AppCompatActivity {
     LinearLayout LLDeleteMSG;
     ArrayList<Sms> toDelete = new ArrayList<>();
     private Handler handler = new Handler();
+    List<String> testDeviceIds = Arrays.asList("D7D25A835A1A43446353F5BEC7C2B635");
+    AdView mAdView;
+    SharedPreferences sharedPrefAppGeneral;
+    boolean isSubscribed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+isSubscribed=false;
         Intent intent = getIntent();
         setContentView(R.layout.sms_activity_thread);
         //      SmsThreadHashMap = (HashMap<String, DataSnapshot>)intent.getSerializableExtra("smsthread");
         //  SmsThreadHashMap = Parcels.unwrap(getIntent().getParcelableExtra("mylist"))(HashMap<String, DataSnapshot>)intent.getBundleExtra("smsthread");
         //  id = intent.getStringExtra("smsthreadid");
-        name = intent.getStringExtra("name");
-        address = intent.getStringExtra("address");
-        thread_id_main = Integer.parseInt(intent.getStringExtra("thread_id"));
-        storage = intent.getStringExtra("storage");
+        if(intent.getStringExtra("name")!=null){
+            name = intent.getStringExtra("name");
+        }
+        if(intent.getStringExtra("address")!=null){
+            address = intent.getStringExtra("address");
+        }
+        if(intent.getStringExtra("thread_id")!=null){
+            thread_id_main = Integer.parseInt(intent.getStringExtra("thread_id"));
+        }
+        if(intent.getStringExtra("storage")!=null){
+            storage = intent.getStringExtra("storage");
+        }
+        sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
 
+        String sub=sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe),"0");
+        if(sub.equals("1")){
+            isSubscribed=true;
+        }else {
+            isSubscribed=false;
+        }
+
+        //Admob
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+                Log.d(TAG, "onInitializationComplete: AdMob has been initialize");
+
+            }
+        });
+
+  /*      RequestConfiguration configuration =
+                new RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build();
+        MobileAds.setRequestConfiguration(configuration);
+*/
+        mAdView = findViewById(R.id.adView1);
+        if(isSubscribed){
+            mAdView.setVisibility(View.GONE);
+        }else {
+            AdRequest adRequest = new AdRequest.Builder().build();
+            mAdView.loadAd(adRequest);
+        }
         //  listView = (ListView) findViewById(R.id.listView);
         //   new_message = (EditText) findViewById(R.id.newTextBox);
 //        send_message = (ImageButton) findViewById(R.id.send_message);
-
         //  NewMsgBoxLL = (LinearLayout) findViewById(R.id.msgTextBoxView);
-
         // setContentView(R.layout.sms_activity_thread);
-        getSupportActionBar().setTitle(name);
+
+        if(name!=null){
+            getSupportActionBar().setTitle(name);
+        }else{
+            name=Function.getContactbyPhoneNumber(this,address);
+            getSupportActionBar().setTitle(name);
+        }
+
 
         recyclerView = findViewById(R.id.SmsThreadRecycleView);
 
@@ -441,15 +495,15 @@ public class ThreadSmsActivity extends AppCompatActivity {
 
     public void addToDeleteList(HashMap<String, String> sms) {
         Sms s = new Sms();
-        s.ID = sms.get(Function._ID);
-        s.KEY_READ = sms.get(Function.KEY_READ);
+        //  s.ID = sms.get(Function._ID);
+        //  s.KEY_READ = sms.get(Function.KEY_READ);
         s.KEY_TIMESTAMP = sms.get(Function.KEY_TIMESTAMP);
         s.KEY_TYPE = sms.get(Function.KEY_TYPE);
         s.KEY_PHONE = sms.get(Function.KEY_PHONE);
-        s.KEY_THREAD_ID = sms.get(Function.KEY_THREAD_ID);
+        //      s.KEY_THREAD_ID = sms.get(Function.KEY_THREAD_ID);
         s.KEY_MSG = sms.get(Function.KEY_MSG);
-        s.KEY_NAME = sms.get(Function.KEY_NAME);
-        s.KEY_TIME = sms.get(Function.KEY_TIME);
+        //       s.KEY_NAME = sms.get(Function.KEY_NAME);
+        //     s.KEY_TIME = sms.get(Function.KEY_TIME);
         s.uid = Integer.parseInt(sms.get("uid"));
         toDelete.add(s);
 
@@ -461,15 +515,15 @@ public class ThreadSmsActivity extends AppCompatActivity {
 
     public void removeFromDeleteList(HashMap<String, String> sms) {
         Sms s = new Sms();
-        s.ID = sms.get(Function._ID);
-        s.KEY_READ = sms.get(Function.KEY_READ);
+        //     s.ID = sms.get(Function._ID);
+        //     s.KEY_READ = sms.get(Function.KEY_READ);
         s.KEY_TIMESTAMP = sms.get(Function.KEY_TIMESTAMP);
         s.KEY_TYPE = sms.get(Function.KEY_TYPE);
         s.KEY_PHONE = sms.get(Function.KEY_PHONE);
-        s.KEY_THREAD_ID = sms.get(Function.KEY_THREAD_ID);
+        //    s.KEY_THREAD_ID = sms.get(Function.KEY_THREAD_ID);
         s.KEY_MSG = sms.get(Function.KEY_MSG);
-        s.KEY_NAME = sms.get(Function.KEY_NAME);
-        s.KEY_TIME = sms.get(Function.KEY_TIME);
+        //     s.KEY_NAME = sms.get(Function.KEY_NAME);
+        //     s.KEY_TIME = sms.get(Function.KEY_TIME);
         s.uid = Integer.parseInt(sms.get("uid"));
 
         toDelete.remove(s);
@@ -709,14 +763,14 @@ public class ThreadSmsActivity extends AppCompatActivity {
                     updateProgress(progress);
                     //    Log.d(TAG, "startLoadingCloudSms: Sorting SMS...");
                     HashMap<String, String> hm = new HashMap<>();
-                    hm.put(Function._ID, smsL.get(i).ID);
-                    hm.put(Function.KEY_READ, smsL.get(i).KEY_READ);
+                    //        hm.put(Function._ID, smsL.get(i).ID);
+                    //      hm.put(Function.KEY_READ, smsL.get(i).KEY_READ);
                     hm.put(Function.KEY_TIMESTAMP, smsL.get(i).KEY_TIMESTAMP);
-                    hm.put(Function.KEY_TIME, smsL.get(i).KEY_TIME);
+                    //    hm.put(Function.KEY_TIME, smsL.get(i).KEY_TIME);
                     hm.put(Function.KEY_TYPE, smsL.get(i).KEY_TYPE);
                     hm.put(Function.KEY_PHONE, smsL.get(i).KEY_PHONE);
                     hm.put(Function.KEY_MSG, smsL.get(i).KEY_MSG);
-                    hm.put(Function.KEY_NAME, smsL.get(i).KEY_NAME);
+                    //    hm.put(Function.KEY_NAME, smsL.get(i).KEY_NAME);
                     hm.put("uid", String.valueOf(smsL.get(i).uid));
 
                     SortSMS.add(hm);
