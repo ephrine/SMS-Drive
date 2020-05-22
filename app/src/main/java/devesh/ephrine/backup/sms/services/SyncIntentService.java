@@ -134,7 +134,6 @@ public class SyncIntentService extends JobIntentService {
     SharedPreferences sharedPrefAppGeneral;
     // Trace myTrace;
 
-
     public static void enqueueWork(Context context, Intent work) {
         enqueueWork(context, SyncIntentService.class, JOB_ID, work);
     }
@@ -166,6 +165,7 @@ public class SyncIntentService extends JobIntentService {
         }
         //  myTrace = FirebasePerformance.getInstance().newTrace("SyncIntentService");
         //   myTrace.start();
+        database = FirebaseDatabase.getInstance();
 
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -173,6 +173,8 @@ public class SyncIntentService extends JobIntentService {
         wakeLock.acquire(60 * 60 * 1000L /*10 minutes*/);
 
         sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        UserUID = user.getPhoneNumber().replace("+", "x");
 
         if (sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0") != null) {
             String sub = sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0");
@@ -201,8 +203,8 @@ public class SyncIntentService extends JobIntentService {
 
         Log.d(TAG, "onCreate: SyncIntentService() #9086");
 
-
         CheckMultiAppUsage();
+
         startSync();
 
 
@@ -250,8 +252,7 @@ public class SyncIntentService extends JobIntentService {
 
         mContext = getApplicationContext();
         iThread = new HashMap<>();
-        user = FirebaseAuth.getInstance().getCurrentUser();
-        database = FirebaseDatabase.getInstance();
+//        database = FirebaseDatabase.getInstance();
 
         sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(mContext /* Activity context */);
         SMSAutoBackup = sharedPrefAutoBackup.getBoolean(mContext.getResources().getString(R.string.settings_sync), false);
@@ -1321,40 +1322,45 @@ public class SyncIntentService extends JobIntentService {
     }
 
     void CheckMultiAppUsage(){
-        String AppInstanceID=sharedPrefAppGeneral.getString(getString(R.string.App_InstanceID),"");
-        DatabaseReference AppInstanceIDDB = database.getReference("/users/"+UserUID+"/smsdrive/instanceid");
-// Read from the database
-        AppInstanceIDDB.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                String AppInstanceIDReged = dataSnapshot.getValue(String.class);
-                Log.d(TAG, "DB AppInstanceID: " + AppInstanceIDReged);
+        try{
+            String AppInstanceID=sharedPrefAppGeneral.getString(getString(R.string.App_InstanceID),"0");
+            DatabaseReference AppInstanceIDDB = database.getReference("/users/"+UserUID+"/smsdrive/instanceid");
 
-                if(AppInstanceIDReged.equals(AppInstanceID)){
-                    Log.d(TAG, "onDataChange: App installed on single device");
-                }else {
-                    if(isSubscribed){
-                        Log.d(TAG, "onDataChange: App installed on multiple device with subscription");
-                    }else{
-                        Log.d(TAG, "onDataChange: App installed on multiple device with non-subscription");
-                        FirebaseAuth.getInstance().signOut();
-                        deleteAppData();
+            AppInstanceIDDB.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    // This method is called once with the initial value and again
+                    // whenever data at this location is updated.
+                    String AppInstanceIDReged = dataSnapshot.getValue(String.class);
+                    Log.d(TAG, "DB AppInstanceID: " + AppInstanceIDReged);
 
+                    if(AppInstanceIDReged.equals(AppInstanceID)){
+                        Log.d(TAG, "onDataChange: App installed on single device");
+                    }else {
+                        if(isSubscribed){
+                            Log.d(TAG, "onDataChange: App installed on multiple device with subscription");
+                        }else{
+                            Log.d(TAG, "onDataChange: App installed on multiple device with non-subscription");
+                            FirebaseAuth.getInstance().signOut();
+                            deleteAppData();
+
+                        }
                     }
+
+
                 }
 
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    // Failed to read value
+                    Log.w(TAG, "Failed to read value.", error.toException());
+                }
+            });
 
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w(TAG, "Failed to read value.", error.toException());
-            }
-        });
-    }
+        }catch (Exception e){
+           Log.e(TAG,"ERROR #654 "+e);
+        }
+   }
 
     private void deleteAppData() {
         try {

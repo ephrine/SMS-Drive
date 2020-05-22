@@ -1077,6 +1077,9 @@ id triangle
 id unchecked
 id uniform
 id up
+id view_tree_lifecycle_owner
+id view_tree_saved_state_registry_owner
+id view_tree_view_model_store_owner
 id visible
 id wrap
 id wrap_content
