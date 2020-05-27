@@ -97,7 +97,7 @@ if (!kk.exists()) {
 keypath=kk
 } */
 
-def AppVersionName = "0.1.0"
+def AppVersionName = "0.1.0X"
 
 android {
     compileOptions {
