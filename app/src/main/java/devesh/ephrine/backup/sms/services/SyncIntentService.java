@@ -16,7 +16,6 @@ import android.os.Build;
 import android.os.PowerManager;
 import android.os.Process;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.JobIntentService;
@@ -179,7 +178,7 @@ public class SyncIntentService extends JobIntentService {
         if (sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0") != null) {
             String sub = sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0");
 
-           try {
+            try {
                 isSubscribed = sub.equals("1");
             } catch (Exception e) {
                 Log.e(TAG, "onCreate: ERROR #6545 ", e);
@@ -1321,10 +1320,10 @@ public class SyncIntentService extends JobIntentService {
         */
     }
 
-    void CheckMultiAppUsage(){
-        try{
-            String AppInstanceID=sharedPrefAppGeneral.getString(getString(R.string.App_InstanceID),"0");
-            DatabaseReference AppInstanceIDDB = database.getReference("/users/"+UserUID+"/smsdrive/instanceid");
+    void CheckMultiAppUsage() {
+        try {
+            String AppInstanceID = sharedPrefAppGeneral.getString(getString(R.string.App_InstanceID), "0");
+            DatabaseReference AppInstanceIDDB = database.getReference("/users/" + UserUID + "/smsdrive/instanceid");
 
             AppInstanceIDDB.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -1334,12 +1333,12 @@ public class SyncIntentService extends JobIntentService {
                     String AppInstanceIDReged = dataSnapshot.getValue(String.class);
                     Log.d(TAG, "DB AppInstanceID: " + AppInstanceIDReged);
 
-                    if(AppInstanceIDReged.equals(AppInstanceID)){
+                    if (AppInstanceIDReged.equals(AppInstanceID)) {
                         Log.d(TAG, "onDataChange: App installed on single device");
-                    }else {
-                        if(isSubscribed){
+                    } else {
+                        if (isSubscribed) {
                             Log.d(TAG, "onDataChange: App installed on multiple device with subscription");
-                        }else{
+                        } else {
                             Log.d(TAG, "onDataChange: App installed on multiple device with non-subscription");
                             FirebaseAuth.getInstance().signOut();
                             deleteAppData();
@@ -1357,15 +1356,15 @@ public class SyncIntentService extends JobIntentService {
                 }
             });
 
-        }catch (Exception e){
-           Log.e(TAG,"ERROR #654 "+e);
+        } catch (Exception e) {
+            Log.e(TAG, "ERROR #654 " + e);
         }
-   }
+    }
 
     private void deleteAppData() {
         try {
             // clearing app data
-            String packageName =getApplicationContext().getPackageName();
+            String packageName = getApplicationContext().getPackageName();
             Runtime runtime = Runtime.getRuntime();
             runtime.exec("pm clear " + packageName);
             Log.i(TAG, "App Data Cleared !!");

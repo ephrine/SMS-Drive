@@ -1,6 +1,7 @@
 package devesh.ephrine.backup.sms.samsung.adapter;
 
 
+import android.content.Intent;
 import android.util.Log;
 
 import com.samsung.android.sdk.iap.lib.helper.IapHelper;
@@ -12,7 +13,8 @@ import com.samsung.android.sdk.iap.lib.vo.PurchaseVo;
 
 import java.util.ArrayList;
 
-import devesh.ephrine.backup.sms.samsung.activity.GalaxyIAPActivity;
+import devesh.ephrine.backup.sms.CheckSubscriptionService;
+import devesh.ephrine.backup.sms.PaymentActivity;
 import devesh.ephrine.backup.sms.samsung.constants.ItemDefine;
 
 /**
@@ -27,17 +29,17 @@ public class PaymentAdapter extends ItemDefine implements OnPaymentListener, OnC
 
     private final String TAG = PaymentAdapter.class.getSimpleName();
 
-    private GalaxyIAPActivity mMainActivity = null;
+    private PaymentActivity mPaymentActivity = null;
     private IapHelper mIapHelper = null;
-    private String mPassThroughParam = "TEMP_PASS_THROUGH";
+    private String mPassThroughParam = "";//TEMP_PASS_THROUGH
     private String mConsumedItemId = "";
 
     public PaymentAdapter
             (
-                    GalaxyIAPActivity _activity,
+                    PaymentActivity _activity,
                     IapHelper _iapHelper
             ) {
-        mMainActivity = _activity;
+        mPaymentActivity = _activity;
         mIapHelper = _iapHelper;
     }
 
@@ -52,7 +54,7 @@ public class PaymentAdapter extends ItemDefine implements OnPaymentListener, OnC
                         if (mPassThroughParam.equals(_purchaseVo.getPassThroughParam())) {
                             message = "passThroughParam is matched";
 
-                            Log.d(TAG, _purchaseVo.dump());
+                            Log.d(TAG, "PAYMENT SUCCESS #323 \n" + _purchaseVo.dump());
                             if (_purchaseVo.getIsConsumable()) {
                                 mConsumedItemId = _purchaseVo.getItemId();
                                 mIapHelper.consumePurchasedItems(_purchaseVo.getPurchaseId(), PaymentAdapter.this);
@@ -60,10 +62,25 @@ public class PaymentAdapter extends ItemDefine implements OnPaymentListener, OnC
 
                             if (_purchaseVo.getItemId().equals(ITEM_ID_NONCONSUMABLE)) {
                             }
-                            //  mMainActivity.setGunLevel(2);
+                            //  mPaymentActivity.setGunLevel(2);
                             else if (_purchaseVo.getItemId().equals(ITEM_ID_SUBSCRIPTION)) {
+                                Log.d(TAG, "onPayment: SUBSCRIPTION SUCCESS ITEM_ID_SUBSCRIPTION !!");
+                                String purchasedate = _purchaseVo.getPurchaseDate();
+                                String OrderID = _purchaseVo.getOrderId();//getOrderId();
+                                String price = _purchaseVo.getItemPriceString();
+
+                                mPaymentActivity.paymentSuccess(OrderID, purchasedate, price);
+                                try {
+                                    Intent subscriptionCheck = new Intent(mPaymentActivity, CheckSubscriptionService.class);
+
+                                    mPaymentActivity.startService(subscriptionCheck);
+
+
+                                } catch (Exception e) {
+                                    Log.e(TAG, "onCreate: #5465653 ", e);
+                                }
                             }
-                            //  mMainActivity.setInfiniteBullet(true);
+                            //  mPaymentActivity.setInfiniteBullet(true);
                             else if (_purchaseVo.getItemId().equals(ITEM_ID_CONSUMABLE)) {
                                 Log.d(TAG, "onPayment consumePurchasedItems" + _purchaseVo.getPurchaseId());
                             }
@@ -95,7 +112,7 @@ public class PaymentAdapter extends ItemDefine implements OnPaymentListener, OnC
                             if (consumeVo.getStatusCode() == CONSUME_STATUS_SUCCESS) {
                                 if (mConsumedItemId.equals(ITEM_ID_CONSUMABLE)) {
                                 }
-                                // mMainActivity.plusBullet();
+                                // mPaymentActivity.plusBullet();
                             } else {
                                 Log.e(TAG, "onConsumePurchasedItems: statuscode " + consumeVo.getStatusCode());
                             }

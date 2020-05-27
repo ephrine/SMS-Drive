@@ -2,18 +2,12 @@ package devesh.ephrine.backup.sms;
 
 import android.view.View;
 
-import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.android.gms.ads.formats.MediaView;
 import com.google.android.gms.ads.formats.UnifiedNativeAdView;
 
-public class UnifiedNativeAdViewHolder  extends SmsAdapter.MyViewHolder {
+public class UnifiedNativeAdViewHolder extends SmsAdapter.MyViewHolder {
 
     private UnifiedNativeAdView adView;
-
-    public UnifiedNativeAdView getAdView() {
-        return adView;
-    }
 
     UnifiedNativeAdViewHolder(View view) {
         super(view);
@@ -32,5 +26,9 @@ public class UnifiedNativeAdViewHolder  extends SmsAdapter.MyViewHolder {
         adView.setStarRatingView(adView.findViewById(R.id.ad_stars));
         adView.setStoreView(adView.findViewById(R.id.ad_store));
         adView.setAdvertiserView(adView.findViewById(R.id.ad_advertiser));
+    }
+
+    public UnifiedNativeAdView getAdView() {
+        return adView;
     }
 }

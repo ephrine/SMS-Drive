@@ -1,5 +1,5 @@
 ext {
-//    var = signingConfigs.production
+//   var = signingConfigs.production
 }
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
@@ -14,6 +14,13 @@ def MS_AppCenterKey
 def AdMobAppID
 def AdMobBanner1ID
 def AdMobIntID
+
+/*def keypassword
+def keyalias
+def keypath
+*/
+
+def samsungIAP_Item
 
 Properties properties = new Properties()
 
@@ -30,10 +37,13 @@ if (!lp.exists()) {
     gplaysubscriptionid1 = properties.getProperty('gplaysubscriptionid1')
     gplaylicensekey = properties.getProperty('g.license.key')
     MS_AppCenterKey = properties.getProperty('msappcenter')
-    AdMobAppID= properties.getProperty('admobappid')
-    AdMobBanner1ID= properties.getProperty('admobbanner1')
-    AdMobIntID= properties.getProperty('admobinitid')
-
+    AdMobAppID = properties.getProperty('admobappid')
+    AdMobBanner1ID = properties.getProperty('admobbanner1')
+    AdMobIntID = properties.getProperty('admobinitid')
+    samsungIAP_Item= properties.getProperty('samsungiapitem')
+    /*keypassword = properties.getProperty('sign.key.password')
+    keyalias = properties.getProperty('sign.key.alias')
+    keypath = properties.getProperty('sign.key.path') */
 } else {
     project.logger.info('Located local.properties file')
 
@@ -42,19 +52,24 @@ if (!lp.exists()) {
     gplaysubscriptionid1 = properties.getProperty('gplaysubscriptionid1')
     gplaylicensekey = properties.getProperty('g.license.key')
     MS_AppCenterKey = properties.getProperty('msappcenter')
-    AdMobAppID= properties.getProperty('admobappid')
-    AdMobBanner1ID= properties.getProperty('admobbanner1')
-    AdMobIntID= properties.getProperty('admobinitid')
+    AdMobAppID = properties.getProperty('admobappid')
+    AdMobBanner1ID = properties.getProperty('admobbanner1')
+    AdMobIntID = properties.getProperty('admobinitid')
+    samsungIAP_Item= properties.getProperty('samsungiapitem')
+
+    /*keypassword = properties.getProperty('sign.key.password')
+    keyalias = properties.getProperty('sign.key.alias')
+    keypath = properties.getProperty('sign.key.path') */
 
 }
 //def keypassword = properties.getProperty('sign.key.password')
 
 
-ext.keypassword = System.getenv('sign.key.password')
+//ext.keypassword = System.getenv('sign.key.password')
 
-ext.keyalias = System.getenv('sign.key.alias')
+//ext.keyalias = System.getenv('sign.key.alias')
 
-ext.keypath = System.getenv('sign.key.path')
+//ext.keypath = System.getenv('sign.key.path')
 
 
 //ext.paymentserverurl = System.getenv('paymentserverurl')
@@ -82,7 +97,7 @@ if (!kk.exists()) {
 keypath=kk
 } */
 
-def AppVersionName = "0.0.9"
+def AppVersionName = "0.1.0"
 
 android {
     compileOptions {
@@ -93,19 +108,19 @@ android {
 
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
-    /*signingConfigs {
-                   release {
-                       storeFile keypath
-                       storePassword keypassword
-                       keyAlias = keyalias
-                       keyPassword keypassword
-					   
-					   // Optional, specify signing versions used
-       v1SigningEnabled true
-       v2SigningEnabled true
-                   }
-               }
-               */
+    /*  signingConfigs {
+                     release {
+                         storeFile keypath
+                         storePassword keypassword
+                         keyAlias = keyalias
+                         keyPassword keypassword
+
+                         // Optional, specify signing versions used
+         v1SigningEnabled true
+         v2SigningEnabled true
+                     }
+                 }
+  */
 
     defaultConfig {
 
@@ -113,7 +128,7 @@ android {
         applicationId "devesh.ephrine.backup.sms"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 30
+        versionCode 32
         versionName "" + AppVersionName + " Beta Version"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
@@ -138,7 +153,7 @@ android {
         resValue "string", "AppVersionCode", "\"" + versionCode + "\""
 
         //     resValue "string", "AppVersionName", "\"" + versionName + "\""
-        //    signingConfig signingConfigs.release
+        //     signingConfig signingConfigs.release
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -179,6 +194,8 @@ android {
             resValue "string", "AppFlavour", "\"" + "galaxy" + "\""
             resValue "string", "AppVersionName", "\"" + versionName + "\""
             // archivesBaseName = "galaxy-app"
+            buildConfigField "String", "SamsungIAP_Item", "\"" + samsungIAP_Item + "\""
+
 
         }
         huawei {
@@ -210,7 +227,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging:+'
     // implementation 'com.google.firebase:firebase-inappmessaging-display:+'
     implementation 'com.google.android.gms:play-services-ads:+'
-  //  implementation 'com.google.firebase:firebase-ads:+'
+    //  implementation 'com.google.firebase:firebase-ads:+'
 // Add the dependency for the Performance Monitoring library
     //  implementation 'com.google.firebase:firebase-perf:19.0.6'
     //  implementation 'androidx.work:work-runtime:2.4.0-alpha01'

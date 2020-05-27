@@ -1,7 +1,11 @@
 package devesh.ephrine.backup.sms.samsung.adapter;
 
+import android.content.SharedPreferences;
 import android.util.Log;
 
+import androidx.preference.PreferenceManager;
+
+import com.lifeofcoding.cacheutlislibrary.CacheUtils;
 import com.samsung.android.sdk.iap.lib.helper.IapHelper;
 import com.samsung.android.sdk.iap.lib.listener.OnConsumePurchasedItemsListener;
 import com.samsung.android.sdk.iap.lib.listener.OnGetOwnedListListener;
@@ -13,7 +17,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import devesh.ephrine.backup.sms.MainActivity;
+import devesh.ephrine.backup.sms.PaymentActivity;
+import devesh.ephrine.backup.sms.R;
 import devesh.ephrine.backup.sms.samsung.constants.ItemDefine;
 
 /**
@@ -22,34 +27,41 @@ import devesh.ephrine.backup.sms.samsung.constants.ItemDefine;
 
 public class OwnedListAdapter extends ItemDefine implements OnGetOwnedListListener, OnConsumePurchasedItemsListener {
     private final String TAG = OwnedListAdapter.class.getSimpleName();
-
-    private MainActivity mMainActivity = null;
+    SharedPreferences sharedPrefAppGeneral;
+    private PaymentActivity mPaymentActivity = null;
     private IapHelper mIapHelper = null;
-
     private String mConsumablePurchaseIDs = "";
     private Map<String, String> consumeItemMap = new HashMap<String, String>();
 
     public OwnedListAdapter
             (
-                    MainActivity _activity,
+                    PaymentActivity _activity,
                     IapHelper _iapHelper
             ) {
-        mMainActivity = _activity;
+        mPaymentActivity = _activity;
         mIapHelper = _iapHelper;
+        sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(mPaymentActivity /* Activity context */);
+
     }
 
     @Override
     public void onGetOwnedProducts(ErrorVo _errorVo, ArrayList<OwnedProductVo> _ownedList) {
-        Log.v(TAG, "onGetOwnedProducts");
+        Log.v(TAG, "onGetOwnedProducts !");
         if (_errorVo != null) {
+
             if (_errorVo.getErrorCode() == IapHelper.IAP_ERROR_NONE) {
+
+
                 int gunLevel = 0;
-                boolean infiniteBullet = false;
+                boolean isSub = false;
                 if (_ownedList != null) {
+
+
                     for (int i = 0; i < _ownedList.size(); i++) {
                         OwnedProductVo product = _ownedList.get(i);
 
-                        Log.d(TAG, product.dump());
+
+                        Log.d(TAG, "onGetOwnedProducts: \n" + product.dump());
                         if (product.getIsConsumable()) {
                             try {
                                 if (consumeItemMap.get(product.getPurchaseId()) == null) {
@@ -66,17 +78,43 @@ public class OwnedListAdapter extends ItemDefine implements OnGetOwnedListListen
 
                         if (product.getItemId().equals(ITEM_ID_NONCONSUMABLE)) {
                             gunLevel = 1;
-                        } else if (product.getItemId().equals(ITEM_ID_SUBSCRIPTION)) {
-                            infiniteBullet = true;
                         } else if (product.getItemId().equals(ITEM_ID_CONSUMABLE)) {
                             Log.d(TAG, "onGetOwnedProducts: consumePurchasedItems" + product.getPurchaseId());
                         }
+
+                        if (product.getItemId().equals(ITEM_ID_SUBSCRIPTION)) {
+                            isSub = true;
+                            Log.d(TAG, "onGetOwnedProducts: ITEM_ID_SUBSCRIPTION");
+                            String purchasedate = product.getPurchaseDate();
+                            String OrderID = product.getPaymentId();
+                            String price = product.getItemPriceString();
+
+                            mPaymentActivity.paymentSuccess("0", purchasedate, price);
+                        }
                     }
+
+                    if (isSub) {
+                        mPaymentActivity.isSubscribed = true;
+
+                        Log.d(TAG, "onGetOwnedProducts: USER HAS SUBSCRIBED TO SMS DRIVE");
+                        SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
+                        editor.putString(mPaymentActivity.getString(R.string.cache_Sub_isSubscribe), "1").apply();
+                        CacheUtils.writeFile(mPaymentActivity.getString(R.string.cache_Sub_isSubscribe), "1");
+                    } else {
+                        Log.d(TAG, "onGetOwnedProducts: USER HAS NOT SUBSCRIBED TO SMS DRIVE");
+                        SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
+                        editor.putString(mPaymentActivity.getString(R.string.cache_Sub_isSubscribe), "0").apply();
+                        CacheUtils.writeFile(mPaymentActivity.getString(R.string.cache_Sub_isSubscribe), "0");
+                        mPaymentActivity.isSubscribed = false;
+                    }
+
+                } else {
+                    Log.e(TAG, "onGetOwnedProducts: NOT SUBSCRIBED !! GALAXY");
                 }
 
                 /* ----------------------------------------------------- */
-                //      mMainActivity.setGunLevel(gunLevel);
-                //     mMainActivity.setInfiniteBullet(infiniteBullet);
+                //      mPaymentActivity.setGunLevel(gunLevel);
+                //     mPaymentActivity.setInfiniteBullet(infiniteBullet);
 
                 if (mConsumablePurchaseIDs.length() > 0) {
                     mIapHelper.consumePurchasedItems(mConsumablePurchaseIDs, OwnedListAdapter.this);
@@ -87,6 +125,8 @@ public class OwnedListAdapter extends ItemDefine implements OnGetOwnedListListen
                 if (_errorVo.getErrorString() != null)
                     Log.e(TAG, "onGetOwnedProducts ErrorString[" + _errorVo.getErrorString() + "]");
             }
+        } else {
+            Log.d(TAG, "onGetOwnedProducts: NOT SUBSCRIBED !! #43445");
         }
     }
 
@@ -101,7 +141,7 @@ public class OwnedListAdapter extends ItemDefine implements OnGetOwnedListListen
                                 String itemId = consumeItemMap.get(consumeVo.getPurchaseId());
                                 if (itemId != null) {
                                     if (itemId.equals(ITEM_ID_CONSUMABLE))
-                                        //         mMainActivity.plusBullet();
+                                        //         mPaymentActivity.plusBullet();
                                         consumeItemMap.remove(consumeVo.getPurchaseId());
                                 }
                             } else

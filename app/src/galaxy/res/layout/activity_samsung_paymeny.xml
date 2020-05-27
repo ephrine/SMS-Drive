@@ -54,7 +54,8 @@
             android:padding="5dp"
             android:text="Samsung Galaxy Users have Free Subscription for Beta Version. Offer is available for limited time until further notice"
             android:textAlignment="center"
-            android:textStyle="italic" />
+            android:textStyle="italic"
+            android:visibility="gone" />
 
         <Space
             android:layout_width="match_parent"
@@ -197,7 +198,7 @@
                     android:onClick="SubscribeNow"
                     android:text="  Subscribe Now"
                     android:textAllCaps="true"
-                    android:visibility="gone" />
+                    android:visibility="visible" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -255,7 +256,8 @@
                     android:layout_marginRight="25dp"
 
                     android:text="Cancel Subscription"
-                    android:textColor="@color/fui_linkColor" />
+                    android:textColor="@color/fui_linkColor"
+                    android:visibility="gone" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>

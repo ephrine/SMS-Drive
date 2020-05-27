@@ -23,13 +23,10 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.provider.Telephony;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -50,15 +47,7 @@ import androidx.room.Room;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.crashlytics.android.Crashlytics;
-import com.google.android.ads.nativetemplates.NativeTemplateStyle;
-import com.google.android.ads.nativetemplates.TemplateView;
-import com.google.android.gms.ads.AdLoader;
-import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.RequestConfiguration;
-import com.google.android.gms.ads.formats.MediaView;
-import com.google.android.gms.ads.formats.UnifiedNativeAd;
-import com.google.android.gms.ads.formats.UnifiedNativeAdView;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.tasks.Continuation;
@@ -180,6 +169,7 @@ public class MainActivity extends AppCompatActivity {
     int PROGRESS_MAX = 100;
     int PROGRESS_CURRENT = 0;
     TextView textNoInternerError;
+    List<String> testDeviceIds = Arrays.asList("D7D25A835A1A43446353F5BEC7C2B635");
     private FirebaseAuth mAuth;
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -218,9 +208,6 @@ public class MainActivity extends AppCompatActivity {
         }
     };
     private FirebaseFunctions mFunctions;
-
-    List<String> testDeviceIds = Arrays.asList("D7D25A835A1A43446353F5BEC7C2B635");
-
 
     public static boolean hasPermissions(Context context, String... permissions) {
         if (context != null && permissions != null) {
@@ -289,7 +276,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-String admobid=getString(R.string.AdMob_AppId);
+        String admobid = getString(R.string.AdMob_AppId);
   /*      RequestConfiguration configuration =
                 new RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build();
         MobileAds.setRequestConfiguration(configuration);
@@ -312,13 +299,13 @@ String admobid=getString(R.string.AdMob_AppId);
 
         FirebaseMessagingServiceAct();
 
-        if(intent.getStringExtra("firstopen")!=null){
-           String firstopen = intent.getStringExtra("firstopen");
-           if(firstopen.equals("1")){
-               Log.d(TAG, "FIRST OPEN:  downloadCloudSMS()");
-               DownloadCloudMessagesService.enqueueWork(this, new Intent());
+        if (intent.getStringExtra("firstopen") != null) {
+            String firstopen = intent.getStringExtra("firstopen");
+            if (firstopen.equals("1")) {
+                Log.d(TAG, "FIRST OPEN:  downloadCloudSMS()");
+                DownloadCloudMessagesService.enqueueWork(this, new Intent());
 
-           }
+            }
         }
 
         sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
@@ -334,9 +321,6 @@ String admobid=getString(R.string.AdMob_AppId);
         } catch (Exception e) {
             Log.e(TAG, "onCreate: #5465653 ", e);
         }
-
-
-
 
 
         Function.getDefaultLocal();
@@ -383,7 +367,6 @@ String admobid=getString(R.string.AdMob_AppId);
                 AppDatabase.class, getString(R.string.DATABASE_SMS_DB)).allowMainThreadQueries().fallbackToDestructiveMigration()
                 .build();
 */
-
 
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -744,9 +727,7 @@ String admobid=getString(R.string.AdMob_AppId);
     void LoadCloudRecycleView() {
 
 
-
-
-ThreadSmsDB = Room.databaseBuilder(getApplicationContext(),
+        ThreadSmsDB = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, getString(R.string.DATABASE_THREAD_SMS_DB)).allowMainThreadQueries().fallbackToDestructiveMigration()
                 .build();
 
@@ -760,10 +741,10 @@ ThreadSmsDB = Room.databaseBuilder(getApplicationContext(),
         // use a linear layout manager
         CloudRecycleView.setLayoutManager(layoutManager);
         // specify an adapter (see also next example)
-        List<Sms> ll=ThreadSmsDB.userDao().getAll();
-        if(ll!=null){
+        List<Sms> ll = ThreadSmsDB.userDao().getAll();
+        if (ll != null) {
 
-        }else {
+        } else {
             Toast.makeText(this, "Tap Refresh", Toast.LENGTH_SHORT).show();
         }
 
@@ -801,8 +782,6 @@ ThreadSmsDB = Room.databaseBuilder(getApplicationContext(),
             // isSubscribed = false;
             Log.e(TAG, "AppStart: ERROR #01011 ", e);
         }
-
-
 
 
         checkBGRunningServices();
@@ -1592,8 +1571,6 @@ ThreadSmsDB = Room.databaseBuilder(getApplicationContext(),
         DownloadCloudMessagesService.enqueueWork(this, new Intent());
 
 
-
-
     }
 
     public ArrayList<HashMap<String, String>> removeDuplicatesCreateList(ArrayList<HashMap<String, String>> smsList) {
@@ -1823,9 +1800,9 @@ ThreadSmsDB = Room.databaseBuilder(getApplicationContext(),
                 });
     }
 
-    void CheckMultiAppUsage(){
-        String AppInstanceID=sharedPrefAppGeneral.getString(getString(R.string.App_InstanceID),"");
-        DatabaseReference AppInstanceIDDB = database.getReference("/users/"+UserUID+"/smsdrive/instanceid");
+    void CheckMultiAppUsage() {
+        String AppInstanceID = sharedPrefAppGeneral.getString(getString(R.string.App_InstanceID), "");
+        DatabaseReference AppInstanceIDDB = database.getReference("/users/" + UserUID + "/smsdrive/instanceid");
 // Read from the database
         AppInstanceIDDB.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -1835,15 +1812,15 @@ ThreadSmsDB = Room.databaseBuilder(getApplicationContext(),
                 String AppInstanceIDReged = dataSnapshot.getValue(String.class);
                 Log.d(TAG, "DB AppInstanceID: " + AppInstanceIDReged);
 
-                if(AppInstanceIDReged.equals(AppInstanceID)){
+                if (AppInstanceIDReged.equals(AppInstanceID)) {
                     Log.d(TAG, "onDataChange: App installed on single device");
-                }else {
-                    if(isSubscribed){
+                } else {
+                    if (isSubscribed) {
                         Log.d(TAG, "onDataChange: App installed on multiple device with subscription");
-                    }else{
+                    } else {
                         Log.d(TAG, "onDataChange: App installed on multiple device with non-subscription");
                         Toast.makeText(getApplicationContext(), "Please Login Again", Toast.LENGTH_LONG).show();
-                 //       Toast.makeText(getApplicationContext(), "get Subscription of SMS Drive for Multi Device Sync", Toast.LENGTH_LONG).show();
+                        //       Toast.makeText(getApplicationContext(), "get Subscription of SMS Drive for Multi Device Sync", Toast.LENGTH_LONG).show();
 
                         FirebaseAuth.getInstance().signOut();
                         deleteAppData();
@@ -1865,7 +1842,7 @@ ThreadSmsDB = Room.databaseBuilder(getApplicationContext(),
     private void deleteAppData() {
         try {
             // clearing app data
-            String packageName =getApplicationContext().getPackageName();
+            String packageName = getApplicationContext().getPackageName();
             Runtime runtime = Runtime.getRuntime();
             runtime.exec("pm clear " + packageName);
             Log.i(TAG, "App Data Cleared !!");
@@ -2171,7 +2148,7 @@ final int position, long id) {
                 ArrayList<HashMap<String, String>> CloudSMS = Function.ConvertListSms2Arraylist(ls);
                 Collections.sort(CloudSMS, new MapComparator(Function.KEY_TIMESTAMP, "dsc")); // Arranging sms by timestamp decending
                 List<Sms> lsClean = Function.ConvertArraylist2ListSms(CloudSMS);
-                List<Sms>  FinalSmsThread=Function.removeDuplicates1(lsClean);
+                List<Sms> FinalSmsThread = Function.removeDuplicates1(lsClean);
                 Log.d(TAG, "doInBackground: END");
                 Log.d(TAG, "doInBackground: FinalSmsThread ");
                 ThreadSmsDB1.userDao().insertAllThread(FinalSmsThread);

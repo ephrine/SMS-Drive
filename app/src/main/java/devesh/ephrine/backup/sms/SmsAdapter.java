@@ -13,19 +13,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RatingBar;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.amulyakhare.textdrawable.util.ColorGenerator;
-import com.google.android.gms.ads.formats.NativeAd;
-import com.google.android.gms.ads.formats.UnifiedNativeAd;
-import com.google.android.gms.ads.formats.UnifiedNativeAdView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,7 +43,7 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.MyViewHolder> {
     public Context mContext;
 
     ArrayList<HashMap<String, String>> SmsThreadHashMap = new ArrayList<>();
-  //  ArrayList<Object> SmsThreadHashMap = new ArrayList<>();
+    //  ArrayList<Object> SmsThreadHashMap = new ArrayList<>();
 
 
     String MsgStorage;
@@ -70,19 +65,16 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.MyViewHolder> {
                                            int viewType) {
 
 
-
-       View v = LayoutInflater.from(parent.getContext())
+        View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.sms_recycleview_item, parent, false);
 
 
         // Give the view as it is
         MyViewHolder vh = new MyViewHolder(v);
-         return vh;
-
+        return vh;
 
 
     }
-
 
 
     @Override
@@ -174,7 +166,6 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.MyViewHolder> {
         });  */
 
 
-
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
@@ -190,8 +181,6 @@ public class SmsAdapter extends RecyclerView.Adapter<SmsAdapter.MyViewHolder> {
     public long getItemId(int position) {
         return position;
     }
-
-
 
 
     // Provide a reference to the views for each data item

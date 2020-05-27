@@ -97,11 +97,11 @@ public class CloudSmsAdapter extends RecyclerView.Adapter<CloudSmsAdapter.MyView
 
                 String tag = view.getTag().toString();
                 int i = Integer.parseInt(tag);
-                Log.d(TAG, "onClick: Device Message \n " + view.getTag() + "\n Name: " +SmsList.get(i).KEY_PHONE);
+                Log.d(TAG, "onClick: Device Message \n " + view.getTag() + "\n Name: " + SmsList.get(i).KEY_PHONE);
                 Intent intent = new Intent(mContext, ThreadSmsActivity.class);
-            //    intent.putExtra("name", SmsList.get(i).get(Function.KEY_NAME));
+                //    intent.putExtra("name", SmsList.get(i).get(Function.KEY_NAME));
                 intent.putExtra("address", SmsList.get(i).KEY_PHONE);
-              //  intent.putExtra("thread_id", SmsList.get(i).get(Function.KEY_THREAD_ID));
+                //  intent.putExtra("thread_id", SmsList.get(i).get(Function.KEY_THREAD_ID));
                 intent.putExtra("storage", "C");
 
                 mContext.startActivity(intent);

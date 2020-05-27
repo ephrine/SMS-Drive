@@ -32,7 +32,6 @@ import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -83,40 +82,40 @@ public class ThreadSmsActivity extends AppCompatActivity {
     AppDatabase db;
     LinearLayout LLDeleteMSG;
     ArrayList<Sms> toDelete = new ArrayList<>();
-    private Handler handler = new Handler();
     List<String> testDeviceIds = Arrays.asList("D7D25A835A1A43446353F5BEC7C2B635");
     AdView mAdView;
     SharedPreferences sharedPrefAppGeneral;
     boolean isSubscribed;
+    private Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-isSubscribed=false;
+        isSubscribed = false;
         Intent intent = getIntent();
         setContentView(R.layout.sms_activity_thread);
         //      SmsThreadHashMap = (HashMap<String, DataSnapshot>)intent.getSerializableExtra("smsthread");
         //  SmsThreadHashMap = Parcels.unwrap(getIntent().getParcelableExtra("mylist"))(HashMap<String, DataSnapshot>)intent.getBundleExtra("smsthread");
         //  id = intent.getStringExtra("smsthreadid");
-        if(intent.getStringExtra("name")!=null){
+        if (intent.getStringExtra("name") != null) {
             name = intent.getStringExtra("name");
         }
-        if(intent.getStringExtra("address")!=null){
+        if (intent.getStringExtra("address") != null) {
             address = intent.getStringExtra("address");
         }
-        if(intent.getStringExtra("thread_id")!=null){
+        if (intent.getStringExtra("thread_id") != null) {
             thread_id_main = Integer.parseInt(intent.getStringExtra("thread_id"));
         }
-        if(intent.getStringExtra("storage")!=null){
+        if (intent.getStringExtra("storage") != null) {
             storage = intent.getStringExtra("storage");
         }
         sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
 
-        String sub=sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe),"0");
-        if(sub.equals("1")){
-            isSubscribed=true;
-        }else {
-            isSubscribed=false;
+        String sub = sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0");
+        if (sub.equals("1")) {
+            isSubscribed = true;
+        } else {
+            isSubscribed = false;
         }
 
         //Admob
@@ -133,9 +132,9 @@ isSubscribed=false;
         MobileAds.setRequestConfiguration(configuration);
 */
         mAdView = findViewById(R.id.adView1);
-        if(isSubscribed){
+        if (isSubscribed) {
             mAdView.setVisibility(View.GONE);
-        }else {
+        } else {
             AdRequest adRequest = new AdRequest.Builder().build();
             mAdView.loadAd(adRequest);
         }
@@ -145,10 +144,10 @@ isSubscribed=false;
         //  NewMsgBoxLL = (LinearLayout) findViewById(R.id.msgTextBoxView);
         // setContentView(R.layout.sms_activity_thread);
 
-        if(name!=null){
+        if (name != null) {
             getSupportActionBar().setTitle(name);
-        }else{
-            name=Function.getContactbyPhoneNumber(this,address);
+        } else {
+            name = Function.getContactbyPhoneNumber(this, address);
             getSupportActionBar().setTitle(name);
         }
 

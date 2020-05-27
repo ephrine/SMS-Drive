@@ -315,9 +315,6 @@ public class SettingsActivity extends AppCompatActivity {
             }
 
 
-
-
-
             Preference PrefContact = findPreference("contact");
             PrefContact.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 public boolean onPreferenceClick(Preference preference) {
@@ -515,6 +512,10 @@ public class SettingsActivity extends AppCompatActivity {
 
                 Log.d(TAG, "onSharedPreferenceChanged: SAVED ");
 
+            }
+
+            if (sharedPreferences.getString(getString(R.string.cache_Sub_isSubscribe), "0").equals("1")) {
+                isSubscribed = true;
             }
 
 

@@ -41,7 +41,6 @@ import java.util.List;
 import devesh.ephrine.backup.sms.broadcastreceiver.MyBroadcastReceiver;
 import devesh.ephrine.backup.sms.pushnotification.EpNotificationActivity;
 import devesh.ephrine.backup.sms.pushnotification.EpNotificationsConstants;
-import devesh.ephrine.backup.sms.services.DownloadCloudMessagesService;
 import io.fabric.sdk.android.Fabric;
 
 public class StartActivity extends AppCompatActivity {
@@ -61,8 +60,10 @@ public class StartActivity extends AppCompatActivity {
     // Instance fields
     Account mAccount;
     boolean openNotificationActivity;
-    private FirebaseAuth mAuth;
     SharedPreferences sharedPrefAppGeneral;
+    FirebaseDatabase database;
+    DatabaseReference instanceIDDB;
+    private FirebaseAuth mAuth;
 
     /**
      * Create a new dummy account for the sync adapter
@@ -96,8 +97,7 @@ public class StartActivity extends AppCompatActivity {
         }*/
 
     }
-    FirebaseDatabase database;
-    DatabaseReference instanceIDDB;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -310,11 +310,11 @@ public class StartActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 // Successfully signed in
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                String UserUID=user.getPhoneNumber().replace("+","x");
-                String instanceID= FirebaseInstanceId.getInstance().getId();
+                String UserUID = user.getPhoneNumber().replace("+", "x");
+                String instanceID = FirebaseInstanceId.getInstance().getId();
                 SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
                 editor.putString(getString(R.string.App_InstanceID), instanceID).apply();
-                instanceIDDB = database.getReference("users/"+UserUID+"/smsdrive/instanceid");
+                instanceIDDB = database.getReference("users/" + UserUID + "/smsdrive/instanceid");
                 instanceIDDB.setValue(instanceID);
 
 
@@ -336,7 +336,7 @@ public class StartActivity extends AppCompatActivity {
                     // FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                     Intent intent = new Intent(this, MainActivity.class);
                     //   CreateSyncAccount(this);
-                    intent.putExtra("firstopen","1");
+                    intent.putExtra("firstopen", "1");
 
                     //  String message = editText.getText().toString();
                     //intent.putExtra(EXTRA_MESSAGE, message);
