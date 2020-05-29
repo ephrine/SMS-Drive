@@ -15,6 +15,11 @@ def AdMobAppID
 def AdMobBanner1ID
 def AdMobIntID
 
+def MoPubAdUnitID
+
+def FacebookAppID
+def FacebookLoginScheme
+
 /*def keypassword
 def keyalias
 def keypath
@@ -40,10 +45,13 @@ if (!lp.exists()) {
     AdMobAppID = properties.getProperty('admobappid')
     AdMobBanner1ID = properties.getProperty('admobbanner1')
     AdMobIntID = properties.getProperty('admobinitid')
-    samsungIAP_Item= properties.getProperty('samsungiapitem')
+    samsungIAP_Item = properties.getProperty('samsungiapitem')
     /*keypassword = properties.getProperty('sign.key.password')
     keyalias = properties.getProperty('sign.key.alias')
     keypath = properties.getProperty('sign.key.path') */
+    MoPubAdUnitID = properties.getProperty('mopubadunitid')
+    FacebookAppID = properties.getProperty('facebookappid')
+    FacebookLoginScheme = properties.getProperty('fbloginprotocolscheme')
 } else {
     project.logger.info('Located local.properties file')
 
@@ -55,7 +63,10 @@ if (!lp.exists()) {
     AdMobAppID = properties.getProperty('admobappid')
     AdMobBanner1ID = properties.getProperty('admobbanner1')
     AdMobIntID = properties.getProperty('admobinitid')
-    samsungIAP_Item= properties.getProperty('samsungiapitem')
+    samsungIAP_Item = properties.getProperty('samsungiapitem')
+    MoPubAdUnitID = properties.getProperty('mopubadunitid')
+    FacebookAppID = properties.getProperty('facebookappid')
+    FacebookLoginScheme = properties.getProperty('fbloginprotocolscheme')
 
     /*keypassword = properties.getProperty('sign.key.password')
     keyalias = properties.getProperty('sign.key.alias')
@@ -97,7 +108,7 @@ if (!kk.exists()) {
 keypath=kk
 } */
 
-def AppVersionName = "0.1.0X"
+def AppVersionName = "0.1.1"
 
 android {
     compileOptions {
@@ -128,7 +139,7 @@ android {
         applicationId "devesh.ephrine.backup.sms"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 32
+        versionCode 33
         versionName "" + AppVersionName + " Beta Version"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
@@ -151,6 +162,12 @@ android {
         resValue "string", "AdMob_InitId", "\"" + AdMobIntID + "\""
 
         resValue "string", "AppVersionCode", "\"" + versionCode + "\""
+
+        resValue "string", "MoPub_AdUnit_ID", "\"" + MoPubAdUnitID + "\""
+
+        resValue "string", "facebook_app_id", "\"" + FacebookAppID + "\""
+
+        resValue "string", "fb_login_protocol_scheme", "\"" + FacebookLoginScheme + "\""
 
         //     resValue "string", "AppVersionName", "\"" + versionName + "\""
         //     signingConfig signingConfigs.release
@@ -306,6 +323,15 @@ dependencies {
     implementation 'com.google.guava:guava:27.0.1-android'
 
     implementation project(':nativetemplates')
+
+    //MoPub-Admob Mediatation
+    implementation 'com.google.ads.mediation:mopub:+'
+
+    //Facebook-AdMob Mediatation
+    implementation 'com.google.ads.mediation:facebook:+'
+
+    //Facebook SDK
+    implementation 'com.facebook.android:facebook-android-sdk:+'
 
 
 }

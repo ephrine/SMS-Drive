@@ -15,5 +15,7 @@
     <color name="bg_set_sms_default">#2856C4</color>
     <color name="bg_trans_black">#B7000000</color>
 
+    <color name="orange">#F57F17</color>
+
 
 </resources>

@@ -32,6 +32,7 @@ import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -82,7 +83,7 @@ public class ThreadSmsActivity extends AppCompatActivity {
     AppDatabase db;
     LinearLayout LLDeleteMSG;
     ArrayList<Sms> toDelete = new ArrayList<>();
-    List<String> testDeviceIds = Arrays.asList("D7D25A835A1A43446353F5BEC7C2B635");
+    List<String> testDeviceIds;
     AdView mAdView;
     SharedPreferences sharedPrefAppGeneral;
     boolean isSubscribed;
@@ -94,6 +95,8 @@ public class ThreadSmsActivity extends AppCompatActivity {
         isSubscribed = false;
         Intent intent = getIntent();
         setContentView(R.layout.sms_activity_thread);
+
+        testDeviceIds = Arrays.asList(getString(R.string.Admob_TestDeviceID));
         //      SmsThreadHashMap = (HashMap<String, DataSnapshot>)intent.getSerializableExtra("smsthread");
         //  SmsThreadHashMap = Parcels.unwrap(getIntent().getParcelableExtra("mylist"))(HashMap<String, DataSnapshot>)intent.getBundleExtra("smsthread");
         //  id = intent.getStringExtra("smsthreadid");
@@ -127,10 +130,11 @@ public class ThreadSmsActivity extends AppCompatActivity {
             }
         });
 
-  /*      RequestConfiguration configuration =
+        /*   */
+        RequestConfiguration configuration =
                 new RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build();
         MobileAds.setRequestConfiguration(configuration);
-*/
+
         mAdView = findViewById(R.id.adView1);
         if (isSubscribed) {
             mAdView.setVisibility(View.GONE);

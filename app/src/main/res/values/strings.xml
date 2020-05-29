@@ -20,7 +20,7 @@
     <string name="sync_interval" translatable="false">Sync Interval</string>
     <string name="sync_interval_summary" translatable="false">Choose how offen app will sync with cloud</string>
 
-    <string name="auto_sync_off_summary" translatable="false">SMS in Device Will Not Backup</string>
+    <string name="auto_sync_off_summary" translatable="false">SMS in Device Will Not Auto-Backup</string>
     <string name="auto_sync_on_summary" translatable="false">SMS will be Auto-Backup</string>
     <string name="auto_sync" translatable="false">Auto Sync</string>
     <string name="profile" translatable="false">Profile</string>
@@ -77,4 +77,5 @@
     <string name="disable_ads" translatable="false">Personalise in-app Ads</string>
     <string name="App_InstanceID" translatable="false">appinstanceid</string>
 
+    <string name="Admob_TestDeviceID" translatable="false">D7D25A835A1A43446353F5BEC7C2B635</string>
 </resources>

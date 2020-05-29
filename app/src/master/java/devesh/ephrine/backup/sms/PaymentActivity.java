@@ -81,8 +81,8 @@ public class PaymentActivity extends AppCompatActivity implements BillingProcess
                 subscribeNowButton.setVisibility(View.GONE);
                 OrderDetailsCardView.setVisibility(View.VISIBLE);
             } else {
-                subscriptionStatusText.setText("Not Subscribed");
-                subscriptionStatusText.setTextColor(getResources().getColor(R.color.material_red));
+                subscriptionStatusText.setText("Free Plan");
+                subscriptionStatusText.setTextColor(getResources().getColor(R.color.orange));
                 subscribeNowButton.setVisibility(View.VISIBLE);
                 OrderDetailsCardView.setVisibility(View.GONE);
 

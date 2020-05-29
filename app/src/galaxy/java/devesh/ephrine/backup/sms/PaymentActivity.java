@@ -33,7 +33,7 @@ public class PaymentActivity extends AppCompatActivity implements OnGetProductsD
 
 
     private static HelperDefine.OperationMode IAP_MODE = HelperDefine.OperationMode.OPERATION_MODE_PRODUCTION;
-   // private static HelperDefine.OperationMode IAP_MODE = HelperDefine.OperationMode.OPERATION_MODE_TEST;
+    // private static HelperDefine.OperationMode IAP_MODE = HelperDefine.OperationMode.OPERATION_MODE_TEST;
     public boolean isSubscribed;
     String TAG = "PaymentActivity";
     String purchaseToken;
@@ -110,8 +110,8 @@ public class PaymentActivity extends AppCompatActivity implements OnGetProductsD
                 Toast.makeText(this, "Loading Subscription Details", Toast.LENGTH_SHORT).show();
 
             } else {
-                subscriptionStatusText.setText("Not Subscribed");
-                subscriptionStatusText.setTextColor(getResources().getColor(R.color.material_red));
+                subscriptionStatusText.setText("Free Plan");
+                subscriptionStatusText.setTextColor(getResources().getColor(R.color.orange));
                 subscribeNowButton.setVisibility(View.VISIBLE);
                 OrderDetailsCardView.setVisibility(View.GONE);
 
@@ -141,8 +141,8 @@ public class PaymentActivity extends AppCompatActivity implements OnGetProductsD
                 subscribeNowButton.setVisibility(View.GONE);
                 OrderDetailsCardView.setVisibility(View.VISIBLE);
             } else {
-                subscriptionStatusText.setText("Not Subscribed");
-                subscriptionStatusText.setTextColor(getResources().getColor(R.color.material_red));
+                subscriptionStatusText.setText("Free Plan");
+                subscriptionStatusText.setTextColor(getResources().getColor(R.color.orange));
                 subscribeNowButton.setVisibility(View.VISIBLE);
                 OrderDetailsCardView.setVisibility(View.GONE);
 

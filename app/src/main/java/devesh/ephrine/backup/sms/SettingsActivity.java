@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
@@ -19,6 +20,13 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.room.Room;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.RequestConfiguration;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -27,18 +35,28 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import devesh.ephrine.backup.sms.room.AppDatabase;
 import io.fabric.sdk.android.Fabric;
 
 public class SettingsActivity extends AppCompatActivity {
+
+    List<String> testDeviceIds;
+    SharedPreferences sharedPrefAppGeneral;
+    boolean isSubscribed;
+    String TAG = "SettingsAct";
+    AdView mAdView;
+    private InterstitialAd mInterstitialAd;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_activity);
         Fabric.with(this, new Crashlytics());
-
+        testDeviceIds = Arrays.asList(getString(R.string.Admob_TestDeviceID));
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.settings, new SettingsFragment())
@@ -46,6 +64,37 @@ public class SettingsActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+
+        sharedPrefAppGeneral = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
+
+        String sub = sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0");
+        if (sub.equals("1")) {
+            isSubscribed = true;
+        } else {
+            isSubscribed = false;
+        }
+
+        //Admob
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+                Log.d(TAG, "onInitializationComplete: AdMob has been initialize");
+
+            }
+        });
+
+        /*   */
+        RequestConfiguration configuration =
+                new RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build();
+        MobileAds.setRequestConfiguration(configuration);
+
+        mAdView = findViewById(R.id.adView2);
+        if (isSubscribed) {
+            mAdView.setVisibility(View.GONE);
+        } else {
+            AdRequest adRequest = new AdRequest.Builder().build();
+            mAdView.loadAd(adRequest);
         }
 
 

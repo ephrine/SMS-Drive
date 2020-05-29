@@ -3,6 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/Menu_gettingstarted"
+        android:title="Getting Started"
+
+        />
+
+    <item
         android:id="@+id/Menu_notification"
         android:icon="@drawable/ic_notifications_white_50dp"
         android:title="Notifications"
@@ -17,11 +23,6 @@
 
         app:showAsAction="always" />
 
-
-    <item
-        android:id="@+id/tutorial"
-        android:title="Tutorial"
-        android:visible="false" />
 
     <item
         android:id="@+id/settings"

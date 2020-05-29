@@ -1,7 +1,5 @@
 package devesh.ephrine.backup.sms.samsung.constants;
 
-import android.os.Build;
-
 import devesh.ephrine.backup.sms.BuildConfig;
 
 /**

@@ -3,6 +3,7 @@ package devesh.ephrine.backup.sms;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -23,10 +24,15 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.provider.Telephony;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -47,7 +53,11 @@ import androidx.room.Room;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.tasks.Continuation;
@@ -169,7 +179,11 @@ public class MainActivity extends AppCompatActivity {
     int PROGRESS_MAX = 100;
     int PROGRESS_CURRENT = 0;
     TextView textNoInternerError;
-    List<String> testDeviceIds = Arrays.asList("D7D25A835A1A43446353F5BEC7C2B635");
+    List<String> testDeviceIds;
+    boolean isIntAdShowed;
+    RelativeLayout RLGettingStarted;
+    WebView webviewGettingStarted;
+    boolean isFirstStart;
     private FirebaseAuth mAuth;
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -208,6 +222,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
     private FirebaseFunctions mFunctions;
+    private InterstitialAd mInterstitialAd;
 
     public static boolean hasPermissions(Context context, String... permissions) {
         if (context != null && permissions != null) {
@@ -261,6 +276,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 //isDefaultSmsApp=false;
         setContentView(R.layout.activity_main_home);
+        isFirstStart = false;
+        isIntAdShowed = false;
+        testDeviceIds = Arrays.asList(getString(R.string.Admob_TestDeviceID));
+
         Intent intent = getIntent();
 
         String flavour = BuildConfig.FLAVOR;
@@ -277,10 +296,17 @@ public class MainActivity extends AppCompatActivity {
         });
 
         String admobid = getString(R.string.AdMob_AppId);
-  /*      RequestConfiguration configuration =
+
+
+        RequestConfiguration configuration =
                 new RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build();
         MobileAds.setRequestConfiguration(configuration);
-*/
+
+
+        mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId(getString(R.string.AdMob_InitId));
+
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             // Register Callback - Call this in your app start!
             CheckNetwork network = new CheckNetwork(getApplicationContext());
@@ -304,12 +330,62 @@ public class MainActivity extends AppCompatActivity {
             if (firstopen.equals("1")) {
                 Log.d(TAG, "FIRST OPEN:  downloadCloudSMS()");
                 DownloadCloudMessagesService.enqueueWork(this, new Intent());
-
+                isFirstStart = true;
             }
         }
 
         sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
         sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
+
+
+        SMSAutoBackup = sharedPrefAutoBackup.getBoolean(getResources().getString(R.string.settings_sync), false);
+        String sub = sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0");
+        Log.d(TAG, "AppStart: isSubscribe Cache " + sub);
+        isSubscribed = sub.equals("1");
+
+        if (!isSubscribed) {
+            mInterstitialAd.loadAd(new AdRequest.Builder().build());
+            mInterstitialAd.setAdListener(new AdListener() {
+                @Override
+                public void onAdLoaded() {
+                    // Code to be executed when an ad finishes loading.
+                    Log.d(TAG, "onAdLoaded: ");
+                }
+
+                @Override
+                public void onAdFailedToLoad(int errorCode) {
+                    // Code to be executed when an ad request fails.
+                }
+
+                @Override
+                public void onAdOpened() {
+                    // Code to be executed when the ad is displayed.
+                    Log.d(TAG, "onAdOpened: ");
+                }
+
+                @Override
+                public void onAdClicked() {
+                    // Code to be executed when the user clicks on an ad.
+                    Log.d(TAG, "onAdClicked: ");
+                    isIntAdShowed = true;
+                }
+
+                @Override
+                public void onAdLeftApplication() {
+                    // Code to be executed when the user has left the app.
+                    finish();
+                    Log.d(TAG, "onAdLeftApplication: ");
+                }
+
+                @Override
+                public void onAdClosed() {
+                    // Code to be executed when the interstitial ad is closed.
+                    Log.d(TAG, "onAdClosed: ");
+                    //     mInterstitialAd.loadAd(new AdRequest.Builder().build());
+                    isIntAdShowed = true;
+                }
+            });
+        }
 
         //Subscription Check
         try {
@@ -354,6 +430,10 @@ public class MainActivity extends AppCompatActivity {
         mySwipeRefreshLayout = findViewById(R.id.swipeRefresh);
 
         textNoInternerError = findViewById(R.id.textView3InternetError);
+
+        RLGettingStarted = findViewById(R.id.RLGettingStarted);
+        webviewGettingStarted = findViewById(R.id.webviewGettingStarted);
+        //   RLGettingStarted.setVisibility(View.GONE);
 
         loadingCircle = findViewById(R.id.progressBar1);
         iThread = new HashMap<>();
@@ -421,24 +501,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-
-
-/*
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            final String myPackageName = getPackageName();
-            if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
-
-                Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
-                intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, myPackageName);
-                startActivityForResult(intent, 1);
-            }else {
-                //saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
-            }
-        }else {
-           // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
-        }*/
-
-
         navigation = findViewById(R.id.bottom_navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
@@ -469,12 +531,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-        /*bg_TASK_STATUS = sharedPrefAppGeneral.getString(getString(R.string.BG_Task_Status), "0");
-        if (bg_TASK_STATUS.equals("1")) {
-            //  LLBGmsgprocessing.setVisibility(View.VISIBLE);
-        } else {
-            //  LLBGmsgprocessing.setVisibility(View.GONE);
-        }*/
 
         if (!isNetworkAvailable()) {
             textNoInternerError.setVisibility(View.VISIBLE);
@@ -482,6 +538,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             textNoInternerError.setVisibility(View.GONE);
         }
+
 
     }
 
@@ -512,6 +569,10 @@ public class MainActivity extends AppCompatActivity {
                     loadsmsTask.execute();
 
                     LoadRecycleView();
+                    if (isFirstStart) {
+                        showGettingStarted();
+                    }
+
                 } else {
                     Toast.makeText(this, "Please Grant Permission otherwise App will not work", Toast.LENGTH_SHORT).show();
                     MainActivity.this.finish();
@@ -599,8 +660,9 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "onOptionsItemSelected: Sync Now menu");
                 return true;
 
-            case R.id.tutorial:
-                Log.d(TAG, "onOptionsItemSelected: Help Menu");
+            case R.id.Menu_gettingstarted:
+                showGettingStarted();
+                Log.d(TAG, "onOptionsItemSelected: Getting Started Menu");
                 return true;
 
             case R.id.settings:
@@ -620,6 +682,24 @@ public class MainActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        if (isIntAdShowed) {
+            finish();
+            super.onBackPressed();
+        } else {
+            if (mInterstitialAd.isLoaded() && !isSubscribed) {
+                mInterstitialAd.show();
+            } else {
+                Log.d("TAG", "The interstitial wasn't loaded yet.");
+                super.onBackPressed();
+                finish();
+            }
+        }
+
     }
 
     /**
@@ -934,6 +1014,7 @@ public class MainActivity extends AppCompatActivity {
         FileAutoBackUpBroadCast();
         setPreferenceListner();
         CheckMultiAppUsage();
+
 
   /*      AdLoader adLoader = new AdLoader.Builder(this, "ca-app-pub-3940256099942544/2247696110")
                 .forUnifiedNativeAd(new UnifiedNativeAd.OnUnifiedNativeAdLoadedListener() {
@@ -1565,7 +1646,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void cloudSMSRefresh(View v) {
-
+        Toast.makeText(this, "Refreshing Cloud SMS Data in Background...Please wait", Toast.LENGTH_LONG).show();
 
         Log.d(TAG, "downloadCloudSMS:  downloadCloudSMS()");
         DownloadCloudMessagesService.enqueueWork(this, new Intent());
@@ -1855,6 +1936,76 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    void showGettingStarted() {
+        RLGettingStarted = findViewById(R.id.RLGettingStarted);
+        webviewGettingStarted = findViewById(R.id.webviewGettingStarted);
+
+        RLGettingStarted.setVisibility(View.VISIBLE);
+        webviewGettingStarted.loadUrl("file:///android_asset/html/appabout.html");   // now it will not fail here
+        WebSettings webSettings = webviewGettingStarted.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+    }
+
+    public void closeGettingStarted(View v) {
+        RLGettingStarted.setVisibility(View.GONE);
+
+    }
+
+    public void NULLL(View v) {
+        Log.d(TAG, "NULLL: NULL AREA CLICK");
+    }
+
+    void showSyncDialogue() {
+
+        // Build an AlertDialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.alertdialog_custom_view, null);
+
+        // Specify alert dialog is not cancelable/not ignorable
+        builder.setCancelable(false);
+
+        // Set the custom layout as alert dialog view
+        builder.setView(dialogView);
+
+        // Get the custom alert dialog view widgets reference
+        Button btn_positive = dialogView.findViewById(R.id.dialog_positive_btn);
+        Button btn_negative = dialogView.findViewById(R.id.dialog_negative_btn);
+        final EditText et_name = dialogView.findViewById(R.id.et_name);
+
+        // Create the alert dialog
+        final AlertDialog dialog = builder.create();
+
+        // Set positive/yes button click listener
+        btn_positive.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Dismiss the alert dialog
+                dialog.cancel();
+                String name = et_name.getText().toString();
+                Log.d(TAG, "onClick: Dialogue: " + name);
+
+            }
+        });
+
+        // Set negative/no button click listener
+        btn_negative.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Dismiss/cancel the alert dialog
+                //dialog.cancel();
+                dialog.dismiss();
+
+            }
+        });
+
+        // Display the custom alert dialog on interface
+        dialog.show();
+
+
+    }
+
     //---------------- LoadSms Async Task
     class LoadSms extends AsyncTask<String, Void, String> {
         final String TAG = "LoadSms | ";
@@ -2030,84 +2181,6 @@ final int position, long id) {
             //  String message = editText.getText().toString();
             //intent.putExtra(EXTRA_MESSAGE, message);
             //  startService(intent);
-
-
-        }
-    }
-
-    class AddSmsDB extends AsyncTask<String, Void, String> {
-        final String TAG = "AddSmsDB |";
-
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            Log.d(TAG, "onPreExecute");
-            if (db == null) {
-                db = Room.databaseBuilder(getApplicationContext(),
-                        AppDatabase.class, getString(R.string.DATABASE_SMS_DB)).fallbackToDestructiveMigration()
-                        .build();
-
-            }
-
-
-        }
-
-        protected String doInBackground(String... args) {
-            String xml = "";
-            Log.d(TAG, "doInBackground");
-            ArrayList<HashMap<String, String>> cloud_sms = new ArrayList<>();
-            try {
-                cloud_sms.clear();
-                cloud_sms = (ArrayList<HashMap<String, String>>) Function.readCachedFile(MainActivity.this, getString(R.string.file_cloud_sms));
-
-            } catch (Exception e) {
-                Log.d(TAG, "DownloadFromCloud: ERROR " + e);
-                Crashlytics.logException(e);
-
-            }
-            double t = cloud_sms.size();
-
-            double progress;
-            List<Sms> sl = new ArrayList<>();
-            for (int j = 0; j <= cloud_sms.size() - 1; j++) {
-
-                progress = j / t * 100;
-                Log.d(TAG, "doInBackground: PROGRESS: " + progress + "% \n j=" + j + "/" + t);
-                Sms u = new Sms();
-                //u.uid= 1;
-
-                //     u.ID = cloud_sms.get(j).get(Function._ID);
-                //     u.KEY_THREAD_ID = cloud_sms.get(j).get(Function.KEY_THREAD_ID);
-                //    u.KEY_NAME = cloud_sms.get(j).get(Function.KEY_NAME);
-                u.KEY_PHONE = cloud_sms.get(j).get(Function.KEY_PHONE);
-                u.KEY_MSG = cloud_sms.get(j).get(Function.KEY_MSG);
-                u.KEY_TYPE = cloud_sms.get(j).get(Function.KEY_TYPE);
-                u.KEY_TIMESTAMP = cloud_sms.get(j).get(Function.KEY_TIMESTAMP);
-                //    u.KEY_TIME = cloud_sms.get(j).get(Function.KEY_TIME);
-                //  u.KEY_READ = cloud_sms.get(j).get(Function.KEY_READ);
-
-                sl.add(u);
-
-
-            }
-
-            db.userDao().insertAllr2(sl);
-
-  /*          db.userDao().insertAll(u);
-            db.userDao().getAll();
-            List<Sms> ll=db.userDao().getAll();
-            Log.d(TAG, "onCreate: "+ll.get(0).KEY_MSG);
-*/
-            return "Done";
-        }
-
-        @Override
-        protected void onPostExecute(String xml) {
-            Log.d(TAG, "onPostExecute");
-            if (db != null) {
-                db.close();
-            }
 
 
         }

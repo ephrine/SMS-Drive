@@ -73,4 +73,47 @@
         app:itemTextColor="@drawable/navbar_selected"
         app:menu="@menu/bottom_navigation_menu" />
 
+    <RelativeLayout
+        android:id="@+id/RLGettingStarted"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:background="@color/bg_trans_black"
+        android:clickable="true"
+        android:elevation="3dp"
+        android:onClick="NULLL"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:layout_centerInParent="true"
+            app:cardElevation="5dp"
+            app:cardPreventCornerOverlap="true"
+            app:cardUseCompatPadding="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <WebView
+                    android:id="@+id/webviewGettingStarted"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <Button
+                    android:id="@+id/button2"
+                    style="@style/Widget.AppCompat.Button.Colored"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:onClick="closeGettingStarted"
+                    android:text="Okay" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </RelativeLayout>
+
 </RelativeLayout>

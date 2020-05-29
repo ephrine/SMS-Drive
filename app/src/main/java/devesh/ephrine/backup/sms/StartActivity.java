@@ -173,15 +173,26 @@ public class StartActivity extends AppCompatActivity {
         }
 
         setContentView(R.layout.activity_start);
-        getSupportActionBar().hide();
+        //  getSupportActionBar().hide();
         mAuth = FirebaseAuth.getInstance();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
 // Write a message to the database
         database = FirebaseDatabase.getInstance();
 
+        if (currentUser != null) {
 
-        Thread background = new Thread() {
+
+            appstart();
+
+
+        } else {
+            getSupportActionBar().hide();
+            setContentView(R.layout.activity_login);
+
+
+        }
+     /*   Thread background = new Thread() {
             public void run() {
 
                 try {
@@ -227,6 +238,7 @@ public class StartActivity extends AppCompatActivity {
         };
 
         background.start();
+        */
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             // Register Callback - Call this in your app start!

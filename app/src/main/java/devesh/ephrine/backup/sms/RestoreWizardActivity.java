@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -25,9 +26,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.preference.PreferenceManager;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -55,6 +58,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -87,13 +91,19 @@ public class RestoreWizardActivity extends AppCompatActivity {
     NotificationCompat.Builder builder;
     int PROGRESS_MAX = 100;
     int PROGRESS_CURRENT = 0;
+    List<String> testDeviceIds;
+    SharedPreferences sharedPrefAutoBackup;
+    SharedPreferences sharedPrefAppGeneral;
+    boolean SMSAutoBackup;
+    boolean isSubscribed;
+    private InterstitialAd mInterstitialAd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restore_wizard);
         Fabric.with(this, new Crashlytics());
-
+        testDeviceIds = Arrays.asList(getString(R.string.Admob_TestDeviceID));
         user = FirebaseAuth.getInstance().getCurrentUser();
         database = FirebaseDatabase.getInstance();
         isRestoreInProgress = false;
@@ -143,7 +153,88 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
         }
 
+        //Admob
+    /*    MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+                Log.d(TAG, "onInitializationComplete: AdMob has been initialize");
 
+            }
+        });
+
+        String admobid = getString(R.string.AdMob_AppId);
+        RequestConfiguration configuration =
+                new RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build();
+        MobileAds.setRequestConfiguration(configuration);
+
+
+        mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId(getString(R.string.AdMob_InitId));
+*/
+        sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
+        sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
+
+        SMSAutoBackup = sharedPrefAutoBackup.getBoolean(getResources().getString(R.string.settings_sync), false);
+        String sub = sharedPrefAppGeneral.getString(getString(R.string.cache_Sub_isSubscribe), "0");
+        Log.d(TAG, "AppStart: isSubscribe Cache " + sub);
+        isSubscribed = sub.equals("1");
+
+       /* if (!isSubscribed) {
+            mInterstitialAd.loadAd(new AdRequest.Builder().build());
+            mInterstitialAd.setAdListener(new AdListener() {
+                @Override
+                public void onAdLoaded() {
+                    // Code to be executed when an ad finishes loading.
+                    Log.d(TAG, "onAdLoaded: ");
+                }
+
+                @Override
+                public void onAdFailedToLoad(int errorCode) {
+                    // Code to be executed when an ad request fails.
+                }
+
+                @Override
+                public void onAdOpened() {
+                    // Code to be executed when the ad is displayed.
+                    Log.d(TAG, "onAdOpened: ");
+                }
+
+                @Override
+                public void onAdClicked() {
+                    // Code to be executed when the user clicks on an ad.
+                    Log.d(TAG, "onAdClicked: ");
+                }
+
+                @Override
+                public void onAdLeftApplication() {
+                    // Code to be executed when the user has left the app.
+                    finish();
+                    Log.d(TAG, "onAdLeftApplication: ");
+                }
+
+                @Override
+                public void onAdClosed() {
+                    // Code to be executed when the interstitial ad is closed.
+                    Log.d(TAG, "onAdClosed: ");
+                    //     mInterstitialAd.loadAd(new AdRequest.Builder().build());
+                    RestoreWizardActivity.this.finish();
+
+                }
+            });
+        }*/
+
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mInterstitialAd.isLoaded() && !isSubscribed) {
+            mInterstitialAd.show();
+        } else {
+            Log.d("TAG", "The interstitial wasn't loaded yet.");
+            super.onBackPressed();
+
+        }
     }
 
     @Override
@@ -325,8 +416,15 @@ public class RestoreWizardActivity extends AppCompatActivity {
             Crashlytics.logException(e);
 
         }
-        //  RestoreProgressTextView.setText("Done");
+        /*if (mInterstitialAd.isLoaded() && !isSubscribed) {
+            mInterstitialAd.show();
+        } else {  }*/
+        Log.d("TAG", "The interstitial wasn't loaded yet.");
+
         RestoreWizardActivity.this.finish();
+
+
+        //  RestoreProgressTextView.setText("Done");
 
     }
 
