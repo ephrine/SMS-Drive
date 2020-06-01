@@ -23,3 +23,5 @@ app/agconnect-services.json
 
 .pepk
 *.pepk
+app/src/debug/google-services.json
+app/src/release/google-services.json

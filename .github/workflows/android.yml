@@ -29,6 +29,7 @@ jobs:
          google.services.json: ${{secrets.google_services_json}}
          key.url: ${{secrets.key_url}}
          local.properties.url: ${{secrets.local_properties_url}}
+         debug.google.services.json: ${{secrets.debug_google_services_json}}
 
   apk:
     name: Generate APK
@@ -50,8 +51,16 @@ jobs:
          google.services.json: ${{secrets.google_services_json}}
          key.url: ${{secrets.key_url}}
          local.properties.url: ${{secrets.local_properties_url}}
-      - name: Upload APK
+         debug.google.services.json: ${{secrets.debug_google_services_json}}
+
+      - name: Upload Master APK
         uses: actions/upload-artifact@v1
         with:
           name: app
           path: app/build/outputs/apk/master/debug/app-master-debug.apk
+          
+      - name: Upload Galaxy APK
+        uses: actions/upload-artifact@v1
+        with:
+          name: app
+          path: app/build/outputs/apk/galaxy/debug/app-galaxy-debug.apk

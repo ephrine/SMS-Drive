@@ -34,7 +34,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Status:  "
+                    android:text="@string/text_status"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:textStyle="bold" />
 
@@ -43,7 +43,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Not Subscribed"
+                    android:text="@string/text_not_subscribed"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:textColor="@color/material_red"
                     android:textStyle="bold" />
@@ -70,7 +70,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Free Plan Includes:"
+                        android:text="@string/text_Free_Plan_Includes"
                         android:textStyle="bold" />
 
 
@@ -92,7 +92,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:layout_weight="1"
-                            android:text="  For Single Device Only" />
+                            android:text="@string/text_For_Single_Device_Only" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -113,7 +113,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:layout_weight="1"
-                            android:text="  Unlimited Cloud Storage" />
+                            android:text="@string/text_Unlimited_Cloud_Storage" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -134,7 +134,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:layout_weight="1"
-                            android:text="  Manual Backup Messages" />
+                            android:text="@string/text_Manual_Backup_Messages" />
                     </LinearLayout>
 
                     <LinearLayout

@@ -278,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main_home);
         isFirstStart = false;
         isIntAdShowed = false;
-        testDeviceIds = Arrays.asList(getString(R.string.Admob_TestDeviceID));
+     //   testDeviceIds = Arrays.asList(getString(R.string.Admob_TestDeviceID));
 
         Intent intent = getIntent();
 
@@ -298,10 +298,10 @@ public class MainActivity extends AppCompatActivity {
         String admobid = getString(R.string.AdMob_AppId);
 
 
-        RequestConfiguration configuration =
+  /*      RequestConfiguration configuration =
                 new RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build();
         MobileAds.setRequestConfiguration(configuration);
-
+*/
 
         mInterstitialAd = new InterstitialAd(this);
         mInterstitialAd.setAdUnitId(getString(R.string.AdMob_InitId));

@@ -20,10 +20,10 @@ def MoPubAdUnitID
 def FacebookAppID
 def FacebookLoginScheme
 
-/*def keypassword
+def keypassword
 def keyalias
 def keypath
-*/
+
 
 def samsungIAP_Item
 
@@ -46,9 +46,9 @@ if (!lp.exists()) {
     AdMobBanner1ID = properties.getProperty('admobbanner1')
     AdMobIntID = properties.getProperty('admobinitid')
     samsungIAP_Item = properties.getProperty('samsungiapitem')
-    /*keypassword = properties.getProperty('sign.key.password')
+    keypassword = properties.getProperty('sign.key.password')
     keyalias = properties.getProperty('sign.key.alias')
-    keypath = properties.getProperty('sign.key.path') */
+    keypath = properties.getProperty('sign.key.path')
     MoPubAdUnitID = properties.getProperty('mopubadunitid')
     FacebookAppID = properties.getProperty('facebookappid')
     FacebookLoginScheme = properties.getProperty('fbloginprotocolscheme')
@@ -68,9 +68,9 @@ if (!lp.exists()) {
     FacebookAppID = properties.getProperty('facebookappid')
     FacebookLoginScheme = properties.getProperty('fbloginprotocolscheme')
 
-    /*keypassword = properties.getProperty('sign.key.password')
+    keypassword = properties.getProperty('sign.key.password')
     keyalias = properties.getProperty('sign.key.alias')
-    keypath = properties.getProperty('sign.key.path') */
+    keypath = properties.getProperty('sign.key.path')
 
 }
 //def keypassword = properties.getProperty('sign.key.password')
@@ -96,6 +96,29 @@ if (!f.exists()) {
 } else {
     project.logger.info('google-services.json already exists')
 }
+def f1 = new File('app/src/release/google-services.json')
+if (!f1.exists()) {
+    new URL(System.getenv('google.services.json')).withInputStream { i ->
+        f1.withOutputStream {
+            it << i
+        }
+    }
+    project.logger.info('Downloaded release google-services.json')
+} else {
+    project.logger.info('release google-services.json already exists')
+}
+def f2 = new File('app/src/debug/google-services.json')
+if (!f2.exists()) {
+    new URL(System.getenv('debug.google.services.json')).withInputStream { i ->
+        f2.withOutputStream {
+            it << i
+        }
+    }
+    project.logger.info('Downloaded debug google-services.json')
+} else {
+    project.logger.info('debug google-services.json already exists')
+}
+
 /*
 def kk = new File('key')
 if (!kk.exists()) {
@@ -119,19 +142,19 @@ android {
 
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
-    /*  signingConfigs {
-                     release {
-                         storeFile keypath
-                         storePassword keypassword
-                         keyAlias = keyalias
-                         keyPassword keypassword
+    signingConfigs {
+        release {
+            storeFile  file(keypath)
+            storePassword keypassword
+            keyAlias = keyalias
+            keyPassword keypassword
 
-                         // Optional, specify signing versions used
-         v1SigningEnabled true
-         v2SigningEnabled true
-                     }
-                 }
-  */
+            // Optional, specify signing versions used
+            v1SigningEnabled true
+            v2SigningEnabled true
+        }
+    }
+
 
     defaultConfig {
 
@@ -155,11 +178,6 @@ android {
 
         buildConfigField "String", "MS_AppCenter_Key", "\"" + MS_AppCenterKey + "\""
 
-        resValue "string", "AdMob_AppId", "\"" + AdMobAppID + "\""
-
-        resValue "string", "AdMob_BannerId1", "\"" + AdMobBanner1ID + "\""
-
-        resValue "string", "AdMob_InitId", "\"" + AdMobIntID + "\""
 
         resValue "string", "AppVersionCode", "\"" + versionCode + "\""
 
@@ -185,11 +203,26 @@ android {
 
 
     buildTypes {
+        debug {
+            //Test IDs
+            resValue "string", "AdMob_AppId", "\"" + "ca-app-pub-3940256099942544~3347511713" + "\""
+            resValue "string", "AdMob_BannerId1", "\"" + "ca-app-pub-3940256099942544/6300978111" + "\""
+            resValue "string", "AdMob_InitId", "\"" + "ca-app-pub-3940256099942544/1033173712" + "\""
+
+            applicationIdSuffix ".debug"
+            debuggable true
+        }
         release {
+            resValue "string", "AdMob_AppId", "\"" + AdMobAppID + "\""
+
+            resValue "string", "AdMob_BannerId1", "\"" + AdMobBanner1ID + "\""
+
+            resValue "string", "AdMob_InitId", "\"" + AdMobIntID + "\""
+
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-//signingConfig signingConfigs.release
+            signingConfig signingConfigs.release
 
         }
     }
@@ -215,13 +248,13 @@ android {
 
 
         }
-        huawei {
+        /*huawei {
             dimension "appstore"
             versionName "" + AppVersionName + " Beta (Huawei)"
             applicationId "devesh.ephrine.backup.sms.huawei"
             resValue "string", "AppFlavour", "\"" + "huawei" + "\""
             resValue "string", "AppVersionName", "\"" + versionName + "\""
-        }
+        }*/
 
     }
 
@@ -315,7 +348,7 @@ dependencies {
     //Samsung Galaxy In-App-purchases
     galaxyImplementation project(':IAP6Helper')
 
-    huaweiImplementation 'com.huawei.hms:iap:4.0.0.300'
+  //  huaweiImplementation 'com.huawei.hms:iap:4.0.0.300'
 
     //Chrome Custom Tab
     implementation 'androidx.browser:browser:+'

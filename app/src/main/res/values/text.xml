@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!--Global English-->
+    <string name="app_desc_short" translatable="false">Keep your Messages Safe &amp; Backup</string>
+    <string name="last_sync_at" translatable="false">Last Synced at</string>
+    <string name="delete_books_summary" translatable="false">Erase all your Messages on Backup Drive</string>
+    <string name="sync_interval" translatable="false">Sync Interval</string>
+    <string name="sync_interval_summary" translatable="false">Choose how offen app will sync with cloud</string>
+    <string name="auto_sync_off_summary" translatable="false">SMS in Device Will Not Auto-Backup</string>
+    <string name="auto_sync_on_summary" translatable="false">SMS will be Auto-Backup</string>
+    <string name="auto_sync" translatable="false">Auto Sync</string>
+    <string name="profile" translatable="false">Profile</string>
+    <string name="title_activity_settings" translatable="false">Settings</string>
+    <string name="text_checkout"  translatable="false">Checkout</string>
+    <string name="text_status" translatable="false">Status:  </string>
+    <string name="text_not_subscribed"  translatable="false">Not Subscribed</string>
+    <string name="text_Free_Plan_Includes" translatable="false">Free Plan Includes:</string>
+    <string name="text_For_Single_Device_Only" translatable="false">  For Single Device Only</string>
+    <string name="text_Unlimited_Cloud_Storage">  Unlimited Cloud Storage</string>
+    <string name="text_Manual_Backup_Messages">  Manual Backup Messages</string>
+
+    <!-- Preference Titles -->
+    <string name="sync_header" translatable="false">Sync</string>
+    <string name="user_name" translatable="false">User Name</string>
+
+</resources>

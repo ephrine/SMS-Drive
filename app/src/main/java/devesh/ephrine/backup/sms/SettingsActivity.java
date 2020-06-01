@@ -44,7 +44,7 @@ import io.fabric.sdk.android.Fabric;
 
 public class SettingsActivity extends AppCompatActivity {
 
-    List<String> testDeviceIds;
+   // List<String> testDeviceIds;
     SharedPreferences sharedPrefAppGeneral;
     boolean isSubscribed;
     String TAG = "SettingsAct";
@@ -56,7 +56,7 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_activity);
         Fabric.with(this, new Crashlytics());
-        testDeviceIds = Arrays.asList(getString(R.string.Admob_TestDeviceID));
+//        testDeviceIds = Arrays.asList(getString(R.string.Admob_TestDeviceID));
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.settings, new SettingsFragment())
@@ -84,11 +84,11 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
-        /*   */
+        /*
         RequestConfiguration configuration =
                 new RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build();
         MobileAds.setRequestConfiguration(configuration);
-
+ */
         mAdView = findViewById(R.id.adView2);
         if (isSubscribed) {
             mAdView.setVisibility(View.GONE);
@@ -234,10 +234,11 @@ public class SettingsActivity extends AppCompatActivity {
                 PrefNotifi.setVisible(true);
                 PrefNotifi.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                     public boolean onPreferenceClick(Preference preference) {
+                        String mPackageName=getActivity().getPackageName();
                         Intent settingsIntent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
                                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                 // .putExtra(Settings.EXTRA_CHANNEL_ID, "001")
-                                .putExtra(Settings.EXTRA_APP_PACKAGE, "devesh.ephrine.backup.sms");
+                                .putExtra(Settings.EXTRA_APP_PACKAGE, mPackageName);
 
                         startActivity(settingsIntent);
 

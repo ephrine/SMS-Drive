@@ -130,11 +130,11 @@ public class ThreadSmsActivity extends AppCompatActivity {
             }
         });
 
-        /*   */
+        /*
         RequestConfiguration configuration =
                 new RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build();
         MobileAds.setRequestConfiguration(configuration);
-
+*/
         mAdView = findViewById(R.id.adView1);
         if (isSubscribed) {
             mAdView.setVisibility(View.GONE);

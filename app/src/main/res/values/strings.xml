@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name" translatable="false">SMS Drive</string>
-    <string name="title_activity_settings" translatable="false">Settings</string>
 
     <string name="settings_sync" translatable="false">settings_sync</string>
     <string name="settings_pref_userphno" translatable="false">pref_userphno</string>
@@ -9,21 +8,10 @@
     <string name="settings_pref_userage" translatable="false">pref_userage</string>
     <string name="settings_pref_last_sync" translatable="false">pref_last_sync</string>
 
-    <!-- Preference Titles -->
-    <string name="sync_header" translatable="false">Sync</string>
-
-    <string name="user_name" translatable="false">User Name</string>
 
     <!-- Sync Preferences -->
     <string name="settings_sync_interval" translatable="false">settings_sync_interval</string>
 
-    <string name="sync_interval" translatable="false">Sync Interval</string>
-    <string name="sync_interval_summary" translatable="false">Choose how offen app will sync with cloud</string>
-
-    <string name="auto_sync_off_summary" translatable="false">SMS in Device Will Not Auto-Backup</string>
-    <string name="auto_sync_on_summary" translatable="false">SMS will be Auto-Backup</string>
-    <string name="auto_sync" translatable="false">Auto Sync</string>
-    <string name="profile" translatable="false">Profile</string>
 
     <string name="social_media_fb" translatable="false">https://www.facebook.com/ephrineapps</string>
     <string name="social_media_twitter" translatable="false">https://twitter.com/ephrineapps</string>
@@ -31,14 +19,11 @@
     <string name="social_media_linkedin" translatable="false">https://www.linkedin.com/company/ephrine</string>
     <string name="social_media_youtube" translatable="false">https://www.youtube.com/channel/UCO-OX7K3zIeY05HaIAu3HRw</string>
 
-    <string name="delete_books_summary" translatable="false">Erase all your Messages on Backup Drive</string>
 
     <string name="file_cloud_sms" translatable="false">file_cloud_sms</string>
     <string name="file_cloud_thread" translatable="false">file_cloud_thread</string>
     <string name="file_device_sms" translatable="false">file_device_sms</string>
 
-    <string name="app_desc_short" translatable="false">Keep your Messages Safe &amp; Backup</string>
-    <string name="last_sync_at" translatable="false">Last Synced at</string>
 
     <!--Purchase Strings-->
     <string name="cache_Sub_PurchaseToken" translatable="false">cachepurchasetoken</string>
