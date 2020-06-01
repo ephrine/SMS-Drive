@@ -6,8 +6,8 @@
 
 Back-up &amp; Sync Messages on your Device
 
-### How to Build & Compile:
-Step 1: Create a [Firebase Project](https://console.firebase.google.com/) and add SMS Drive App in it with package name <code>devesh.ephrine.backup.sms</code>
+### How to Build & Compile Debug APK:
+Step 1: Create a [Firebase Project](https://console.firebase.google.com/) and add SMS Drive App in it with package name <code>devesh.ephrine.backup.sms.debug</code>
 
 Step 2: Download <code>google-services.json</code> file from console and add it into project location <code>/app/google-services.json</code>
 
