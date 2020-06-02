@@ -10,22 +10,19 @@ def paymentserverurl
 def gplaysubscriptionid1
 def gplaylicensekey
 def MS_AppCenterKey
-
 def AdMobAppID
 def AdMobBanner1ID
 def AdMobIntID
-
 def MoPubAdUnitID
-
 def FacebookAppID
 def FacebookLoginScheme
-
 def keypassword
 def keyalias
 def keypath
-
-
 def samsungIAP_Item
+def AdColonyAppID
+def AdColonyZoneID1
+def AdColonyZoneID2
 
 Properties properties = new Properties()
 
@@ -52,6 +49,9 @@ if (!lp.exists()) {
     MoPubAdUnitID = properties.getProperty('mopubadunitid')
     FacebookAppID = properties.getProperty('facebookappid')
     FacebookLoginScheme = properties.getProperty('fbloginprotocolscheme')
+     AdColonyAppID= properties.getProperty('adcolonyappid')
+     AdColonyZoneID1= properties.getProperty('adcolonyzoneid1')
+     AdColonyZoneID2= properties.getProperty('adcolonyzoneid2')
 } else {
     project.logger.info('Located local.properties file')
 
@@ -67,11 +67,12 @@ if (!lp.exists()) {
     MoPubAdUnitID = properties.getProperty('mopubadunitid')
     FacebookAppID = properties.getProperty('facebookappid')
     FacebookLoginScheme = properties.getProperty('fbloginprotocolscheme')
-
     keypassword = properties.getProperty('sign.key.password')
     keyalias = properties.getProperty('sign.key.alias')
     keypath = properties.getProperty('sign.key.path')
-
+    AdColonyAppID= properties.getProperty('adcolonyappid')
+    AdColonyZoneID1= properties.getProperty('adcolonyzoneid1')
+    AdColonyZoneID2= properties.getProperty('adcolonyzoneid2')
 }
 //def keypassword = properties.getProperty('sign.key.password')
 
@@ -162,7 +163,7 @@ android {
         applicationId "devesh.ephrine.backup.sms"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 33
+        versionCode 34
         versionName "" + AppVersionName + " Beta Version"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
@@ -186,6 +187,12 @@ android {
         resValue "string", "facebook_app_id", "\"" + FacebookAppID + "\""
 
         resValue "string", "fb_login_protocol_scheme", "\"" + FacebookLoginScheme + "\""
+
+        resValue "string", "AdColony_App_ID", "\"" + AdColonyAppID + "\""
+
+       resValue "string", "AdColony_ZoneID1", "\"" + AdColonyZoneID1+ "\""
+
+        resValue "string", "AdColony_ZoneID2", "\"" + AdColonyZoneID2 +"\""
 
         //     resValue "string", "AppVersionName", "\"" + versionName + "\""
         //     signingConfig signingConfigs.release
@@ -365,6 +372,9 @@ dependencies {
 
     //Facebook SDK
     implementation 'com.facebook.android:facebook-android-sdk:+'
+
+    //AdColony-AdMob Mediatation
+    implementation 'com.google.ads.mediation:adcolony:+'
 
 
 }

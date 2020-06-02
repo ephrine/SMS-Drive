@@ -52,7 +52,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.adcolony.sdk.AdColony;
+import com.adcolony.sdk.AdColonyAppOptions;
 import com.crashlytics.android.Crashlytics;
+import com.google.ads.mediation.adcolony.AdColonyMediationAdapter;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
@@ -77,10 +80,14 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.gson.Gson;
+import com.jirbo.adcolony.AdColonyAdapter;
+import com.jirbo.adcolony.AdColonyBundleBuilder;
 import com.lifeofcoding.cacheutlislibrary.CacheUtils;
 import com.microsoft.appcenter.AppCenter;
 import com.microsoft.appcenter.analytics.Analytics;
 import com.microsoft.appcenter.crashes.Crashes;
+import com.mopub.common.MoPub;
+import com.mopub.common.SdkConfiguration;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -344,7 +351,28 @@ public class MainActivity extends AppCompatActivity {
         isSubscribed = sub.equals("1");
 
         if (!isSubscribed) {
-            mInterstitialAd.loadAd(new AdRequest.Builder().build());
+            SdkConfiguration sdkConfiguration =
+                    new SdkConfiguration.Builder(getString(R.string.MoPub_AdUnit_ID)).build();
+
+            MoPub.initializeSdk(this, sdkConfiguration, null);
+
+
+            AdColonyAppOptions appOptions = AdColonyMediationAdapter.getAppOptions();
+            appOptions.setGDPRConsentString("1");
+            appOptions.setGDPRRequired(true);
+
+            AdColony.configure(this,
+                    getString(R.string.AdColony_App_ID),
+                    getString(R.string.AdColony_ZoneID1),getString(R.string.AdColony_ZoneID2));
+            AdColonyBundleBuilder.setShowPrePopup(true);
+            AdColonyBundleBuilder.setShowPostPopup(true);
+            AdRequest request = new AdRequest.Builder()
+                    .addNetworkExtrasBundle(AdColonyAdapter.class, AdColonyBundleBuilder.build())
+                    .build();
+
+//            mInterstitialAd.loadAd(new AdRequest.Builder().build());
+            mInterstitialAd.loadAd(request);
+
             mInterstitialAd.setAdListener(new AdListener() {
                 @Override
                 public void onAdLoaded() {
