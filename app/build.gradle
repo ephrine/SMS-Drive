@@ -143,7 +143,7 @@ android {
 
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
-    signingConfigs {
+  /*  signingConfigs {
         release {
             storeFile  file(keypath)
             storePassword keypassword
@@ -155,7 +155,7 @@ android {
             v2SigningEnabled true
         }
     }
-
+*/
 
     defaultConfig {
 
@@ -229,7 +229,7 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+         //   signingConfig signingConfigs.release
 
         }
     }
