@@ -1089,9 +1089,8 @@ public class SyncIntentService extends JobIntentService {
             Crashlytics.logException(e);
         }
 
+        CloudSMS2DBService.enqueueWork(this, new Intent());
 
-        Intent intent = new Intent(this, CloudSMS2DBService.class);
-        startService(intent);
         //   myTrace.stop();
 
     }

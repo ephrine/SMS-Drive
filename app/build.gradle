@@ -25,6 +25,7 @@ def AdColonyZoneID1
 def AdColonyZoneID2
 
 Properties properties = new Properties()
+//project.ext.machine = System.getenv('clcd')
 
 def lp = new File('smsdrive.local.properties')
 if (!lp.exists()) {
@@ -143,19 +144,25 @@ android {
 
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
-  /*  signingConfigs {
+    signingConfigs {
         release {
-            storeFile  file(keypath)
-            storePassword keypassword
-            keyAlias = keyalias
-            keyPassword keypassword
+            if (System.getenv("CLCD")) {
+            }else{
 
-            // Optional, specify signing versions used
-            v1SigningEnabled true
-            v2SigningEnabled true
+                storeFile  file(keypath)
+                storePassword keypassword
+                keyAlias = keyalias
+                keyPassword keypassword
+
+                // Optional, specify signing versions used
+                v1SigningEnabled true
+                v2SigningEnabled true
+
+            }
+
         }
     }
-*/
+
 
     defaultConfig {
 
@@ -229,7 +236,13 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-         //   signingConfig signingConfigs.release
+
+                      if (System.getenv("CLCD")) {
+
+            }else{
+                signingConfig signingConfigs.release
+            }
+
 
         }
     }
