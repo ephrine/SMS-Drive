@@ -9,9 +9,16 @@ echo %message%
 echo %message0%
 echo %message1%
 echo %message2%
-gradlew tasks assembleGalaxy --stacktrace && gradlew tasks assembleMaster --stacktrace
+for /F "tokens=2" %%i in ('date /t') do set mydate=%%i
+set mytime=%time%
+echo started at %mydate%:%mytime%
+
+gradlew tasks clean --stacktrace && gradlew tasks build --stacktrace && gradlew tasks assembleRelease --stacktrace
 
 set messageend======================SMS Drive Debug APK has Generated===================  
 echo %messageend%
+for /F "tokens=2" %%i in ('date /t') do set mydate=%%i
+set mytime=%time%
+echo Finished at %mydate%:%mytime%
 
 PAUSE

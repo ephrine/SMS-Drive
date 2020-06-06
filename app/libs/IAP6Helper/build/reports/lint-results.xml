@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="5" by="lint 4.0.0">
+
+    <issue
+        id="OldTargetApi"
+        severity="Warning"
+        message="Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the android.os.Build.VERSION_CODES javadoc for details."
+        category="Correctness"
+        priority="6"
+        summary="Target SDK attribute is not targeting latest version"
+        explanation="When your application runs on a version of Android that is more recent than your `targetSdkVersion` specifies that it has been tested with, various compatibility modes kick in. This ensures that your application continues to work, but it may look out of place. For example, if the `targetSdkVersion` is less than 14, your app may get an option button in the UI.&#xA;&#xA;To fix this issue, set the `targetSdkVersion` to the highest available value. Then test your app to make sure everything works correctly. You may want to consult the compatibility notes to see what changes apply to each version you are adding support for: http://developer.android.com/reference/android/os/Build.VERSION_CODES.html as well as follow this guide:&#xA;https://developer.android.com/distribute/best-practices/develop/target-sdk.html"
+        url="https://developer.android.com/distribute/best-practices/develop/target-sdk.html"
+        urls="https://developer.android.com/distribute/best-practices/develop/target-sdk.html,http://developer.android.com/reference/android/os/Build.VERSION_CODES.html"
+        errorLine1="        targetSdkVersion 26"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\build.gradle"
+            line="8"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="InflateParams"
+        severity="Warning"
+        message="Avoid passing `null` as the view root (needed to resolve layout parameters on the inflated layout&apos;s root element)"
+        category="Correctness"
+        priority="5"
+        summary="Layout Inflation without a Parent"
+        explanation="When inflating a layout, avoid passing in null as the parent view, since otherwise any layout parameters on the root of the inflated layout will be ignored."
+        url="http://www.doubleencore.com/2013/05/layout-inflation-as-intended"
+        urls="http://www.doubleencore.com/2013/05/layout-inflation-as-intended"
+        errorLine1="        View view = getActivity().getLayoutInflater().inflate(R.layout.base_dialog, null);"
+        errorLine2="                                                                                    ~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\java\com\samsung\android\sdk\iap\lib\dialog\BaseDialogFragment.java"
+            line="90"
+            column="85"/>
+    </issue>
+
+    <issue
+        id="SpUsage"
+        severity="Warning"
+        message="This dimension is used as a text size: Should use &quot;`sp`&quot; instead of &quot;`dp`&quot;"
+        category="Correctness"
+        priority="3"
+        summary="Using `dp` instead of `sp` for text sizes"
+        explanation="When setting text sizes, you should normally use `sp`, or &quot;scale-independent pixels&quot;. This is like the `dp` unit, but it is also scaled by the user&apos;s font size preference. It is recommend you use this unit when specifying font sizes, so they will be adjusted for both the screen density and the user&apos;s preference.&#xA;&#xA;There **are** cases where you might need to use `dp`; typically this happens when the text is in a container with a specific dp-size. This will prevent the text from spilling outside the container. Note however that this means that the user&apos;s font size settings are not respected, so consider adjusting the layout itself to be more flexible."
+        url="http://developer.android.com/training/multiscreen/screendensities.html"
+        urls="http://developer.android.com/training/multiscreen/screendensities.html"
+        errorLine1="    &lt;dimen name=&quot;page_loading_textview_textsize&quot;>15dp&lt;/dimen>"
+        errorLine2="                                                 ^">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\values\dimen.xml"
+            line="3"
+            column="50"/>
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\layout\progress_dialog.xml"
+            line="29"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="PackageManagerGetSignatures"
+        severity="Warning"
+        message="Reading app signatures from getPackageInfo: The app signatures could be exploited if not validated properly; see issue explanation for details."
+        category="Security"
+        priority="8"
+        summary="Potential Multiple Certificate Exploit"
+        explanation="Improper validation of app signatures could lead to issues where a malicious app submits itself to the Play Store with both its real certificate and a fake certificate and gains access to functionality or information it shouldn&apos;t have due to another application only checking for the fake certificate and ignoring the rest. Please make sure to validate all signatures returned by this method."
+        url="https://bluebox.com/technical/android-fake-id-vulnerability/"
+        urls="https://bluebox.com/technical/android-fake-id-vulnerability/"
+        errorLine1="                    PackageManager.GET_SIGNATURES).signatures;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\java\com\samsung\android\sdk\iap\lib\helper\HelperUtil.java"
+            line="125"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="ObsoleteLayoutParam"
+        severity="Warning"
+        message="Invalid layout param in a `LinearLayout`: `layout_centerHorizontal`"
+        category="Performance"
+        priority="6"
+        summary="Obsolete layout params"
+        explanation="The given layout_param is not defined for the given layout, meaning it has no effect. This usually happens when you change the parent layout or move view code around without updating the layout params. This will cause useless attribute processing at runtime, and is misleading for others reading the layout so the parameter should be removed."
+        errorLine1="        android:layout_centerHorizontal=&quot;true&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\layout\base_dialog.xml"
+            line="34"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; SDK_INT is always >= 18"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\java\com\samsung\android\sdk\iap\lib\activity\CheckPackageActivity.java"
+            line="84"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        severity="Warning"
+        message="Unnecessary; SDK_INT is always >= 18"
+        category="Performance"
+        priority="6"
+        summary="Obsolete SDK_INT Version Check"
+        explanation="This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.&#xA;&#xA;Similarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+        errorLine1="                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\java\com\samsung\android\sdk\iap\lib\helper\HelperUtil.java"
+            line="181"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
+        severity="Warning"
+        message="This field leaks a context object"
+        category="Performance"
+        priority="6"
+        summary="Static Field Leaks"
+        explanation="A static field will leak contexts.&#xA;&#xA;Non-static inner classes have an implicit reference to their outer class. If that outer class is for example a `Fragment` or `Activity`, then this reference means that the long-running handler/loader/task will hold a reference to the activity which prevents it from getting garbage collected.&#xA;&#xA;Similarly, direct field references to activities and fragments from these longer running instances can cause leaks.&#xA;&#xA;ViewModel classes should never point to Views or non-application Contexts."
+        errorLine1="    protected Context mContext = null;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\java\com\samsung\android\sdk\iap\lib\helper\task\BaseTask.java"
+            line="22"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
+        severity="Warning"
+        message="Do not place Android context classes in static fields (static reference to `ConsumePurchasedItems` which has field `mContext` pointing to `Context`); this is a memory leak"
+        category="Performance"
+        priority="6"
+        summary="Static Field Leaks"
+        explanation="A static field will leak contexts.&#xA;&#xA;Non-static inner classes have an implicit reference to their outer class. If that outer class is for example a `Fragment` or `Activity`, then this reference means that the long-running handler/loader/task will hold a reference to the activity which prevents it from getting garbage collected.&#xA;&#xA;Similarly, direct field references to activities and fragments from these longer running instances can cause leaks.&#xA;&#xA;ViewModel classes should never point to Views or non-application Contexts."
+        errorLine1="    private static ConsumePurchasedItems mInstance = null;"
+        errorLine2="            ~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\java\com\samsung\android\sdk\iap\lib\service\ConsumePurchasedItems.java"
+            line="21"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
+        severity="Warning"
+        message="Do not place Android context classes in static fields (static reference to `IapHelper` which has field `mContext` pointing to `Context`); this is a memory leak"
+        category="Performance"
+        priority="6"
+        summary="Static Field Leaks"
+        explanation="A static field will leak contexts.&#xA;&#xA;Non-static inner classes have an implicit reference to their outer class. If that outer class is for example a `Fragment` or `Activity`, then this reference means that the long-running handler/loader/task will hold a reference to the activity which prevents it from getting garbage collected.&#xA;&#xA;Similarly, direct field references to activities and fragments from these longer running instances can cause leaks.&#xA;&#xA;ViewModel classes should never point to Views or non-application Contexts."
+        errorLine1="    private static IapHelper mInstance = null;"
+        errorLine2="            ~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\java\com\samsung\android\sdk\iap\lib\helper\IapHelper.java"
+            line="38"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
+        severity="Warning"
+        message="Do not place Android context classes in static fields (static reference to `OwnedProduct` which has field `mContext` pointing to `Context`); this is a memory leak"
+        category="Performance"
+        priority="6"
+        summary="Static Field Leaks"
+        explanation="A static field will leak contexts.&#xA;&#xA;Non-static inner classes have an implicit reference to their outer class. If that outer class is for example a `Fragment` or `Activity`, then this reference means that the long-running handler/loader/task will hold a reference to the activity which prevents it from getting garbage collected.&#xA;&#xA;Similarly, direct field references to activities and fragments from these longer running instances can cause leaks.&#xA;&#xA;ViewModel classes should never point to Views or non-application Contexts."
+        errorLine1="    private static OwnedProduct mInstance = null;"
+        errorLine2="            ~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\java\com\samsung\android\sdk\iap\lib\service\OwnedProduct.java"
+            line="21"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="StaticFieldLeak"
+        severity="Warning"
+        message="Do not place Android context classes in static fields (static reference to `ProductsDetails` which has field `mContext` pointing to `Context`); this is a memory leak"
+        category="Performance"
+        priority="6"
+        summary="Static Field Leaks"
+        explanation="A static field will leak contexts.&#xA;&#xA;Non-static inner classes have an implicit reference to their outer class. If that outer class is for example a `Fragment` or `Activity`, then this reference means that the long-running handler/loader/task will hold a reference to the activity which prevents it from getting garbage collected.&#xA;&#xA;Similarly, direct field references to activities and fragments from these longer running instances can cause leaks.&#xA;&#xA;ViewModel classes should never point to Views or non-application Contexts."
+        errorLine1="    private static ProductsDetails mInstance = null;"
+        errorLine2="            ~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\java\com\samsung\android\sdk\iap\lib\service\ProductsDetails.java"
+            line="21"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UselessParent"
+        severity="Warning"
+        message="This `LinearLayout` layout or its `FrameLayout` parent is possibly useless"
+        category="Performance"
+        priority="2"
+        summary="Useless parent layout"
+        explanation="A layout with children that has no siblings, is not a scrollview or a root layout, and does not have a background, can be removed and have its children moved directly into the parent for a flatter and more efficient layout hierarchy."
+        errorLine1="    &lt;LinearLayout"
+        errorLine2="     ~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\layout\progress_dialog.xml"
+            line="7"
+            column="6"/>
+    </issue>
+
+    <issue
+        id="RedundantNamespace"
+        severity="Warning"
+        message="This namespace declaration is redundant"
+        category="Performance"
+        priority="1"
+        summary="Redundant namespace"
+        explanation="In Android XML documents, only specify the namespace on the root/document element. Namespace declarations elsewhere in the document are typically accidental leftovers from copy/pasting XML from other files or documentation."
+        errorLine1="        &lt;layer-list xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;>"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\drawable\dialog_button_animation.xml"
+            line="4"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="RedundantNamespace"
+        severity="Warning"
+        message="This namespace declaration is redundant"
+        category="Performance"
+        priority="1"
+        summary="Redundant namespace"
+        explanation="In Android XML documents, only specify the namespace on the root/document element. Namespace declarations elsewhere in the document are typically accidental leftovers from copy/pasting XML from other files or documentation."
+        errorLine1="        &lt;layer-list xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;>"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\drawable\dialog_button_animation.xml"
+            line="15"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="TypographyEllipsis"
+        severity="Warning"
+        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
+        category="Usability:Typography"
+        priority="5"
+        summary="Ellipsis string can be replaced with ellipsis character"
+        explanation="You can replace the string &quot;...&quot; with a dedicated ellipsis character, ellipsis character (…, &amp;#8230;). This can help make the text more readable."
+        url="http://en.wikipedia.org/wiki/Ellipsis"
+        urls="http://en.wikipedia.org/wiki/Ellipsis"
+        errorLine1="    &lt;string name=&quot;mids_sapps_body_waiting_ing&quot; did=&quot;MIDS_SAPPS_BODY_WAITING_ING&quot;>Waiting...&lt;/string>"
+        errorLine2="                                                                                 ^">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\values\strings.xml"
+            line="10"
+            column="82"/>
+    </issue>
+
+    <issue
+        id="TypographyEllipsis"
+        severity="Warning"
+        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
+        category="Usability:Typography"
+        priority="5"
+        summary="Ellipsis string can be replaced with ellipsis character"
+        explanation="You can replace the string &quot;...&quot; with a dedicated ellipsis character, ellipsis character (…, &amp;#8230;). This can help make the text more readable."
+        url="http://en.wikipedia.org/wiki/Ellipsis"
+        urls="http://en.wikipedia.org/wiki/Ellipsis"
+        errorLine1="    &lt;string name=&quot;dream_sapps_body_authenticating_ing&quot; did=&quot;DREAM_SAPPS_BODY_AUTHENTICATING_ING&quot;>Authenticating...&lt;/string>"
+        errorLine2="                                                                                                 ^">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\values\strings.xml"
+            line="11"
+            column="98"/>
+    </issue>
+
+    <issue
+        id="IconDipSize"
+        severity="Warning"
+        message="The image `tw_widget_progressbar_effect_holo_light.png` varies significantly in its density-independent (dip) size across the various density versions: drawable-hdpi\\tw_widget_progressbar_effect_holo_light.png: 34x34 dp (51x51 px), drawable-mdpi\\tw_widget_progressbar_effect_holo_light.png: 51x51 dp (51x51 px), drawable-xhdpi\\tw_widget_progressbar_effect_holo_light.png: 34x34 dp (68x68 px), drawable-xxhdpi\\tw_widget_progressbar_effect_holo_light.png: 34x34 dp (102x102 px)"
+        category="Usability:Icons"
+        priority="5"
+        summary="Icon density-independent size validation"
+        explanation="Checks the all icons which are provided in multiple densities, all compute to roughly the same density-independent pixel (`dip`) size. This catches errors where images are either placed in the wrong folder, or icons are changed to new sizes but some folders are forgotten.">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\drawable-hdpi\tw_widget_progressbar_effect_holo_light.png"/>
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\drawable-xxhdpi\tw_widget_progressbar_effect_holo_light.png"/>
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\drawable-xhdpi\tw_widget_progressbar_effect_holo_light.png"/>
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\drawable-mdpi\tw_widget_progressbar_effect_holo_light.png"/>
+    </issue>
+
+    <issue
+        id="IconDipSize"
+        severity="Warning"
+        message="The image `tw_widget_progressbar_holo_light.png` varies significantly in its density-independent (dip) size across the various density versions: drawable-hdpi\\tw_widget_progressbar_holo_light.png: 34x34 dp (51x51 px), drawable-mdpi\\tw_widget_progressbar_holo_light.png: 51x51 dp (51x51 px), drawable-xhdpi\\tw_widget_progressbar_holo_light.png: 34x34 dp (68x68 px), drawable-xxhdpi\\tw_widget_progressbar_holo_light.png: 34x34 dp (102x102 px)"
+        category="Usability:Icons"
+        priority="5"
+        summary="Icon density-independent size validation"
+        explanation="Checks the all icons which are provided in multiple densities, all compute to roughly the same density-independent pixel (`dip`) size. This catches errors where images are either placed in the wrong folder, or icons are changed to new sizes but some folders are forgotten.">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\drawable-xhdpi\tw_widget_progressbar_holo_light.png"/>
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\drawable-hdpi\tw_widget_progressbar_holo_light.png"/>
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\drawable-xxhdpi\tw_widget_progressbar_holo_light.png"/>
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\drawable-mdpi\tw_widget_progressbar_holo_light.png"/>
+    </issue>
+
+    <issue
+        id="IconDuplicatesConfig"
+        severity="Warning"
+        message="The `tw_widget_progressbar_effect_holo_light.png` icon has identical contents in the following configuration folders: drawable-hdpi, drawable-mdpi, drawable"
+        category="Usability:Icons"
+        priority="5"
+        summary="Identical bitmaps across various configurations"
+        explanation="If an icon is provided under different configuration parameters such as `drawable-hdpi` or `-v11`, they should typically be different. This detector catches cases where the same icon is provided in different configuration folder which is usually not intentional.">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\drawable\tw_widget_progressbar_effect_holo_light.png"/>
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\drawable-mdpi\tw_widget_progressbar_effect_holo_light.png"/>
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\drawable-hdpi\tw_widget_progressbar_effect_holo_light.png"/>
+    </issue>
+
+    <issue
+        id="IconDuplicatesConfig"
+        severity="Warning"
+        message="The `tw_widget_progressbar_holo_light.png` icon has identical contents in the following configuration folders: drawable-hdpi, drawable-mdpi, drawable"
+        category="Usability:Icons"
+        priority="5"
+        summary="Identical bitmaps across various configurations"
+        explanation="If an icon is provided under different configuration parameters such as `drawable-hdpi` or `-v11`, they should typically be different. This detector catches cases where the same icon is provided in different configuration folder which is usually not intentional.">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\drawable\tw_widget_progressbar_holo_light.png"/>
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\drawable-mdpi\tw_widget_progressbar_holo_light.png"/>
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\drawable-hdpi\tw_widget_progressbar_holo_light.png"/>
+    </issue>
+
+    <issue
+        id="IconLocation"
+        severity="Warning"
+        message="Found bitmap drawable `res/drawable/dialog_full_holo_light.9.png` in densityless folder"
+        category="Usability:Icons"
+        priority="5"
+        summary="Image defined in density-independent drawable folder"
+        explanation="The res/drawable folder is intended for density-independent graphics such as shapes defined in XML. For bitmaps, move it to `drawable-mdpi` and consider providing higher and lower resolution versions in `drawable-ldpi`, `drawable-hdpi` and `drawable-xhdpi`. If the icon **really** is density independent (for example a solid color) you can place it in `drawable-nodpi`."
+        url="http://developer.android.com/guide/practices/screens_support.html"
+        urls="http://developer.android.com/guide/practices/screens_support.html">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\drawable\dialog_full_holo_light.9.png"/>
+    </issue>
+
+    <issue
+        id="IconLocation"
+        severity="Warning"
+        message="Found bitmap drawable `res/drawable/tw_widget_progressbar_effect_holo_light.png` in densityless folder"
+        category="Usability:Icons"
+        priority="5"
+        summary="Image defined in density-independent drawable folder"
+        explanation="The res/drawable folder is intended for density-independent graphics such as shapes defined in XML. For bitmaps, move it to `drawable-mdpi` and consider providing higher and lower resolution versions in `drawable-ldpi`, `drawable-hdpi` and `drawable-xhdpi`. If the icon **really** is density independent (for example a solid color) you can place it in `drawable-nodpi`."
+        url="http://developer.android.com/guide/practices/screens_support.html"
+        urls="http://developer.android.com/guide/practices/screens_support.html">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\drawable\tw_widget_progressbar_effect_holo_light.png"/>
+    </issue>
+
+    <issue
+        id="IconLocation"
+        severity="Warning"
+        message="Found bitmap drawable `res/drawable/tw_widget_progressbar_holo_light.png` in densityless folder"
+        category="Usability:Icons"
+        priority="5"
+        summary="Image defined in density-independent drawable folder"
+        explanation="The res/drawable folder is intended for density-independent graphics such as shapes defined in XML. For bitmaps, move it to `drawable-mdpi` and consider providing higher and lower resolution versions in `drawable-ldpi`, `drawable-hdpi` and `drawable-xhdpi`. If the icon **really** is density independent (for example a solid color) you can place it in `drawable-nodpi`."
+        url="http://developer.android.com/guide/practices/screens_support.html"
+        urls="http://developer.android.com/guide/practices/screens_support.html">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\drawable\tw_widget_progressbar_holo_light.png"/>
+    </issue>
+
+    <issue
+        id="RtlHardcoded"
+        severity="Warning"
+        message="Consider replacing `android:layout_marginLeft` with `android:layout_marginStart=&quot;16dip&quot;` to better support right-to-left layouts"
+        category="Internationalization:Bidirectional Text"
+        priority="5"
+        summary="Using left/right instead of start/end attributes"
+        explanation="Using `Gravity#LEFT` and `Gravity#RIGHT` can lead to problems when a layout is rendered in locales where text flows from right to left. Use `Gravity#START` and `Gravity#END` instead. Similarly, in XML `gravity` and `layout_gravity` attributes, use `start` rather than `left`.&#xA;&#xA;For XML attributes such as paddingLeft and `layout_marginLeft`, use `paddingStart` and `layout_marginStart`. **NOTE**: If your `minSdkVersion` is less than 17, you should add **both** the older left/right attributes **as well as** the new start/end attributes. On older platforms, where RTL is not supported and the start/end attributes are unknown and therefore ignored, you need the older left/right attributes. There is a separate lint check which catches that type of error.&#xA;&#xA;(Note: For `Gravity#LEFT` and `Gravity#START`, you can use these constants even when targeting older platforms, because the `start` bitmask is a superset of the `left` bitmask. Therefore, you can use `gravity=&quot;start&quot;` rather than `gravity=&quot;left|start&quot;`.)"
+        errorLine1="            android:layout_marginLeft=&quot;16dip&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\app\libs\IAP6Helper\src\main\res\layout\progress_dialog.xml"
+            line="25"
+            column="13"/>
+    </issue>
+
+</issues>

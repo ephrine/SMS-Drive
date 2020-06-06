@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "D:\\Android_Development\\GitHub\\SMS-Drive\\app\\libs\\IAP6Helper\\build\\intermediates\\res\\merged\\release\\drawable-mdpi-v4\\tw_widget_progressbar_effect_holo_light.png",
+        "source": "D:\\Android_Development\\GitHub\\SMS-Drive\\app\\libs\\IAP6Helper\\src\\main\\res\\drawable-mdpi\\tw_widget_progressbar_effect_holo_light.png"
+    },
+    {
+        "merged": "D:\\Android_Development\\GitHub\\SMS-Drive\\app\\libs\\IAP6Helper\\build\\intermediates\\res\\merged\\release\\drawable-mdpi-v4\\tw_widget_progressbar_holo_light.png",
+        "source": "D:\\Android_Development\\GitHub\\SMS-Drive\\app\\libs\\IAP6Helper\\src\\main\\res\\drawable-mdpi\\tw_widget_progressbar_holo_light.png"
+    }
+]

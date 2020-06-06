@@ -325,9 +325,13 @@ public class MainActivity extends AppCompatActivity {
         Resources res = getResources();
         isAnalyticDataCollectionEnable = res.getBoolean(R.bool.FIREBASE_ANALYTICS_DATA_COLLECTION);
         if (isAnalyticDataCollectionEnable) {
+if(BuildConfig.DEBUG){
 
-            AppCenter.start(getApplication(), BuildConfig.MS_AppCenter_Key,
-                    Analytics.class, Crashes.class);
+}else{
+    AppCenter.start(getApplication(), BuildConfig.MS_AppCenter_Key,
+            Analytics.class, Crashes.class);
+
+}
         }
 
         FirebaseMessagingServiceAct();
@@ -940,41 +944,43 @@ public class MainActivity extends AppCompatActivity {
         UserDB.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+if(dataSnapshot.exists()){
+    SharedPreferences.Editor editor = sharedPrefAutoBackup.edit();
 
-                SharedPreferences.Editor editor = sharedPrefAutoBackup.edit();
+    if (dataSnapshot.child("UserName").getValue(String.class) != null) {
+        UserName = dataSnapshot.child("UserName").getValue(String.class);
+        editor.putString(getString(R.string.settings_pref_username), UserName).apply();
+        Log.d(TAG, "onDataChange: UserName " + UserName);
 
-                if (dataSnapshot.child("UserName").getValue(String.class) != null) {
-                    UserName = dataSnapshot.child("UserName").getValue(String.class);
-                    editor.putString(getString(R.string.settings_pref_username), UserName).apply();
-                    Log.d(TAG, "onDataChange: UserName " + UserName);
+    } else {
+        UserName = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_pref_username), null);
 
-                } else {
-                    UserName = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_pref_username), null);
+        Log.d(TAG, "onDataChange: UserName NULL");
+    }
 
-                    Log.d(TAG, "onDataChange: UserName NULL");
-                }
+    if (dataSnapshot.child("UserEmail").getValue(String.class) != null) {
+        UserEmail = dataSnapshot.child("UserEmail").getValue(String.class);
+        editor.putString(getString(R.string.settings_pref_useremail), UserEmail).apply();
+        Log.d(TAG, "onDataChange: UserEmail " + UserEmail);
 
-                if (dataSnapshot.child("UserEmail").getValue(String.class) != null) {
-                    UserEmail = dataSnapshot.child("UserEmail").getValue(String.class);
-                    editor.putString(getString(R.string.settings_pref_useremail), UserEmail).apply();
-                    Log.d(TAG, "onDataChange: UserEmail " + UserEmail);
+    } else {
+        UserEmail = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_pref_useremail), null);
 
-                } else {
-                    UserEmail = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_pref_useremail), null);
+        Log.d(TAG, "onDataChange: UserEmail NULL");
+    }
 
-                    Log.d(TAG, "onDataChange: UserEmail NULL");
-                }
+    if (dataSnapshot.child("UserAge").getValue(String.class) != null) {
+        UserAge = dataSnapshot.child("UserAge").getValue(String.class);
+        editor.putString(getString(R.string.settings_pref_userage), UserAge).apply();
+        Log.d(TAG, "onDataChange: UserAge " + UserAge);
 
-                if (dataSnapshot.child("UserAge").getValue(String.class) != null) {
-                    UserAge = dataSnapshot.child("UserAge").getValue(String.class);
-                    editor.putString(getString(R.string.settings_pref_userage), UserAge).apply();
-                    Log.d(TAG, "onDataChange: UserAge " + UserAge);
+    } else {
+        UserAge = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_pref_userage), null);
 
-                } else {
-                    UserAge = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_pref_userage), null);
+        Log.d(TAG, "onDataChange: UserAge NULL");
+    }
 
-                    Log.d(TAG, "onDataChange: UserAge NULL");
-                }
+}
 
 
             }

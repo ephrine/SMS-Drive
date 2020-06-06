@@ -1,0 +1,26 @@
+[
+    {
+        "merged": "D:\\Android_Development\\GitHub\\SMS-Drive\\app\\libs\\IAP6Helper\\build\\intermediates\\res\\merged\\release\\drawable\\dialog_full_holo_light.9.png",
+        "source": "D:\\Android_Development\\GitHub\\SMS-Drive\\app\\libs\\IAP6Helper\\src\\main\\res\\drawable\\dialog_full_holo_light.9.png"
+    },
+    {
+        "merged": "D:\\Android_Development\\GitHub\\SMS-Drive\\app\\libs\\IAP6Helper\\build\\intermediates\\res\\merged\\release\\drawable\\progressbar_middle.xml",
+        "source": "D:\\Android_Development\\GitHub\\SMS-Drive\\app\\libs\\IAP6Helper\\src\\main\\res\\drawable\\progressbar_middle.xml"
+    },
+    {
+        "merged": "D:\\Android_Development\\GitHub\\SMS-Drive\\app\\libs\\IAP6Helper\\build\\intermediates\\res\\merged\\release\\drawable\\dialog_radius.xml",
+        "source": "D:\\Android_Development\\GitHub\\SMS-Drive\\app\\libs\\IAP6Helper\\src\\main\\res\\drawable\\dialog_radius.xml"
+    },
+    {
+        "merged": "D:\\Android_Development\\GitHub\\SMS-Drive\\app\\libs\\IAP6Helper\\build\\intermediates\\res\\merged\\release\\drawable\\dialog_button_animation.xml",
+        "source": "D:\\Android_Development\\GitHub\\SMS-Drive\\app\\libs\\IAP6Helper\\src\\main\\res\\drawable\\dialog_button_animation.xml"
+    },
+    {
+        "merged": "D:\\Android_Development\\GitHub\\SMS-Drive\\app\\libs\\IAP6Helper\\build\\intermediates\\res\\merged\\release\\drawable\\tw_widget_progressbar_effect_holo_light.png",
+        "source": "D:\\Android_Development\\GitHub\\SMS-Drive\\app\\libs\\IAP6Helper\\src\\main\\res\\drawable\\tw_widget_progressbar_effect_holo_light.png"
+    },
+    {
+        "merged": "D:\\Android_Development\\GitHub\\SMS-Drive\\app\\libs\\IAP6Helper\\build\\intermediates\\res\\merged\\release\\drawable\\tw_widget_progressbar_holo_light.png",
+        "source": "D:\\Android_Development\\GitHub\\SMS-Drive\\app\\libs\\IAP6Helper\\src\\main\\res\\drawable\\tw_widget_progressbar_holo_light.png"
+    }
+]

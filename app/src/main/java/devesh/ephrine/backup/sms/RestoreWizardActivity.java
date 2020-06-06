@@ -30,7 +30,13 @@ import androidx.preference.PreferenceManager;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.RequestConfiguration;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -154,7 +160,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
         }
 
         //Admob
-    /*    MobileAds.initialize(this, new OnInitializationCompleteListener() {
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
             @Override
             public void onInitializationComplete(InitializationStatus initializationStatus) {
                 Log.d(TAG, "onInitializationComplete: AdMob has been initialize");
@@ -170,7 +176,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
         mInterstitialAd = new InterstitialAd(this);
         mInterstitialAd.setAdUnitId(getString(R.string.AdMob_InitId));
-*/
+
         sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
         sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
 
@@ -179,7 +185,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
         Log.d(TAG, "AppStart: isSubscribe Cache " + sub);
         isSubscribed = sub.equals("1");
 
-       /* if (!isSubscribed) {
+       if (!isSubscribed) {
             mInterstitialAd.loadAd(new AdRequest.Builder().build());
             mInterstitialAd.setAdListener(new AdListener() {
                 @Override
@@ -221,20 +227,24 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
                 }
             });
-        }*/
+        }
 
 
     }
 
     @Override
     public void onBackPressed() {
-        if (mInterstitialAd.isLoaded() && !isSubscribed) {
-            mInterstitialAd.show();
-        } else {
-            Log.d("TAG", "The interstitial wasn't loaded yet.");
+        if(mInterstitialAd!=null){
+            if (mInterstitialAd.isLoaded() && !isSubscribed) {
+                mInterstitialAd.show();
+            } else {
+                Log.d("TAG", "The interstitial wasn't loaded yet.");
+                super.onBackPressed();
+            }
+        }else{
             super.onBackPressed();
-
         }
+
     }
 
     @Override

@@ -133,9 +133,12 @@ if (!kk.exists()) {
 keypath=kk
 } */
 
-def AppVersionName = "0.1.1"
+def AppVersionName = "0.1.2"
 
 android {
+lintOptions {
+         abortOnError false
+      }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -170,7 +173,7 @@ android {
         applicationId "devesh.ephrine.backup.sms"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 34
+        versionCode 35
         versionName "" + AppVersionName + " Beta Version"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
@@ -299,7 +302,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-ads:+'
     //  implementation 'com.google.firebase:firebase-ads:+'
 // Add the dependency for the Performance Monitoring library
-    //  implementation 'com.google.firebase:firebase-perf:19.0.6'
+    //  implementation 'com.google.firebase:firebase-perf:+'
     //  implementation 'androidx.work:work-runtime:2.4.0-alpha01'
 
 

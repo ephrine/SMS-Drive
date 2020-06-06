@@ -16,8 +16,8 @@ import static android.content.Context.ALARM_SERVICE;
 
 public class MyBroadcastReceiver extends BroadcastReceiver {
     private static final String TAG = "MyBroadcastReceiver";
-    BroadcastReceiver br = new MyBroadcastReceiver();
-    int requestId = 248;
+    //BroadcastReceiver br = new MyBroadcastReceiver();
+    //int requestId = 248;
 
     @Override
     public void onReceive(Context context, Intent intent) {

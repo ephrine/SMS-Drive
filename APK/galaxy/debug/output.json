@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "devesh.ephrine.backup.sms.debug",
+  "variantName": "galaxyDebug",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "properties": [],
+      "versionCode": 35,
+      "versionName": "35",
+      "enabled": true,
+      "outputFile": "app-galaxy-debug.apk"
+    }
+  ]
+}

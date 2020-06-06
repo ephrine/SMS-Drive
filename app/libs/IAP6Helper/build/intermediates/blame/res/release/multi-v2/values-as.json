@@ -1,0 +1,48 @@
+{
+    "logs": [
+        {
+            "outputFile": "D:\\Android_Development\\GitHub\\SMS-Drive\\app\\libs\\IAP6Helper\\build\\intermediates\\res\\merged\\release\\values-as\\values-as.xml",
+            "map": [
+                {
+                    "source": "D:\\Android_Development\\GitHub\\SMS-Drive\\app\\libs\\IAP6Helper\\src\\main\\res\\values-as\\strings.xml",
+                    "from": {
+                        "startLines": "26,28,30,36,22,40,42,34,38,32,24,20",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "1369,1539,1750,2443,969,2694,2912,2240,2561,1948,1132,823",
+                        "endColumns": "88,154,97,71,91,86,242,161,82,200,187,86",
+                        "endOffsets": "1453,1689,1843,2510,1056,2776,3150,2397,2639,2144,1315,905"
+                    },
+                    "to": {
+                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,144,299,397,469,561,648,891,1053,1136,1337,1525",
+                        "endColumns": "88,154,97,71,91,86,242,161,82,200,187,86",
+                        "endOffsets": "139,294,392,464,556,643,886,1048,1131,1332,1520,1607"
+                    }
+                }
+            ]
+        },
+        {
+            "outputFile": "D:\\Android_Development\\GitHub\\SMS-Drive\\app\\libs\\IAP6Helper\\build\\intermediates\\incremental\\mergeReleaseResources\\merged.dir\\values-as\\values-as.xml",
+            "map": [
+                {
+                    "source": "D:\\Android_Development\\GitHub\\SMS-Drive\\app\\libs\\IAP6Helper\\src\\main\\res\\values-as\\strings.xml",
+                    "from": {
+                        "startLines": "26,28,30,36,22,40,42,34,38,32,24,20",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "1369,1539,1750,2443,969,2694,2912,2240,2561,1948,1132,823",
+                        "endColumns": "88,154,97,71,91,86,242,161,82,200,187,86",
+                        "endOffsets": "1453,1689,1843,2510,1056,2776,3150,2397,2639,2144,1315,905"
+                    },
+                    "to": {
+                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,144,299,397,469,561,648,891,1053,1136,1337,1525",
+                        "endColumns": "88,154,97,71,91,86,242,161,82,200,187,86",
+                        "endOffsets": "139,294,392,464,556,643,886,1048,1131,1332,1520,1607"
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -1332,18 +1332,22 @@ public class SyncIntentService extends JobIntentService {
                     String AppInstanceIDReged = dataSnapshot.getValue(String.class);
                     Log.d(TAG, "DB AppInstanceID: " + AppInstanceIDReged);
 
-                    if (AppInstanceIDReged.equals(AppInstanceID)) {
-                        Log.d(TAG, "onDataChange: App installed on single device");
-                    } else {
-                        if (isSubscribed) {
-                            Log.d(TAG, "onDataChange: App installed on multiple device with subscription");
+                    if(AppInstanceIDReged!=null){
+                        if (AppInstanceIDReged.equals(AppInstanceID)) {
+                            Log.d(TAG, "onDataChange: App installed on single device");
                         } else {
-                            Log.d(TAG, "onDataChange: App installed on multiple device with non-subscription");
-                            FirebaseAuth.getInstance().signOut();
-                            deleteAppData();
+                            if (isSubscribed) {
+                                Log.d(TAG, "onDataChange: App installed on multiple device with subscription");
+                            } else {
+                                Log.d(TAG, "onDataChange: App installed on multiple device with non-subscription");
+                                FirebaseAuth.getInstance().signOut();
+                                deleteAppData();
 
+                            }
                         }
                     }
+
+
 
 
                 }

@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="5" by="lint 4.0.0">
+
+    <issue
+        id="ObsoleteLintCustomCheck"
+        severity="Warning"
+        message="Lint found an issue registry (`androidx.appcompat.AppCompatIssueRegistry`) which requires a newer API level. That means that the custom lint checks are intended for a newer lint version; please upgrade"
+        category="Lint"
+        priority="10"
+        summary="Obsolete custom lint check"
+        explanation="Lint can be extended with &quot;custom checks&quot;: additional checks implemented by developers and libraries to for example enforce specific API usages required by a library or a company coding style guideline.&#xA;&#xA;The Lint APIs are not yet stable, so these checks may either cause a performance degradation, or stop working, or provide wrong results.&#xA;&#xA;This warning flags custom lint checks that are found to be using obsolete APIs and will need to be updated to run in the current lint environment.&#xA;&#xA;It may also flag issues found to be using a **newer** version of the API, meaning that you need to use a newer version of lint (or Android Studio or Gradle plugin etc) to work with these checks.">
+        <location
+            file="C:\Users\Devesh\.gradle\caches\transforms-2\files-2.1\b902bbfb9c722debab70965c1c1f2eb6\appcompat-1.3.0-alpha01\jars\lint.jar"/>
+    </issue>
+
+    <issue
+        id="ResourceName"
+        severity="Fatal"
+        message="Resource named &apos;`TemplateView`&apos; does not start with the project&apos;s resource prefix &apos;`gnt_`&apos;; rename to &apos;`GntTemplateView`&apos; ?"
+        category="Correctness"
+        priority="8"
+        summary="Resource with Wrong Prefix"
+        explanation="In Gradle projects you can specify a resource prefix that all resources in the project must conform to. This makes it easier to ensure that you don&apos;t accidentally combine resources from different libraries, since they all end up in the same shared app namespace."
+        errorLine1="  &lt;declare-styleable name=&quot;TemplateView&quot;>"
+        errorLine2="                     ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\nativetemplates\src\main\res\values\attrs.xml"
+            line="4"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        severity="Error"
+        message="Call requires API level 21 (current min is 16): `new android.widget.FrameLayout`"
+        category="Correctness"
+        priority="6"
+        summary="Calling new methods on older versions"
+        explanation="This check scans through all the Android API calls in the application and warns about any calls that are not available on **all** versions targeted by this application (according to its minimum SDK attribute in the manifest).&#xA;&#xA;If you really want to use this API and don&apos;t need to support older devices just set the `minSdkVersion` in your `build.gradle` or `AndroidManifest.xml` files.&#xA;&#xA;If your code is **deliberately** accessing newer APIs, and you have ensured (e.g. with conditional execution) that this code will only ever be called on a supported platform, then you can annotate your class or method with the `@TargetApi` annotation specifying the local minimum SDK to apply, such as `@TargetApi(11)`, such that this check considers 11 rather than your manifest file&apos;s minimum SDK as the required API level.&#xA;&#xA;If you are deliberately setting `android:` attributes in style definitions, make sure you place this in a `values-v`*NN* folder in order to avoid running into runtime conflicts on certain devices where manufacturers have added custom attributes whose ids conflict with the new ones on later platforms.&#xA;&#xA;Similarly, you can use tools:targetApi=&quot;11&quot; in an XML file to indicate that the element will only be inflated in an adequate context."
+        errorLine1="    super(context, attrs, defStyleAttr, defStyleRes);"
+        errorLine2="    ~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\nativetemplates\src\main\java\com\google\android\ads\nativetemplates\TemplateView.java"
+            line="71"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        severity="Warning"
+        message="A newer version of androidx.test.espresso:espresso-core than 3.1.0 is available: 3.2.0"
+        category="Correctness"
+        priority="4"
+        summary="Obsolete Gradle Dependency"
+        explanation="This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+        errorLine1="    androidTestImplementation &apos;androidx.test.espresso:espresso-core:3.1.0&apos;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\nativetemplates\build.gradle"
+            line="36"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="GradleDynamicVersion"
+        severity="Warning"
+        message="Avoid using + in version numbers; can lead to unpredictable and unrepeatable builds (androidx.appcompat:appcompat:+)"
+        category="Correctness"
+        priority="4"
+        summary="Gradle Dynamic Version"
+        explanation="Using `+` in dependencies lets you automatically pick up the latest available version rather than a specific, named version. However, this is not recommended; your builds are not repeatable; you may have tested with a slightly different version than what the build server used. (Using a dynamic version as the major version number is more problematic than using it in the minor version position.)"
+        errorLine1="    implementation &apos;androidx.appcompat:appcompat:+&apos;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\nativetemplates\build.gradle"
+            line="33"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="GradleDynamicVersion"
+        severity="Warning"
+        message="Avoid using + in version numbers; can lead to unpredictable and unrepeatable builds (androidx.test:runner:+)"
+        category="Correctness"
+        priority="4"
+        summary="Gradle Dynamic Version"
+        explanation="Using `+` in dependencies lets you automatically pick up the latest available version rather than a specific, named version. However, this is not recommended; your builds are not repeatable; you may have tested with a slightly different version than what the build server used. (Using a dynamic version as the major version number is more problematic than using it in the minor version position.)"
+        errorLine1="    androidTestImplementation &apos;androidx.test:runner:+&apos;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\nativetemplates\build.gradle"
+            line="35"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="GradleDynamicVersion"
+        severity="Warning"
+        message="Avoid using + in version numbers; can lead to unpredictable and unrepeatable builds (com.google.android.gms:play-services-ads:+)"
+        category="Correctness"
+        priority="4"
+        summary="Gradle Dynamic Version"
+        explanation="Using `+` in dependencies lets you automatically pick up the latest available version rather than a specific, named version. However, this is not recommended; your builds are not repeatable; you may have tested with a slightly different version than what the build server used. (Using a dynamic version as the major version number is more problematic than using it in the minor version position.)"
+        errorLine1="    implementation &apos;com.google.android.gms:play-services-ads:+&apos;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\nativetemplates\build.gradle"
+            line="37"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="GradleDynamicVersion"
+        severity="Warning"
+        message="Avoid using + in version numbers; can lead to unpredictable and unrepeatable builds (androidx.constraintlayout:constraintlayout:+)"
+        category="Correctness"
+        priority="4"
+        summary="Gradle Dynamic Version"
+        explanation="Using `+` in dependencies lets you automatically pick up the latest available version rather than a specific, named version. However, this is not recommended; your builds are not repeatable; you may have tested with a slightly different version than what the build server used. (Using a dynamic version as the major version number is more problematic than using it in the minor version position.)"
+        errorLine1="    implementation &apos;androidx.constraintlayout:constraintlayout:+&apos;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\nativetemplates\build.gradle"
+            line="38"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ContentDescription"
+        severity="Warning"
+        message="Missing `contentDescription` attribute on image"
+        category="Accessibility"
+        priority="3"
+        summary="Image without `contentDescription`"
+        explanation="Non-textual widgets like ImageViews and ImageButtons should use the `contentDescription` attribute to specify a textual description of the widget such that screen readers and other accessibility tools can adequately describe the user interface.&#xA;&#xA;Note that elements in application screens that are purely decorative and do not provide any content or enable a user action should not have accessibility content descriptions. In this case, just suppress the lint warning with a tools:ignore=&quot;ContentDescription&quot; attribute.&#xA;&#xA;Note that for text fields, you should not set both the `hint` and the `contentDescription` attributes since the hint will never be shown. Just set the `hint`. See http://developer.android.com/guide/topics/ui/accessibility/checklist.html#special-cases."
+        errorLine1="        &lt;ImageView"
+        errorLine2="         ~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\nativetemplates\src\main\res\layout\gnt_medium_template_view.xml"
+            line="55"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="ContentDescription"
+        severity="Warning"
+        message="Missing `contentDescription` attribute on image"
+        category="Accessibility"
+        priority="3"
+        summary="Image without `contentDescription`"
+        explanation="Non-textual widgets like ImageViews and ImageButtons should use the `contentDescription` attribute to specify a textual description of the widget such that screen readers and other accessibility tools can adequately describe the user interface.&#xA;&#xA;Note that elements in application screens that are purely decorative and do not provide any content or enable a user action should not have accessibility content descriptions. In this case, just suppress the lint warning with a tools:ignore=&quot;ContentDescription&quot; attribute.&#xA;&#xA;Note that for text fields, you should not set both the `hint` and the `contentDescription` attributes since the hint will never be shown. Just set the `hint`. See http://developer.android.com/guide/topics/ui/accessibility/checklist.html#special-cases."
+        errorLine1="        &lt;ImageView"
+        errorLine2="         ~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\nativetemplates\src\main\res\layout\gnt_small_template_view.xml"
+            line="34"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        severity="Warning"
+        message="Hardcoded string &quot;Ad&quot;, should use `@string` resource"
+        category="Internationalization"
+        priority="5"
+        summary="Hardcoded text"
+        explanation="Hardcoding text attributes directly in layout files is bad for several reasons:&#xA;&#xA;* When creating configuration variations (for example for landscape or portrait) you have to repeat the actual text (and keep it up to date when making changes)&#xA;&#xA;* The application cannot be translated to other languages by just adding new translations for existing string resources.&#xA;&#xA;There are quickfixes to automatically extract this hardcoded string into a resource lookup."
+        errorLine1="                android:text=&quot;Ad&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\nativetemplates\src\main\res\layout\gnt_medium_template_view.xml"
+            line="133"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        severity="Warning"
+        message="Hardcoded string &quot;Ad&quot;, should use `@string` resource"
+        category="Internationalization"
+        priority="5"
+        summary="Hardcoded text"
+        explanation="Hardcoding text attributes directly in layout files is bad for several reasons:&#xA;&#xA;* When creating configuration variations (for example for landscape or portrait) you have to repeat the actual text (and keep it up to date when making changes)&#xA;&#xA;* The application cannot be translated to other languages by just adding new translations for existing string resources.&#xA;&#xA;There are quickfixes to automatically extract this hardcoded string into a resource lookup."
+        errorLine1="                android:text=&quot;Ad&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\nativetemplates\src\main\res\layout\gnt_small_template_view.xml"
+            line="115"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="RtlCompat"
+        severity="Error"
+        message="To support older versions than API 17 (project specifies 16) you should **also** add `android:layout_marginLeft=&quot;@dimen/gnt_default_margin&quot;`"
+        category="Internationalization:Bidirectional Text"
+        priority="6"
+        summary="Right-to-left text compatibility issues"
+        explanation="API 17 adds a `textAlignment` attribute to specify text alignment. However, if you are supporting older versions than API 17, you must **also** specify a gravity or layout_gravity attribute, since older platforms will ignore the `textAlignment` attribute."
+        errorLine1="            android:layout_marginStart=&quot;@dimen/gnt_default_margin&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\nativetemplates\src\main\res\layout\gnt_medium_template_view.xml"
+            line="61"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="RtlCompat"
+        severity="Error"
+        message="To support older versions than API 17 (project specifies 16) you should **also** add `android:layout_marginRight=&quot;@dimen/gnt_no_margin&quot;`"
+        category="Internationalization:Bidirectional Text"
+        priority="6"
+        summary="Right-to-left text compatibility issues"
+        explanation="API 17 adds a `textAlignment` attribute to specify text alignment. However, if you are supporting older versions than API 17, you must **also** specify a gravity or layout_gravity attribute, since older platforms will ignore the `textAlignment` attribute."
+        errorLine1="            android:layout_marginEnd=&quot;@dimen/gnt_no_margin&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\nativetemplates\src\main\res\layout\gnt_medium_template_view.xml"
+            line="63"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="RtlCompat"
+        severity="Error"
+        message="To support older versions than API 17 (project specifies 16) you should **also** add `android:layout_marginLeft=&quot;@dimen/gnt_no_margin&quot;`"
+        category="Internationalization:Bidirectional Text"
+        priority="6"
+        summary="Right-to-left text compatibility issues"
+        explanation="API 17 adds a `textAlignment` attribute to specify text alignment. However, if you are supporting older versions than API 17, you must **also** specify a gravity or layout_gravity attribute, since older platforms will ignore the `textAlignment` attribute."
+        errorLine1="                android:layout_marginStart=&quot;@dimen/gnt_no_margin&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\nativetemplates\src\main\res\layout\gnt_medium_template_view.xml"
+            line="131"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="RtlCompat"
+        severity="Error"
+        message="To support older versions than API 17 (project specifies 16) you should **also** add `android:layout_marginRight=&quot;@dimen/gnt_default_margin&quot;`"
+        category="Internationalization:Bidirectional Text"
+        priority="6"
+        summary="Right-to-left text compatibility issues"
+        explanation="API 17 adds a `textAlignment` attribute to specify text alignment. However, if you are supporting older versions than API 17, you must **also** specify a gravity or layout_gravity attribute, since older platforms will ignore the `textAlignment` attribute."
+        errorLine1="                android:layout_marginEnd=&quot;@dimen/gnt_default_margin&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\nativetemplates\src\main\res\layout\gnt_medium_template_view.xml"
+            line="132"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="RtlCompat"
+        severity="Error"
+        message="To support older versions than API 17 (project specifies 16) you should **also** add `android:layout_marginLeft=&quot;@dimen/gnt_no_margin&quot;`"
+        category="Internationalization:Bidirectional Text"
+        priority="6"
+        summary="Right-to-left text compatibility issues"
+        explanation="API 17 adds a `textAlignment` attribute to specify text alignment. However, if you are supporting older versions than API 17, you must **also** specify a gravity or layout_gravity attribute, since older platforms will ignore the `textAlignment` attribute."
+        errorLine1="                android:layout_marginStart=&quot;@dimen/gnt_no_margin&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\nativetemplates\src\main\res\layout\gnt_small_template_view.xml"
+            line="113"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="RtlCompat"
+        severity="Error"
+        message="To support older versions than API 17 (project specifies 16) you should **also** add `android:layout_marginRight=&quot;@dimen/gnt_default_margin&quot;`"
+        category="Internationalization:Bidirectional Text"
+        priority="6"
+        summary="Right-to-left text compatibility issues"
+        explanation="API 17 adds a `textAlignment` attribute to specify text alignment. However, if you are supporting older versions than API 17, you must **also** specify a gravity or layout_gravity attribute, since older platforms will ignore the `textAlignment` attribute."
+        errorLine1="                android:layout_marginEnd=&quot;@dimen/gnt_default_margin&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\nativetemplates\src\main\res\layout\gnt_small_template_view.xml"
+            line="114"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="RtlSymmetry"
+        severity="Warning"
+        message="When you define `paddingLeft` you should probably also define `paddingRight` for right-to-left symmetry"
+        category="Internationalization:Bidirectional Text"
+        priority="6"
+        summary="Padding and margin symmetry"
+        explanation="If you specify padding or margin on the left side of a layout, you should probably also specify padding on the right side (and vice versa) for right-to-left layout symmetry."
+        errorLine1="            android:paddingLeft=&quot;@dimen/gnt_default_margin&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\nativetemplates\src\main\res\layout\gnt_medium_template_view.xml"
+            line="193"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="RtlHardcoded"
+        severity="Warning"
+        message="Consider adding `android:layout_marginStart=&quot;@dimen/gnt_default_margin&quot;` to better support right-to-left layouts"
+        category="Internationalization:Bidirectional Text"
+        priority="5"
+        summary="Using left/right instead of start/end attributes"
+        explanation="Using `Gravity#LEFT` and `Gravity#RIGHT` can lead to problems when a layout is rendered in locales where text flows from right to left. Use `Gravity#START` and `Gravity#END` instead. Similarly, in XML `gravity` and `layout_gravity` attributes, use `start` rather than `left`.&#xA;&#xA;For XML attributes such as paddingLeft and `layout_marginLeft`, use `paddingStart` and `layout_marginStart`. **NOTE**: If your `minSdkVersion` is less than 17, you should add **both** the older left/right attributes **as well as** the new start/end attributes. On older platforms, where RTL is not supported and the start/end attributes are unknown and therefore ignored, you need the older left/right attributes. There is a separate lint check which catches that type of error.&#xA;&#xA;(Note: For `Gravity#LEFT` and `Gravity#START`, you can use these constants even when targeting older platforms, because the `start` bitmask is a superset of the `left` bitmask. Therefore, you can use `gravity=&quot;start&quot;` rather than `gravity=&quot;left|start&quot;`.)"
+        errorLine1="            android:layout_marginLeft=&quot;@dimen/gnt_default_margin&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\nativetemplates\src\main\res\layout\gnt_medium_template_view.xml"
+            line="76"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="RtlHardcoded"
+        severity="Warning"
+        message="Consider adding `android:paddingStart=&quot;@dimen/gnt_default_margin&quot;` to better support right-to-left layouts"
+        category="Internationalization:Bidirectional Text"
+        priority="5"
+        summary="Using left/right instead of start/end attributes"
+        explanation="Using `Gravity#LEFT` and `Gravity#RIGHT` can lead to problems when a layout is rendered in locales where text flows from right to left. Use `Gravity#START` and `Gravity#END` instead. Similarly, in XML `gravity` and `layout_gravity` attributes, use `start` rather than `left`.&#xA;&#xA;For XML attributes such as paddingLeft and `layout_marginLeft`, use `paddingStart` and `layout_marginStart`. **NOTE**: If your `minSdkVersion` is less than 17, you should add **both** the older left/right attributes **as well as** the new start/end attributes. On older platforms, where RTL is not supported and the start/end attributes are unknown and therefore ignored, you need the older left/right attributes. There is a separate lint check which catches that type of error.&#xA;&#xA;(Note: For `Gravity#LEFT` and `Gravity#START`, you can use these constants even when targeting older platforms, because the `start` bitmask is a superset of the `left` bitmask. Therefore, you can use `gravity=&quot;start&quot;` rather than `gravity=&quot;left|start&quot;`.)"
+        errorLine1="            android:paddingLeft=&quot;@dimen/gnt_default_margin&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="D:\Android_Development\GitHub\SMS-Drive\nativetemplates\src\main\res\layout\gnt_medium_template_view.xml"
+            line="193"
+            column="13"/>
+    </issue>
+
+</issues>

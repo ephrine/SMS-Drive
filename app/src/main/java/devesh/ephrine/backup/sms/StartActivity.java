@@ -101,75 +101,87 @@ public class StartActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        openNotificationActivity = false;
-        if (getIntent().getExtras() != null) {
-            String url = null;
-            String title = null;
-            String desc = null;
-            String time = null;
-
-            LinkedHashSet<HashMap<String, String>> notificationsDataHash = new LinkedHashSet<>();
-
-            for (String key : getIntent().getExtras().keySet()) {
-                String value = getIntent().getExtras().getString(key);
-                Log.d(TAG, "FCM DATALOAD \nKey: " + key + " Value: " + value);
-
-                if (key.equals(EpNotificationsConstants.EP_FCM_URL)) {
-                    url = value;
-                }
-                if (key.equals(EpNotificationsConstants.EP_FCM_TITLE)) {
-                    title = value;
-                }
-                if (key.equals(EpNotificationsConstants.EP_FCM_DESC)) {
-                    desc = value;
-                }
-
-
-            }
-            time = String.valueOf(System.currentTimeMillis());
-            if (title != null) {
-
-                HashMap<String, String> data = new HashMap<>();
-                data.put(EpNotificationsConstants.EP_FCM_URL, url);
-                data.put(EpNotificationsConstants.EP_FCM_TITLE, title);
-                data.put(EpNotificationsConstants.EP_FCM_DESC, desc);
-                data.put("time", time);
-
-                try {
-                    notificationsDataHash = (LinkedHashSet<HashMap<String, String>>) Function.readCachedFile(this, getString(R.string.FCM_Notifications_Data));
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Log.e(TAG, "onMessageReceived: ERROR #5234 ", e);
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                    Log.e(TAG, "onMessageReceived: ERROR #65 ", e);
-                }
-
-                notificationsDataHash.add(data);
-
-                try {
-                    Function.createCachedNotificationFile(this, getString(R.string.FCM_Notifications_Data), notificationsDataHash);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                openNotificationActivity = true;
-
-            }
-
-
-        }
-        sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
-
         Fabric.with(this, new Crashlytics());
+
+        openNotificationActivity = false;
+        try {
+            if (getIntent().getExtras() != null) {
+                String url = null;
+                String title = null;
+                String desc = null;
+                String time = null;
+
+                LinkedHashSet<HashMap<String, String>> notificationsDataHash = new LinkedHashSet<>();
+
+                for (String key : getIntent().getExtras().keySet()) {
+                    String value = getIntent().getExtras().getString(key);
+                    Log.d(TAG, "FCM DATALOAD \nKey: " + key + " Value: " + value);
+
+                    if (key.equals(EpNotificationsConstants.EP_FCM_URL)) {
+                        url = value;
+                    }
+                    if (key.equals(EpNotificationsConstants.EP_FCM_TITLE)) {
+                        title = value;
+                    }
+                    if (key.equals(EpNotificationsConstants.EP_FCM_DESC)) {
+                        desc = value;
+                    }
+
+
+                }
+                time = String.valueOf(System.currentTimeMillis());
+                if (title != null) {
+
+                    HashMap<String, String> data = new HashMap<>();
+                    data.put(EpNotificationsConstants.EP_FCM_URL, url);
+                    data.put(EpNotificationsConstants.EP_FCM_TITLE, title);
+                    data.put(EpNotificationsConstants.EP_FCM_DESC, desc);
+                    data.put("time", time);
+
+                    try {
+                        notificationsDataHash = (LinkedHashSet<HashMap<String, String>>) Function.readCachedFile(this, getString(R.string.FCM_Notifications_Data));
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        Log.e(TAG, "onMessageReceived: ERROR #5234 ", e);
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                        Log.e(TAG, "onMessageReceived: ERROR #65 ", e);
+                    }
+
+                    notificationsDataHash.add(data);
+
+                    try {
+                        Function.createCachedNotificationFile(this, getString(R.string.FCM_Notifications_Data), notificationsDataHash);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    openNotificationActivity = true;
+
+                }
+
+
+            }
+
+        }catch (Exception e){
+            Log.e(TAG, "onCreate: ERROR Getting Notification intent ",e );
+            Crashlytics.logException(e);
+        }
+         sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
+
 
         boolean isAnalyticDataCollectionEnable = false;
         Resources res = getResources();
         isAnalyticDataCollectionEnable = res.getBoolean(R.bool.FIREBASE_ANALYTICS_DATA_COLLECTION);
         if (isAnalyticDataCollectionEnable) {
 
-            AppCenter.start(getApplication(), BuildConfig.MS_AppCenter_Key,
-                    Analytics.class, Crashes.class);
+            if(BuildConfig.DEBUG){
+
+            }else{
+                AppCenter.start(getApplication(), BuildConfig.MS_AppCenter_Key,
+                        Analytics.class, Crashes.class);
+
+            }
         }
 
         setContentView(R.layout.activity_start);
