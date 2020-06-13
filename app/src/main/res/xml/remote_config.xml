@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?><!-- START xml_defaults -->
 <defaultsMap>
     <entry>
-        <key>SMSDrive_free_access</key>
-        <value>true</value>
+        <key>SMSDrive_Latest_Version</key>
+        <value>0</value>
     </entry>
 
 </defaultsMap><!-- END xml_defaults -->

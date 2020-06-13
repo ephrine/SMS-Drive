@@ -15,6 +15,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.MergeCursor;
+import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -79,6 +80,7 @@ import com.google.firebase.functions.HttpsCallableResult;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.google.gson.Gson;
 import com.jirbo.adcolony.AdColonyAdapter;
 import com.jirbo.adcolony.AdColonyBundleBuilder;
@@ -537,8 +539,13 @@ if(BuildConfig.DEBUG){
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-        mFirebaseRemoteConfig.setDefaults(R.xml.remote_config);
-        mFirebaseRemoteConfig.fetch(10)
+        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+               // .setMinimumFetchIntervalInSeconds(3600)
+                .build();
+        mFirebaseRemoteConfig.setConfigSettingsAsync(configSettings);
+        mFirebaseRemoteConfig.setDefaultsAsync(R.xml.remote_config);
+    /*     mFirebaseRemoteConfig.setDefaults(R.xml.remote_config);
+       mFirebaseRemoteConfig.fetch(10)
                 .addOnCompleteListener(this, new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
@@ -562,6 +569,34 @@ if(BuildConfig.DEBUG){
                         //  displayWelcomeMessage();
                     }
                 });
+*/
+
+        mFirebaseRemoteConfig.fetchAndActivate()
+                .addOnCompleteListener(this, new OnCompleteListener<Boolean>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Boolean> task) {
+                        if (task.isSuccessful()) {
+                            boolean updated = task.getResult();
+                            Log.d(TAG, "Config params updated: " + updated);
+                            /*Toast.makeText(MainActivity.this, "Fetch and activate succeeded",
+                                    Toast.LENGTH_SHORT).show();  */
+
+                        } else {
+                            /*Toast.makeText(MainActivity.this, "Fetch failed",
+                                    Toast.LENGTH_SHORT).show(); */
+                        }
+                      //  displayWelcomeMessage();
+                        String LatestVersionCode = mFirebaseRemoteConfig.getString("SMSDrive_Latest_Version");
+                        int currentVersion=BuildConfig.VERSION_CODE;
+                        Log.d(TAG, "onComplete: mFirebaseRemoteConfig SMSDriveLatestVersionCode:"+LatestVersionCode+"\ncurrent versioncode:"+currentVersion);
+                        if(Integer.parseInt(LatestVersionCode)>currentVersion){
+                            CreateNotification("New Update Available");
+                            Log.d(TAG, "onComplete: mFirebaseRemoteConfig Update Available");
+                        }
+
+                    }
+                });
+
 
 
         if (!isNetworkAvailable()) {
@@ -1020,8 +1055,7 @@ if(dataSnapshot.exists()){
 
                             refreshLastSync();
 
-                            processCloudThread = new ProcessCloudSmsThread();
-                            processCloudThread.execute();
+
 
                             Log.d(TAG, "onRefresh: Swipe Down ! Refreshing..");
                         }
@@ -1888,9 +1922,26 @@ if(dataSnapshot.exists()){
     }
 
     public void stopLoadingRefreshView() {
-        mySwipeRefreshLayout = findViewById(R.id.swipeRefresh);
+        new Thread() {
+            public void run() {
+                try {
+                    runOnUiThread(new Runnable() {
 
-        mySwipeRefreshLayout.setRefreshing(false);
+                        @Override
+                        public void run() {
+                            mySwipeRefreshLayout = findViewById(R.id.swipeRefresh);
+
+                            mySwipeRefreshLayout.setRefreshing(false);
+                        }
+                    });
+//                    Thread.sleep(300);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Crashlytics.logException(e);
+                }
+            }
+        }.start();
+
 
     }
 
@@ -1926,22 +1977,24 @@ if(dataSnapshot.exists()){
                 // whenever data at this location is updated.
                 String AppInstanceIDReged = dataSnapshot.getValue(String.class);
                 Log.d(TAG, "DB AppInstanceID: " + AppInstanceIDReged);
+if(dataSnapshot.exists()){
+    if (AppInstanceIDReged.equals(AppInstanceID)) {
+        Log.d(TAG, "onDataChange: App installed on single device");
+    } else {
+        if (isSubscribed) {
+            Log.d(TAG, "onDataChange: App installed on multiple device with subscription");
+        } else {
+            Log.d(TAG, "onDataChange: App installed on multiple device with non-subscription");
+            Toast.makeText(getApplicationContext(), "Please Login Again", Toast.LENGTH_LONG).show();
+            //       Toast.makeText(getApplicationContext(), "get Subscription of SMS Drive for Multi Device Sync", Toast.LENGTH_LONG).show();
 
-                if (AppInstanceIDReged.equals(AppInstanceID)) {
-                    Log.d(TAG, "onDataChange: App installed on single device");
-                } else {
-                    if (isSubscribed) {
-                        Log.d(TAG, "onDataChange: App installed on multiple device with subscription");
-                    } else {
-                        Log.d(TAG, "onDataChange: App installed on multiple device with non-subscription");
-                        Toast.makeText(getApplicationContext(), "Please Login Again", Toast.LENGTH_LONG).show();
-                        //       Toast.makeText(getApplicationContext(), "get Subscription of SMS Drive for Multi Device Sync", Toast.LENGTH_LONG).show();
+            FirebaseAuth.getInstance().signOut();
+            deleteAppData();
 
-                        FirebaseAuth.getInstance().signOut();
-                        deleteAppData();
+        }
+    }
+}
 
-                    }
-                }
 
 
             }
@@ -2040,6 +2093,45 @@ if(dataSnapshot.exists()){
 
     }
 
+
+
+    void CreateNotification(String title) {
+
+        // Create an explicit intent for an Activity in your app
+        Intent intent = new Intent(this, StartActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, getString(R.string.notification_update_channel))
+                .setSmallIcon(R.drawable.app_logo)
+                .setContentTitle(title)
+                .setContentIntent(pendingIntent)
+                .setColor(getResources().getColor(R.color.colorAccent))
+                //.setContentText(message)
+                .setSound(null, AudioManager.STREAM_NOTIFICATION)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            String CHANNEL_ID = getString(R.string.notification_update_channel);
+            CharSequence name = "App Update";
+            String Description = "Receive notification when Latest app version is available";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel mChannel;
+            mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
+            mChannel.setDescription(Description);
+            mChannel.enableVibration(true);
+
+            notificationManager.createNotificationChannel(mChannel);
+        }
+        // notificationId is a unique int for each notification that you must define
+        notificationManager.notify(Integer.parseInt(getString(R.string.notification_update_channel)), builder.build());
+
+
+    }
+
     //---------------- LoadSms Async Task
     class LoadSms extends AsyncTask<String, Void, String> {
         final String TAG = "LoadSms | ";
@@ -2062,7 +2154,13 @@ if(dataSnapshot.exists()){
 
             smsList.clear();
             //   loadingCircle.setVisibility(View.VISIBLE);
-            mySwipeRefreshLayout.setRefreshing(true);
+            try {
+                mySwipeRefreshLayout.setRefreshing(true);
+            }catch (Exception e){
+                Log.e(TAG, "onPreExecute: ERROR #45645 ",e );
+            Crashlytics.logException(e);
+            }
+
            /* try{
                 Function.createCachedFile(MainActivity.this, "orgsms", null);
             }catch (Exception e){
@@ -2198,9 +2296,14 @@ final int position, long id) {
         }
         });
         */
-                mySwipeRefreshLayout = findViewById(R.id.swipeRefresh);
+                try {
+                    mySwipeRefreshLayout = findViewById(R.id.swipeRefresh);
 
-                mySwipeRefreshLayout.setRefreshing(false);
+                    mySwipeRefreshLayout.setRefreshing(false);
+                }catch (Exception e){
+                    Log.e(TAG, "onPreExecute: ERROR #6645 ",e );
+                    Crashlytics.logException(e);
+                }
 
                 if (onceOpen == 0) {
                     AppStart();
@@ -2209,6 +2312,9 @@ final int position, long id) {
 
 
             }
+
+            processCloudThread = new ProcessCloudSmsThread();
+            processCloudThread.execute();
 
             //  Intent intent = new Intent(MainActivity.this, DownloadCloudMessagesService.class);
 

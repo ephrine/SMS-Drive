@@ -63,4 +63,10 @@
     <string name="App_InstanceID" translatable="false">appinstanceid</string>
 
     <string name="Admob_TestDeviceID" translatable="false">D7D25A835A1A43446353F5BEC7C2B635</string>
+
+    <string name="notification_auto_sync">001</string>
+    <string name="notification_general">002</string>
+    <string name="notification_fcm_channelid">010</string>
+    <string name="notification_update_channel">003</string>
+
 </resources>

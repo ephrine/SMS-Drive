@@ -605,7 +605,7 @@ public class SyncIntentService extends JobIntentService {
         // broadcastIntent.setAction("restartservice");
         // broadcastIntent.setClass(this, Restarter.class);
         // this.sendBroadcast(broadcastIntent);
-        notificationManager.cancel(001);
+        notificationManager.cancel(Integer.parseInt(getString(R.string.notification_auto_sync)));
         cancelAllNotification();
         try {
             wakeLock.release();
@@ -931,7 +931,7 @@ public class SyncIntentService extends JobIntentService {
                         @Override
                         public void onFailure(@NonNull Exception exception) {
                             // Handle unsuccessful uploads
-                            notificationManager.cancel(001);
+                            notificationManager.cancel(Integer.parseInt(getString(R.string.notification_auto_sync)));
                             Log.d(TAG, "onFailure: ERROR #4676587 " + exception);
                             cache_temp1.delete();
                             cache_temp2.delete();
@@ -1077,7 +1077,7 @@ public class SyncIntentService extends JobIntentService {
         editor.putString(mContext.getResources().getString(R.string.settings_pref_last_sync), formattedDate1);
         editor.apply();
 
-        notificationManager.cancel(001);
+        notificationManager.cancel(Integer.parseInt(getString(R.string.notification_auto_sync)));
         cache_temp1.delete();
         cache_temp2.delete();
 
@@ -1201,7 +1201,7 @@ public class SyncIntentService extends JobIntentService {
 
     void setNotification() {
 
-        builder = new NotificationCompat.Builder(this, "001")
+        builder = new NotificationCompat.Builder(this, getString(R.string.notification_auto_sync))
                 .setSmallIcon(R.drawable.app_logo)
                 .setContentTitle("Auto-Backup")
                 .setContentText("Syncing Messages....")
@@ -1215,7 +1215,7 @@ public class SyncIntentService extends JobIntentService {
             CharSequence name = "Backup, Restore & Sync";
             String description = "Syncing Messages..";
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel("001", name, importance);
+            NotificationChannel channel = new NotificationChannel(getString(R.string.notification_auto_sync), name, importance);
             channel.setDescription(description);
 
             // Register the channel with the system; you can't change the importance
@@ -1229,7 +1229,7 @@ public class SyncIntentService extends JobIntentService {
         builder.setContentText("Preparing...");
 
 // notificationId is a unique int for each notification that you must define
-        notificationManager.notify(001, builder.build());
+        notificationManager.notify(Integer.parseInt(getString(R.string.notification_auto_sync)), builder.build());
 
 
     }
@@ -1241,13 +1241,13 @@ public class SyncIntentService extends JobIntentService {
             Log.d(TAG, "cancelAllNotification: CLEARING ALL NOTIFICATION");
 
             try {
-                notificationManager.cancel(001);
+                notificationManager.cancel(Integer.parseInt(getString(R.string.notification_auto_sync)));
             } catch (Exception e) {
                 Log.e(TAG, "cancelNotification: ERROR #5423 ", e);
             }
 
             try {
-                notificationManager.cancel(002);
+                notificationManager.cancel(Integer.parseInt(getString(R.string.notification_general)));
             } catch (Exception e) {
                 Log.e(TAG, "cancelNotification: ERROR #32424 ", e);
             }

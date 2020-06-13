@@ -271,7 +271,7 @@ Facebook SDK
         <meta-data android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id"
             />
-        -->
+
         <activity
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
@@ -288,6 +288,8 @@ Facebook SDK
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
+        -->
+
     </application>
 
 </manifest>

@@ -171,7 +171,7 @@ public class CloudSMS2DBService extends JobIntentService {
 
     void setNotificationCloudRefresh() {
 
-        nmbuilder = new NotificationCompat.Builder(this, "002")
+        nmbuilder = new NotificationCompat.Builder(this, getString(R.string.notification_general))
                 .setSmallIcon(R.drawable.app_logo)
                 .setContentTitle("Processing Messages from Cloud")
                 .setContentText("")
@@ -185,7 +185,7 @@ public class CloudSMS2DBService extends JobIntentService {
             CharSequence name = "General Tasks";
             String description = "Refresh Messages in background";
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel("002", name, importance);
+            NotificationChannel channel = new NotificationChannel(getString(R.string.notification_general), name, importance);
             channel.setDescription(description);
 
             // Register the channel with the system; you can't change the importance
@@ -199,7 +199,7 @@ public class CloudSMS2DBService extends JobIntentService {
         nmbuilder.setContentText("");
 
 // notificationId is a unique int for each notification that you must define
-        notificationManager.notify(002, nmbuilder.build());
+        notificationManager.notify(Integer.parseInt(getString(R.string.notification_general)), nmbuilder.build());
 
 
     }
@@ -239,7 +239,7 @@ public class CloudSMS2DBService extends JobIntentService {
             double progress;
             List<Sms> slist = new ArrayList<>();
             nmbuilder.setProgress(PROGRESS_MAX, PROGRESS_CURRENT, false);
-            notificationManager.notify(002, nmbuilder.build());
+            notificationManager.notify(Integer.parseInt(getString(R.string.notification_general)), nmbuilder.build());
 
             try {
                 for (int j = 0; j < CloudSms.size(); j++) {
@@ -249,7 +249,7 @@ public class CloudSMS2DBService extends JobIntentService {
                     Log.d(TAG, "AddSmsDB | doInBackground: PROGRESS: " + progress + "% \n j=" + j + "/" + t);
                     PROGRESS_CURRENT = (int) progress;
                     nmbuilder.setProgress(PROGRESS_MAX, PROGRESS_CURRENT, false).setContentText("" + prg + "%");
-                    notificationManager.notify(002, nmbuilder.build());
+                    notificationManager.notify(Integer.parseInt(getString(R.string.notification_general)), nmbuilder.build());
                     try {
 
                         Sms u = new Sms();
@@ -271,7 +271,7 @@ public class CloudSMS2DBService extends JobIntentService {
                     } catch (Exception e) {
                         Log.e(TAG, "doInBackground: ERROR #04732 " + e);
                         Crashlytics.logException(e);
-                        //    notificationManager.cancel(002);
+                        //    notificationManager.cancel(Integer.parseInt(getString(R.string.notification_general)));
 
                     }
 
@@ -326,7 +326,7 @@ public class CloudSMS2DBService extends JobIntentService {
             //      SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
             //    editor.putString(getString(R.string.BG_Task_Status), "0").apply();
             CloudSms.clear();
-            notificationManager.cancel(002);
+            notificationManager.cancel(Integer.parseInt(getString(R.string.notification_general)));
             try {
                 //     myTrace.stop();
             } catch (Exception e) {

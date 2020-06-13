@@ -146,7 +146,7 @@ try {
 }*/
 
         try {
-            notificationManager.cancel(002);
+            notificationManager.cancel(Integer.parseInt(getString(R.string.notification_general)));
 
             //      myTrace.stop();
         } catch (Exception e) {
@@ -282,7 +282,7 @@ try {
                                         //  String message = editText.getText().toString();
                                         //intent.putExtra(EXTRA_MESSAGE, message);
 
-                                        //      notificationManager.cancel(002);
+                                        //      notificationManager.cancel(Integer.parseInt(getString(R.string.notification_general)));
                                         // startService(intent);
                                         AddtoDatabaseTask();
                                         //stopSelf();
@@ -333,7 +333,7 @@ try {
                     }
                     AddtoDatabaseTask();
                     //   wakeLock.release();
-                    //   notificationManager.cancel(002);
+                    //   notificationManager.cancel(Integer.parseInt(getString(R.string.notification_general)));
 
                     //    Intent intent = new Intent(DownloadCloudMessagesService.this, CloudSMS2DBService.class);
 
@@ -521,7 +521,7 @@ try {
             }
 
             try {
-                notificationManager.cancel(002);
+                notificationManager.cancel(Integer.parseInt(getString(R.string.notification_general)));
             } catch (Exception e) {
                 Log.e(TAG, "cancelNotification: ERROR #32424 ", e);
             }
@@ -609,7 +609,7 @@ try {
                     } catch (Exception e) {
                         Log.e(TAG, "doInBackground: ERROR #04732 " + e);
                         Crashlytics.logException(e);
-                        notificationManager.cancel(002);
+                        notificationManager.cancel(Integer.parseInt(getString(R.string.notification_general)));
 
                     }
 
@@ -656,7 +656,7 @@ try {
             SharedPreferences.Editor editor = sharedPrefAppGeneral.edit();
             editor.putString(getString(R.string.BG_Task_Status), "0").apply();
             CloudSms.clear();
-            notificationManager.cancel(002);
+            notificationManager.cancel(Integer.parseInt(getString(R.string.notification_general)));
 
             try {
                 //           myTrace.stop();

@@ -75,7 +75,7 @@ public class ThreadSmsActivity extends AppCompatActivity {
     LoadSms loadsmsTask;
     LoadCloudSms loadCloudSmsTask;
     String storage;
-    //LinearLayout NewMsgBoxLL;
+    LinearLayout LLBottomLayout;
     ArrayList<HashMap<String, String>> CloudSMS;
     ArrayList<HashMap<String, String>> SortSMS = new ArrayList<>();
     ProgressBar progressBarLoading;
@@ -143,10 +143,11 @@ public class ThreadSmsActivity extends AppCompatActivity {
             mAdView.loadAd(adRequest);
         }
         //  listView = (ListView) findViewById(R.id.listView);
-        //   new_message = (EditText) findViewById(R.id.newTextBox);
+           new_message = (EditText) findViewById(R.id.newTextBox);
 //        send_message = (ImageButton) findViewById(R.id.send_message);
-        //  NewMsgBoxLL = (LinearLayout) findViewById(R.id.msgTextBoxView);
+        LLBottomLayout = (LinearLayout) findViewById(R.id.LLBottomLayout);
         // setContentView(R.layout.sms_activity_thread);
+        LLBottomLayout.setVisibility(View.GONE);
 
         if (name != null) {
             getSupportActionBar().setTitle(name);
@@ -200,12 +201,17 @@ public class ThreadSmsActivity extends AppCompatActivity {
             startActivity(intent1);
         }
 
-       /* if (!isDefaultApp()) {
-            NewMsgBoxLL.setVisibility(View.GONE);
+     /* if (!isDefaultApp()) {
+          LLBottomLayout.setVisibility(View.GONE);
         } else {
-            NewMsgBoxLL.setVisibility(View.VISIBLE);
+          if (storage.equals("D")) {
+          LLBottomLayout.setVisibility(View.VISIBLE);
+          }else {
+              LLBottomLayout.setVisibility(View.GONE);
+          }
         }
-        */
+      */
+
 
     }
 
@@ -344,7 +350,8 @@ public class ThreadSmsActivity extends AppCompatActivity {
 */
     }
 
-   /* public void SendMSG(View v) {
+
+    public void SendMSG(View v) {
 
         new_message = (EditText) findViewById(R.id.newTextBox);
 
@@ -378,7 +385,8 @@ public class ThreadSmsActivity extends AppCompatActivity {
         }
 
     }
-    */
+
+
 
     void loadCloudMsgRecycleView() {
         Collections.sort(SortSMS, new MapComparator(Function.KEY_TIMESTAMP, "asc"));
@@ -450,7 +458,8 @@ public class ThreadSmsActivity extends AppCompatActivity {
     }
 
     boolean isDefaultApp() {
-        /*
+
+
         boolean a;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             final String myPackageName = getPackageName();
@@ -467,8 +476,9 @@ public class ThreadSmsActivity extends AppCompatActivity {
             a=true;
             // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
         }
-        */
-        return false;
+
+
+        return a;
     }
 
     void updateProgress(int progress) {

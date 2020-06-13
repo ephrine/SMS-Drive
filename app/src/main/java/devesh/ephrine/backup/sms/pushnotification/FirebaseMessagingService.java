@@ -113,7 +113,7 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "010")
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, getString(R.string.notification_fcm_channelid))
                 .setSmallIcon(R.drawable.app_logo)
                 .setContentTitle(title)
                 .setContentIntent(pendingIntent)
@@ -125,7 +125,7 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            String CHANNEL_ID = "010";
+            String CHANNEL_ID = getString(R.string.notification_fcm_channelid);
             CharSequence name = "News & Updates";
             String Description = "Push Notification";
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
@@ -137,7 +137,7 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
             notificationManager.createNotificationChannel(mChannel);
         }
         // notificationId is a unique int for each notification that you must define
-        notificationManager.notify(010, builder.build());
+        notificationManager.notify(Integer.parseInt(getString(R.string.notification_fcm_channelid)), builder.build());
 
 
     }

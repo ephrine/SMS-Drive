@@ -133,7 +133,7 @@ if (!kk.exists()) {
 keypath=kk
 } */
 
-def AppVersionName = "0.1.2"
+def AppVersionName = "0.1.3"
 
 android {
 lintOptions {
@@ -173,7 +173,7 @@ lintOptions {
         applicationId "devesh.ephrine.backup.sms"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 35
+        versionCode 36
         versionName "" + AppVersionName + " Beta Version"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
@@ -387,7 +387,7 @@ dependencies {
     implementation 'com.google.ads.mediation:facebook:+'
 
     //Facebook SDK
-    implementation 'com.facebook.android:facebook-android-sdk:+'
+   // implementation 'com.facebook.android:facebook-android-sdk:+'
 
     //AdColony-AdMob Mediatation
     implementation 'com.google.ads.mediation:adcolony:+'

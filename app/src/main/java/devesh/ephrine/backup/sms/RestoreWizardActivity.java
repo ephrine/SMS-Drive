@@ -580,13 +580,13 @@ public class RestoreWizardActivity extends AppCompatActivity {
         builder.setContentText(text);
 
 // notificationId is a unique int for each notification that you must define
-        notificationManager.notify(001, builder.build());
+        notificationManager.notify(Integer.parseInt(getString(R.string.notification_auto_sync)), builder.build());
 
     }
 
     void setNotification() {
 
-        builder = new NotificationCompat.Builder(this, "001")
+        builder = new NotificationCompat.Builder(this,  getString(R.string.notification_auto_sync))
                 .setSmallIcon(R.drawable.app_logo)
                 .setContentTitle("Restoring Messages")
                 .setContentText("Restoring Cloud Message on Device....")
@@ -600,7 +600,8 @@ public class RestoreWizardActivity extends AppCompatActivity {
             CharSequence name = "Backup, Restore & Sync";
             String description = "Syncing Messages..";
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel("001", name, importance);
+            NotificationChannel channel = new NotificationChannel(
+                    getString(R.string.notification_auto_sync), name, importance);
             channel.setDescription(description);
 
             // Register the channel with the system; you can't change the importance
@@ -614,7 +615,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
         builder.setContentText("Preparing...");
 
 // notificationId is a unique int for each notification that you must define
-        notificationManager.notify(001, builder.build());
+        notificationManager.notify(Integer.parseInt(getString(R.string.notification_auto_sync)), builder.build());
 
 
     }
