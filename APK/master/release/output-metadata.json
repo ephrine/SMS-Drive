@@ -4,17 +4,17 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "devesh.ephrine.backup.sms.debug",
-  "variantName": "masterDebug",
+  "applicationId": "devesh.ephrine.backup.sms",
+  "variantName": "masterRelease",
   "elements": [
     {
       "type": "SINGLE",
       "filters": [],
       "properties": [],
-      "versionCode": 36,
-      "versionName": "36",
+      "versionCode": 37,
+      "versionName": "0.1.4 Alpha",
       "enabled": true,
-      "outputFile": "app-master-debug.apk"
+      "outputFile": "app-master-release.apk"
     }
   ]
 }

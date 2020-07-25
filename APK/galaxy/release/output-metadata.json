@@ -4,17 +4,17 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "devesh.ephrine.backup.sms.debug",
-  "variantName": "galaxyDebug",
+  "applicationId": "devesh.ephrine.backup.sms",
+  "variantName": "galaxyRelease",
   "elements": [
     {
       "type": "SINGLE",
       "filters": [],
       "properties": [],
-      "versionCode": 36,
-      "versionName": "36",
+      "versionCode": 37,
+      "versionName": "0.1.4 Alpha (Samsung)",
       "enabled": true,
-      "outputFile": "app-galaxy-debug.apk"
+      "outputFile": "app-galaxy-release.apk"
     }
   ]
 }
