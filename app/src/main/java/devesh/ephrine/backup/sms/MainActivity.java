@@ -7,10 +7,12 @@ import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.role.RoleManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -61,7 +63,6 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.tasks.Continuation;
@@ -101,7 +102,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -284,14 +284,19 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //isDefaultSmsApp=false;
-        setContentView(R.layout.activity_main_home);
+        String flavour = BuildConfig.FLAVOR;
+
+
+    setContentView(R.layout.activity_main_home);
+
+
+
         isFirstStart = false;
         isIntAdShowed = false;
-     //   testDeviceIds = Arrays.asList(getString(R.string.Admob_TestDeviceID));
+        //   testDeviceIds = Arrays.asList(getString(R.string.Admob_TestDeviceID));
 
         Intent intent = getIntent();
 
-        String flavour = BuildConfig.FLAVOR;
         Log.d(TAG, "onCreate: FLAVOUR: " + flavour);
 
         Fabric.with(this, new Crashlytics());
@@ -327,13 +332,13 @@ public class MainActivity extends AppCompatActivity {
         Resources res = getResources();
         isAnalyticDataCollectionEnable = res.getBoolean(R.bool.FIREBASE_ANALYTICS_DATA_COLLECTION);
         if (isAnalyticDataCollectionEnable) {
-if(BuildConfig.DEBUG){
+            if (BuildConfig.DEBUG) {
 
-}else{
-    AppCenter.start(getApplication(), BuildConfig.MS_AppCenter_Key,
-            Analytics.class, Crashes.class);
+            } else {
+                AppCenter.start(getApplication(), BuildConfig.MS_AppCenter_Key,
+                        Analytics.class, Crashes.class);
 
-}
+            }
         }
 
         FirebaseMessagingServiceAct();
@@ -369,7 +374,7 @@ if(BuildConfig.DEBUG){
 
             AdColony.configure(this,
                     getString(R.string.AdColony_App_ID),
-                    getString(R.string.AdColony_ZoneID1),getString(R.string.AdColony_ZoneID2));
+                    getString(R.string.AdColony_ZoneID1), getString(R.string.AdColony_ZoneID2));
             AdColonyBundleBuilder.setShowPrePopup(true);
             AdColonyBundleBuilder.setShowPostPopup(true);
             AdRequest request = new AdRequest.Builder()
@@ -516,7 +521,36 @@ if(BuildConfig.DEBUG){
 
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+
+        if ( Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            final String myPackageName = getPackageName();
+          boolean  a = Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName);
+            Log.d(TAG, "isDefaultApp: api kitkat-Q: "+a);
+        }else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            RoleManager roleManager = null;
+            roleManager = getSystemService(RoleManager.class);
+            Log.d(TAG, "isDefaultApp(): API Q");
+
+            if (roleManager.isRoleAvailable(RoleManager.ROLE_SMS)) {
+                if (roleManager.isRoleHeld(RoleManager.ROLE_SMS)) {
+                    Log.d(TAG, "isDefaultApp(): Default SMS App role");
+               //     a=true;
+                } else {
+                    Log.d(TAG, "isDefaultApp(): Not Default SMS App role");
+             //       a=false;
+                }
+            }else{
+                Log.d(TAG, "isDefaultApp: api Q ");
+                Log.d(TAG, "isDefaultApp(): api QNot Default SMS App role");
+           //     a=false;
+            }
+        }else {
+         //   a = true;
+            Log.d(TAG, "isDefaultApp(): api Q Default SMS App role #32543");
+            // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
+        }
+
+       /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             final String myPackageName = getPackageName();
             if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
 
@@ -533,6 +567,7 @@ if(BuildConfig.DEBUG){
             //       isDefaultSmsApp=true;
             // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
         }
+        */
 
 
         navigation = findViewById(R.id.bottom_navigation);
@@ -540,7 +575,7 @@ if(BuildConfig.DEBUG){
 
         mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
         FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
-               // .setMinimumFetchIntervalInSeconds(3600)
+                // .setMinimumFetchIntervalInSeconds(3600)
                 .build();
         mFirebaseRemoteConfig.setConfigSettingsAsync(configSettings);
         mFirebaseRemoteConfig.setDefaultsAsync(R.xml.remote_config);
@@ -585,18 +620,17 @@ if(BuildConfig.DEBUG){
                             /*Toast.makeText(MainActivity.this, "Fetch failed",
                                     Toast.LENGTH_SHORT).show(); */
                         }
-                      //  displayWelcomeMessage();
+                        //  displayWelcomeMessage();
                         String LatestVersionCode = mFirebaseRemoteConfig.getString("SMSDrive_Latest_Version");
-                        int currentVersion=BuildConfig.VERSION_CODE;
-                        Log.d(TAG, "onComplete: mFirebaseRemoteConfig SMSDriveLatestVersionCode:"+LatestVersionCode+"\ncurrent versioncode:"+currentVersion);
-                        if(Integer.parseInt(LatestVersionCode)>currentVersion){
+                        int currentVersion = BuildConfig.VERSION_CODE;
+                        Log.d(TAG, "onComplete: mFirebaseRemoteConfig SMSDriveLatestVersionCode:" + LatestVersionCode + "\ncurrent versioncode:" + currentVersion);
+                        if (Integer.parseInt(LatestVersionCode) > currentVersion) {
                             CreateNotification("New Update Available");
                             Log.d(TAG, "onComplete: mFirebaseRemoteConfig Update Available");
                         }
 
                     }
                 });
-
 
 
         if (!isNetworkAvailable()) {
@@ -873,34 +907,45 @@ if(BuildConfig.DEBUG){
 
     void LoadCloudRecycleView() {
 
+try{
+    ThreadSmsDB = Room.databaseBuilder(getApplicationContext(),
+            AppDatabase.class, getString(R.string.DATABASE_THREAD_SMS_DB)).allowMainThreadQueries().fallbackToDestructiveMigration()
+            .build();
 
-        ThreadSmsDB = Room.databaseBuilder(getApplicationContext(),
-                AppDatabase.class, getString(R.string.DATABASE_THREAD_SMS_DB)).allowMainThreadQueries().fallbackToDestructiveMigration()
-                .build();
+    CloudRecycleView = findViewById(R.id.cloudsmsrecycle);
+
+    layoutManager = new LinearLayoutManager(this);
+
+    CloudRecycleView.setHasFixedSize(true);
+
+    // use a linear layout manager
+    CloudRecycleView.setLayoutManager(layoutManager);
+    // specify an adapter (see also next example)
+    List<Sms> ll = ThreadSmsDB.userDao().getAll();
+    if (ll != null) {
+
+    } else {
+        Toast.makeText(this, "Tap Refresh", Toast.LENGTH_SHORT).show();
+    }
+
+    CloudSmsAdapter mAdapter = new CloudSmsAdapter(MainActivity.this, ll);
+    // C = Cloud
+    // D = Device
+
+    CloudRecycleView.setAdapter(mAdapter);
+    ThreadSmsDB.close();
+
+}catch (Exception e){
+Log.e(TAG,e.toString());
+    Toast.makeText(this, "Error! Please Restart/Re-install App", Toast.LENGTH_LONG).show();
+    Intent intent = new Intent(this, StartActivity.class);
 
 
-        CloudRecycleView = findViewById(R.id.cloudsmsrecycle);
+    MainActivity.this.finish();
 
-        layoutManager = new LinearLayoutManager(this);
+    startActivity(intent);
+}
 
-        CloudRecycleView.setHasFixedSize(true);
-
-        // use a linear layout manager
-        CloudRecycleView.setLayoutManager(layoutManager);
-        // specify an adapter (see also next example)
-        List<Sms> ll = ThreadSmsDB.userDao().getAll();
-        if (ll != null) {
-
-        } else {
-            Toast.makeText(this, "Tap Refresh", Toast.LENGTH_SHORT).show();
-        }
-
-        CloudSmsAdapter mAdapter = new CloudSmsAdapter(MainActivity.this, ll);
-        // C = Cloud
-        // D = Device
-
-        CloudRecycleView.setAdapter(mAdapter);
-        ThreadSmsDB.close();
 
     }
 
@@ -979,43 +1024,43 @@ if(BuildConfig.DEBUG){
         UserDB.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-if(dataSnapshot.exists()){
-    SharedPreferences.Editor editor = sharedPrefAutoBackup.edit();
+                if (dataSnapshot.exists()) {
+                    SharedPreferences.Editor editor = sharedPrefAutoBackup.edit();
 
-    if (dataSnapshot.child("UserName").getValue(String.class) != null) {
-        UserName = dataSnapshot.child("UserName").getValue(String.class);
-        editor.putString(getString(R.string.settings_pref_username), UserName).apply();
-        Log.d(TAG, "onDataChange: UserName " + UserName);
+                    if (dataSnapshot.child("UserName").getValue(String.class) != null) {
+                        UserName = dataSnapshot.child("UserName").getValue(String.class);
+                        editor.putString(getString(R.string.settings_pref_username), UserName).apply();
+                        Log.d(TAG, "onDataChange: UserName " + UserName);
 
-    } else {
-        UserName = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_pref_username), null);
+                    } else {
+                        UserName = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_pref_username), null);
 
-        Log.d(TAG, "onDataChange: UserName NULL");
-    }
+                        Log.d(TAG, "onDataChange: UserName NULL");
+                    }
 
-    if (dataSnapshot.child("UserEmail").getValue(String.class) != null) {
-        UserEmail = dataSnapshot.child("UserEmail").getValue(String.class);
-        editor.putString(getString(R.string.settings_pref_useremail), UserEmail).apply();
-        Log.d(TAG, "onDataChange: UserEmail " + UserEmail);
+                    if (dataSnapshot.child("UserEmail").getValue(String.class) != null) {
+                        UserEmail = dataSnapshot.child("UserEmail").getValue(String.class);
+                        editor.putString(getString(R.string.settings_pref_useremail), UserEmail).apply();
+                        Log.d(TAG, "onDataChange: UserEmail " + UserEmail);
 
-    } else {
-        UserEmail = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_pref_useremail), null);
+                    } else {
+                        UserEmail = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_pref_useremail), null);
 
-        Log.d(TAG, "onDataChange: UserEmail NULL");
-    }
+                        Log.d(TAG, "onDataChange: UserEmail NULL");
+                    }
 
-    if (dataSnapshot.child("UserAge").getValue(String.class) != null) {
-        UserAge = dataSnapshot.child("UserAge").getValue(String.class);
-        editor.putString(getString(R.string.settings_pref_userage), UserAge).apply();
-        Log.d(TAG, "onDataChange: UserAge " + UserAge);
+                    if (dataSnapshot.child("UserAge").getValue(String.class) != null) {
+                        UserAge = dataSnapshot.child("UserAge").getValue(String.class);
+                        editor.putString(getString(R.string.settings_pref_userage), UserAge).apply();
+                        Log.d(TAG, "onDataChange: UserAge " + UserAge);
 
-    } else {
-        UserAge = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_pref_userage), null);
+                    } else {
+                        UserAge = sharedPrefAutoBackup.getString(getResources().getString(R.string.settings_pref_userage), null);
 
-        Log.d(TAG, "onDataChange: UserAge NULL");
-    }
+                        Log.d(TAG, "onDataChange: UserAge NULL");
+                    }
 
-}
+                }
 
 
             }
@@ -1054,7 +1099,6 @@ if(dataSnapshot.exists()){
                             LoadRecycleView();
 
                             refreshLastSync();
-
 
 
                             Log.d(TAG, "onRefresh: Swipe Down ! Refreshing..");
@@ -1101,6 +1145,8 @@ if(dataSnapshot.exists()){
 
         adLoader.loadAd(new AdRequest.Builder().build());
 */
+
+
 
     }
 
@@ -1977,24 +2023,23 @@ if(dataSnapshot.exists()){
                 // whenever data at this location is updated.
                 String AppInstanceIDReged = dataSnapshot.getValue(String.class);
                 Log.d(TAG, "DB AppInstanceID: " + AppInstanceIDReged);
-if(dataSnapshot.exists()){
-    if (AppInstanceIDReged.equals(AppInstanceID)) {
-        Log.d(TAG, "onDataChange: App installed on single device");
-    } else {
-        if (isSubscribed) {
-            Log.d(TAG, "onDataChange: App installed on multiple device with subscription");
-        } else {
-            Log.d(TAG, "onDataChange: App installed on multiple device with non-subscription");
-            Toast.makeText(getApplicationContext(), "Please Login Again", Toast.LENGTH_LONG).show();
-            //       Toast.makeText(getApplicationContext(), "get Subscription of SMS Drive for Multi Device Sync", Toast.LENGTH_LONG).show();
+                if (dataSnapshot.exists()) {
+                    if (AppInstanceIDReged.equals(AppInstanceID)) {
+                        Log.d(TAG, "onDataChange: App installed on single device");
+                    } else {
+                        if (isSubscribed) {
+                            Log.d(TAG, "onDataChange: App installed on multiple device with subscription");
+                        } else {
+                            Log.d(TAG, "onDataChange: App installed on multiple device with non-subscription");
+                            Toast.makeText(getApplicationContext(), "Please Login Again", Toast.LENGTH_LONG).show();
+                            //       Toast.makeText(getApplicationContext(), "get Subscription of SMS Drive for Multi Device Sync", Toast.LENGTH_LONG).show();
 
-            FirebaseAuth.getInstance().signOut();
-            deleteAppData();
+                            FirebaseAuth.getInstance().signOut();
+                            deleteAppData();
 
-        }
-    }
-}
-
+                        }
+                    }
+                }
 
 
             }
@@ -2094,7 +2139,6 @@ if(dataSnapshot.exists()){
     }
 
 
-
     void CreateNotification(String title) {
 
         // Create an explicit intent for an Activity in your app
@@ -2132,6 +2176,23 @@ if(dataSnapshot.exists()){
 
     }
 
+    /**
+    public boolean isDefaultSmsApp() {
+        if (OsUtil.isAtLeastKLP()) {
+            final String configuredApplication = Telephony.Sms.getDefaultSmsPackage(this);
+            return  getPackageName().equals(configuredApplication);
+        }
+        return true;
+    }
+
+     * Get default SMS app package name
+     *
+     * @return the package name of default SMS app
+     */
+
+
+
+
     //---------------- LoadSms Async Task
     class LoadSms extends AsyncTask<String, Void, String> {
         final String TAG = "LoadSms | ";
@@ -2156,9 +2217,9 @@ if(dataSnapshot.exists()){
             //   loadingCircle.setVisibility(View.VISIBLE);
             try {
                 mySwipeRefreshLayout.setRefreshing(true);
-            }catch (Exception e){
-                Log.e(TAG, "onPreExecute: ERROR #45645 ",e );
-            Crashlytics.logException(e);
+            } catch (Exception e) {
+                Log.e(TAG, "onPreExecute: ERROR #45645 ", e);
+                Crashlytics.logException(e);
             }
 
            /* try{
@@ -2300,8 +2361,8 @@ final int position, long id) {
                     mySwipeRefreshLayout = findViewById(R.id.swipeRefresh);
 
                     mySwipeRefreshLayout.setRefreshing(false);
-                }catch (Exception e){
-                    Log.e(TAG, "onPreExecute: ERROR #6645 ",e );
+                } catch (Exception e) {
+                    Log.e(TAG, "onPreExecute: ERROR #6645 ", e);
                     Crashlytics.logException(e);
                 }
 

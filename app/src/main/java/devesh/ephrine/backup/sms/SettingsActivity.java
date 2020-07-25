@@ -24,7 +24,6 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -35,16 +34,14 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 import devesh.ephrine.backup.sms.room.AppDatabase;
 import io.fabric.sdk.android.Fabric;
 
 public class SettingsActivity extends AppCompatActivity {
 
-   // List<String> testDeviceIds;
+    // List<String> testDeviceIds;
     SharedPreferences sharedPrefAppGeneral;
     boolean isSubscribed;
     String TAG = "SettingsAct";
@@ -234,7 +231,7 @@ public class SettingsActivity extends AppCompatActivity {
                 PrefNotifi.setVisible(true);
                 PrefNotifi.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                     public boolean onPreferenceClick(Preference preference) {
-                        String mPackageName=getActivity().getPackageName();
+                        String mPackageName = getActivity().getPackageName();
                         Intent settingsIntent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
                                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                 // .putExtra(Settings.EXTRA_CHANNEL_ID, "001")
@@ -596,7 +593,12 @@ public class SettingsActivity extends AppCompatActivity {
                     .allowMainThreadQueries()
                     .build();
 
-
+            AppDatabase db2;
+            db2 = Room.databaseBuilder(getContext().getApplicationContext(),
+                    AppDatabase.class, getString(R.string.DATABASE_THREAD_SMS_DB))
+                    //.setJournalMode(RoomDatabase.JournalMode.AUTOMATIC)
+                    .allowMainThreadQueries()
+                    .build();
             Toast.makeText(getContext(), "Delete SMS Backup: Deleting...", Toast.LENGTH_SHORT).show();
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if (user != null) {
@@ -609,8 +611,16 @@ public class SettingsActivity extends AppCompatActivity {
                 StorageReference mStorageRef;
                 mStorageRef = FirebaseStorage.getInstance().getReference();
                 StorageReference riversRef = mStorageRef.child(BackupStorageDB);
+            try{
                 riversRef.delete();
-                db.userDao().nukeTable();
+
+            }catch (Exception e) {
+                Log.e(TAG, "DeleteBackup: ERROR #1092 ", e);
+            }
+
+
+           db.userDao().nukeTable();
+                db2.userDao().nukeTable();
                 ArrayList<HashMap<String, String>> CloudThreadSms = new ArrayList<>();
 
                 try {

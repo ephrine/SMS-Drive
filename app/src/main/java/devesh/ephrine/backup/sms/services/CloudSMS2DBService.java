@@ -19,6 +19,7 @@ import androidx.room.Room;
 import com.crashlytics.android.Crashlytics;
 import com.lifeofcoding.cacheutlislibrary.CacheUtils;
 
+import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -119,6 +120,24 @@ public class CloudSMS2DBService extends JobIntentService {
         } catch (Exception e) {
             Log.e(TAG, "onDestroy: ERROR #564 ", e);
         }
+        deleteTempFiles(getCacheDir());
+
+    }
+
+    private boolean deleteTempFiles(File file) {
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    if (f.isDirectory()) {
+                        deleteTempFiles(f);
+                    } else {
+                        f.delete();
+                    }
+                }
+            }
+        }
+        return file.delete();
     }
 
     @Override
@@ -242,11 +261,12 @@ public class CloudSMS2DBService extends JobIntentService {
             notificationManager.notify(Integer.parseInt(getString(R.string.notification_general)), nmbuilder.build());
 
             try {
+                Log.d(TAG, "AddSmsDB | doInBackground: PROGRESS ");
                 for (int j = 0; j < CloudSms.size(); j++) {
 
                     progress = j / t * 100;
                     String prg = new DecimalFormat("##.##").format(progress);
-                    Log.d(TAG, "AddSmsDB | doInBackground: PROGRESS: " + progress + "% \n j=" + j + "/" + t);
+                 //   Log.d(TAG, "AddSmsDB | doInBackground: PROGRESS: " + progress + "% \n j=" + j + "/" + t);
                     PROGRESS_CURRENT = (int) progress;
                     nmbuilder.setProgress(PROGRESS_MAX, PROGRESS_CURRENT, false).setContentText("" + prg + "%");
                     notificationManager.notify(Integer.parseInt(getString(R.string.notification_general)), nmbuilder.build());
@@ -302,6 +322,7 @@ public class CloudSMS2DBService extends JobIntentService {
 
             //    List<Sms> FinalSmsThread = Function.ConvertArraylist2ListSms(CloudSMS);
             Log.d(TAG, "doInBackground: FinalSmsThread: " + FinalSmsThread.toString());
+            ThreadSmsDB.userDao().nukeTable();
             ThreadSmsDB.userDao().insertAllThread(FinalSmsThread);
             Log.d(TAG, "doInBackground: END");
 

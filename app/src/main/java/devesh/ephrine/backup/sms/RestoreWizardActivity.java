@@ -3,6 +3,7 @@ package devesh.ephrine.backup.sms;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.role.RoleManager;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -113,8 +114,8 @@ public class RestoreWizardActivity extends AppCompatActivity {
         user = FirebaseAuth.getInstance().getCurrentUser();
         database = FirebaseDatabase.getInstance();
         isRestoreInProgress = false;
-        lottieAnimationView1 = findViewById(R.id.animation_view);
-        lottieAnimationView2 = findViewById(R.id.animation_view2);
+        lottieAnimationView1 = findViewById(R.id.animation_view); //set as default
+        lottieAnimationView2 = findViewById(R.id.animation_view2);//2nd button
         lottieSyncing = findViewById(R.id.lottiesyncanim);
         lottieDoneAnim = findViewById(R.id.lottiedoneanim);
         RestoreProgressTextView = findViewById(R.id.textView6ProgressStatus);
@@ -124,7 +125,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
         smsbotIMG = findViewById(R.id.imageView3SMSBot);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
             final String myPackageName = getPackageName();
             OldDefaultSMSApp = Telephony.Sms.getDefaultSmsPackage(this);
 
@@ -138,15 +139,57 @@ public class RestoreWizardActivity extends AppCompatActivity {
                 lottieAnimationView2.setVisibility(View.VISIBLE);
                 smsbotIMG.setVisibility(View.VISIBLE);
                 LLDefaultSmsAppStep1.setVisibility(View.GONE);
+
             }
-        } else {
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            RoleManager roleManager = null;
+            roleManager = getSystemService(RoleManager.class);
+            Log.d(TAG, "isDefaultApp(): API Q");
+
+            if (roleManager.isRoleAvailable(RoleManager.ROLE_SMS)) {
+                if (roleManager.isRoleHeld(RoleManager.ROLE_SMS)) {
+                    Log.d(TAG, "isDefaultApp(): Default SMS App role");
+                    //  isDefaultSmsApp = true;
+                    lottieAnimationView1.setVisibility(View.INVISIBLE);
+                    lottieAnimationView2.setVisibility(View.VISIBLE);
+                    smsbotIMG.setVisibility(View.VISIBLE);
+                    LLDefaultSmsAppStep1.setVisibility(View.GONE);
+
+                } else {
+                    Log.d(TAG, "isDefaultApp(): 45345 Not Default SMS App role");
+                    //isDefaultSmsApp = false;
+                    lottieAnimationView1.setVisibility(View.VISIBLE);
+                    lottieAnimationView2.setVisibility(View.INVISIBLE);
+
+
+                }
+            }else{
+                Log.d(TAG, "isDefaultApp: api Q ");
+                Log.d(TAG, "isDefaultApp(): 45323234  api QNot Default SMS App role");
+
+                //isDefaultSmsApp = false;
+                lottieAnimationView1.setVisibility(View.VISIBLE);
+                lottieAnimationView2.setVisibility(View.INVISIBLE);
+            }
+        }
+
+        else {
+            Log.d(TAG, "onCreate: isDefaultSmsApp=true;");
             // isDefaultSmsApp = true;
             lottieAnimationView1.setVisibility(View.INVISIBLE);
             lottieAnimationView2.setVisibility(View.VISIBLE);
             smsbotIMG.setVisibility(View.VISIBLE);
             LLDefaultSmsAppStep1.setVisibility(View.GONE);
             // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
+
         }
+
+        //====
+
+
+
+
+
         Log.d(TAG, "onCreate: isDefault SMS Handler: " + isDefaultSmsApp());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -185,7 +228,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
         Log.d(TAG, "AppStart: isSubscribe Cache " + sub);
         isSubscribed = sub.equals("1");
 
-       if (!isSubscribed) {
+        if (!isSubscribed) {
             mInterstitialAd.loadAd(new AdRequest.Builder().build());
             mInterstitialAd.setAdListener(new AdListener() {
                 @Override
@@ -234,14 +277,14 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if(mInterstitialAd!=null){
+        if (mInterstitialAd != null) {
             if (mInterstitialAd.isLoaded() && !isSubscribed) {
                 mInterstitialAd.show();
             } else {
                 Log.d("TAG", "The interstitial wasn't loaded yet.");
                 super.onBackPressed();
             }
-        }else{
+        } else {
             super.onBackPressed();
         }
 
@@ -249,7 +292,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        if ( Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
             final String myPackageName = getPackageName();
             if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
                 if (!isRestoreInProgress) {
@@ -258,7 +301,10 @@ public class RestoreWizardActivity extends AppCompatActivity {
                     lottieAnimationView2.setVisibility(View.INVISIBLE);
                 }
 
-            } else {
+            }
+
+
+            else {
                 if (!isRestoreInProgress) {
                     //isDefaultSmsApp = true;
                     lottieAnimationView1.setVisibility(View.INVISIBLE);
@@ -270,7 +316,47 @@ public class RestoreWizardActivity extends AppCompatActivity {
                 }
 
             }
-        } else {
+        }
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            RoleManager roleManager = null;
+            roleManager = getSystemService(RoleManager.class);
+            Log.d(TAG, "isDefaultApp(): API Q");
+
+            if (roleManager.isRoleAvailable(RoleManager.ROLE_SMS)) {
+                if (roleManager.isRoleHeld(RoleManager.ROLE_SMS)) {
+                    Log.d(TAG, "isDefaultApp(): 0546 Default SMS App role");
+                    //  isDefaultSmsApp = true;
+                    if (!isRestoreInProgress) {
+                        //isDefaultSmsApp = true;
+                        lottieAnimationView1.setVisibility(View.INVISIBLE);
+                        lottieAnimationView2.setVisibility(View.VISIBLE);
+
+                        smsbotIMG.setVisibility(View.VISIBLE);
+                        LLDefaultSmsAppStep1.setVisibility(View.GONE);
+
+                    }
+                } else {
+                    Log.d(TAG, "isDefaultApp(): 45345 Not Default SMS App role");
+                    //isDefaultSmsApp = false;
+                    if (!isRestoreInProgress) {
+                        //  isDefaultSmsApp = false;
+                        lottieAnimationView1.setVisibility(View.VISIBLE);
+                        lottieAnimationView2.setVisibility(View.INVISIBLE);
+                    }
+
+                }
+            }else{
+                Log.d(TAG, "isDefaultApp: api Q ");
+                Log.d(TAG, "isDefaultApp(): 45323234  api QNot Default SMS App role");
+
+                if (!isRestoreInProgress) {
+                    //  isDefaultSmsApp = false;
+                    lottieAnimationView1.setVisibility(View.VISIBLE);
+                    lottieAnimationView2.setVisibility(View.INVISIBLE);
+                }
+            }
+        }
+        else {
             if (!isRestoreInProgress) {
                 // isDefaultSmsApp = true;
                 lottieAnimationView1.setVisibility(View.INVISIBLE);
@@ -301,12 +387,15 @@ public class RestoreWizardActivity extends AppCompatActivity {
                     //isDefaultSmsApp = true;
                     lottieAnimationView1.setVisibility(View.INVISIBLE);
                     lottieAnimationView2.setVisibility(View.VISIBLE);
+
+
                 }
             } else {
                 // isDefaultSmsApp = true;
                 lottieAnimationView1.setVisibility(View.INVISIBLE);
                 lottieAnimationView2.setVisibility(View.VISIBLE);
                 // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
+
             }
 
         }
@@ -413,7 +502,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
         }
 
-        CreateNotification("Restore Complete", "Cloud Messages hav been Saved on Device");
+        CreateNotification("Restore Complete", "Cloud Messages have been Saved on Device");
         try {
             lottieSyncing.setVisibility(View.GONE);
             lottieDoneAnim.setVisibility(View.VISIBLE);
@@ -503,7 +592,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
     boolean isDefaultSmsApp() {
         boolean s = false;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
             final String myPackageName = getPackageName();
             if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
                 s = false;
@@ -513,12 +602,50 @@ public class RestoreWizardActivity extends AppCompatActivity {
                 s = true;
                 lottieAnimationView1.setVisibility(View.INVISIBLE);
                 lottieAnimationView2.setVisibility(View.VISIBLE);
+
             }
-        } else {
+        }
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            RoleManager roleManager = null;
+            roleManager = getSystemService(RoleManager.class);
+            Log.d(TAG, "isDefaultApp(): API Q");
+
+            if (roleManager.isRoleAvailable(RoleManager.ROLE_SMS)) {
+                if (roleManager.isRoleHeld(RoleManager.ROLE_SMS)) {
+                    Log.d(TAG, "isDefaultApp(): Default SMS App role");
+                    //  isDefaultSmsApp = true;
+                    s=true;
+                    lottieAnimationView1.setVisibility(View.INVISIBLE);
+                    lottieAnimationView2.setVisibility(View.VISIBLE);
+                    smsbotIMG.setVisibility(View.VISIBLE);
+                    LLDefaultSmsAppStep1.setVisibility(View.GONE);
+
+                } else {
+                    Log.d(TAG, "isDefaultApp(): 324 Not Default SMS App role");
+                    //isDefaultSmsApp = false;
+                    s=false;
+                    lottieAnimationView1.setVisibility(View.VISIBLE);
+                    lottieAnimationView2.setVisibility(View.INVISIBLE);
+
+
+                }
+            }else{
+                Log.d(TAG, "isDefaultApp: api Q 1342");
+                Log.d(TAG, "isDefaultApp(): api QNot Default SMS App role");
+                s=false;
+                //isDefaultSmsApp = false;
+                lottieAnimationView1.setVisibility(View.VISIBLE);
+                lottieAnimationView2.setVisibility(View.INVISIBLE);
+            }
+        }
+        else {
             s = true;
             lottieAnimationView1.setVisibility(View.INVISIBLE);
             lottieAnimationView2.setVisibility(View.VISIBLE);
+            smsbotIMG.setVisibility(View.VISIBLE);
+            LLDefaultSmsAppStep1.setVisibility(View.GONE);
             // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
+
         }
 
         return s;
@@ -526,7 +653,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
     public void setDefaultSmsApp(View v) {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
             final String myPackageName = getPackageName();
             if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
   /*              Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
@@ -558,7 +685,28 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
             }
 
-        } else {
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            RoleManager roleManager = null;
+            roleManager = getSystemService(RoleManager.class);
+            Log.d(TAG, "isDefaultApp(): API Q");
+            if (roleManager.isRoleAvailable(RoleManager.ROLE_SMS)) {
+                if (roleManager.isRoleHeld(RoleManager.ROLE_SMS)) {
+                    Log.d(TAG, "isDefaultApp(): Default SMS App role");
+                    //     a=true;
+                } else {
+                    Log.d(TAG, "isDefaultApp(): 645  Not Default SMS App role");
+                    //       a=false;
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS);
+                    startActivity(intent);
+                }
+            }else{
+                Log.d(TAG, "isDefaultApp: api Q ");
+                Log.d(TAG, "isDefaultApp(): 32453 api QNot Default SMS App role");
+                Intent intent = new Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS);
+                startActivity(intent);
+                //     a=false;
+            }
+        }else {
             //  isDefaultSmsApp = true;
             // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
             //   lottieAnimationView1.setVisibility(View.INVISIBLE);
@@ -586,7 +734,7 @@ public class RestoreWizardActivity extends AppCompatActivity {
 
     void setNotification() {
 
-        builder = new NotificationCompat.Builder(this,  getString(R.string.notification_auto_sync))
+        builder = new NotificationCompat.Builder(this, getString(R.string.notification_auto_sync))
                 .setSmallIcon(R.drawable.app_logo)
                 .setContentTitle("Restoring Messages")
                 .setContentText("Restoring Cloud Message on Device....")

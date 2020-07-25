@@ -2,6 +2,8 @@ package devesh.ephrine.backup.sms;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.Activity;
+import android.app.role.RoleManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -163,11 +165,11 @@ public class StartActivity extends AppCompatActivity {
 
             }
 
-        }catch (Exception e){
-            Log.e(TAG, "onCreate: ERROR Getting Notification intent ",e );
+        } catch (Exception e) {
+            Log.e(TAG, "onCreate: ERROR Getting Notification intent ", e);
             Crashlytics.logException(e);
         }
-         sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
+        sharedPrefAppGeneral = PreferenceManager.getDefaultSharedPreferences(this /* Activity context */);
 
 
         boolean isAnalyticDataCollectionEnable = false;
@@ -175,9 +177,9 @@ public class StartActivity extends AppCompatActivity {
         isAnalyticDataCollectionEnable = res.getBoolean(R.bool.FIREBASE_ANALYTICS_DATA_COLLECTION);
         if (isAnalyticDataCollectionEnable) {
 
-            if(BuildConfig.DEBUG){
+            if (BuildConfig.DEBUG) {
 
-            }else{
+            } else {
                 AppCenter.start(getApplication(), BuildConfig.MS_AppCenter_Key,
                         Analytics.class, Crashes.class);
 
@@ -433,13 +435,43 @@ public class StartActivity extends AppCompatActivity {
 
     void isDefaultApp() {
         boolean a;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        //Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT &&
+        if ( Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
             final String myPackageName = getPackageName();
             a = Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName);
-        } else {
+            Log.d(TAG, "isDefaultApp: api kitkat-Q");
+        }else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            RoleManager roleManager = null;
+            roleManager = getSystemService(RoleManager.class);
+            Log.d(TAG, "isDefaultApp(): API Q");
+
+            if (roleManager.isRoleAvailable(RoleManager.ROLE_SMS)) {
+                if (roleManager.isRoleHeld(RoleManager.ROLE_SMS)) {
+                    Log.d(TAG, "isDefaultApp(): Default SMS App role");
+                    a=true;
+                } else {
+                    Log.d(TAG, "isDefaultApp(): Not Default SMS App role");
+
+                    a=false;
+
+                }
+            }else{
+                Log.d(TAG, "isDefaultApp: api Q ");
+                Log.d(TAG, "isDefaultApp(): api QNot Default SMS App role");
+
+                a=false;
+            }
+        }else {
             a = true;
+            Log.d(TAG, "isDefaultApp(): api Q Default SMS App role #32543");
+
             // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
         }
+
+
+
+        //======
+
 
         //   isDefaultSmsApp=a;
     }

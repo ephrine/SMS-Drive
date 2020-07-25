@@ -100,6 +100,7 @@ public class DownloadCloudMessagesService extends JobIntentService {
     */
     int PROGRESS_CURRENT = 0;
     private FirebaseAuth mAuth;
+    ArrayList<File> FilesToDelete=new ArrayList<>();
 
     public DownloadCloudMessagesService() {
     }
@@ -125,7 +126,7 @@ public class DownloadCloudMessagesService extends JobIntentService {
         Log.d(TAG, "onCreate: SyncIntentService() #9086");
 
 
-        Fabric.with(getApplicationContext(), new Crashlytics());
+     //   Fabric.with(getApplicationContext(), new Crashlytics());
         //    startSync();
 
     }
@@ -152,6 +153,16 @@ try {
         } catch (Exception e) {
             Log.e(TAG, "onDestroy: ERROR #564 ", e);
         }
+        deleteTempFiles(getCacheDir());
+
+        for(File f:FilesToDelete){
+            if(f.exists()){
+                f.delete();
+            }
+
+        }
+        super.onDestroy();
+
 
     }
 
@@ -210,22 +221,26 @@ try {
 
             ArrayList<HashMap<String, String>> tmpList = null;
             try {
-                tmpList.clear();
+                if(tmpList!=null){
+                    tmpList.clear();
+                }
                 tmpList = (ArrayList<HashMap<String, String>>) Function.readCachedFile(this, getString(R.string.file_device_sms));
-
             } catch (Exception e) {
-                Log.d(TAG, "DownloadFromCloud: ERROR " + e);
+                Log.d(TAG, "DownloadFromCloud: ERROR #32 " + e);
                 Crashlytics.logException(e);
 
             }
 
             try {
-                localFile = File.createTempFile("smscloud", "backup");
+            //    localFile = File.createTempFile("smscloud2", "zip");
+                localFile = new File(getFilesDir(), "smscloud2.zip");
+                localFile.deleteOnExit();
+                FilesToDelete.add(localFile);
             } catch (Exception e) {
-                Log.d(TAG, "DownloadFromCloud: #ERROR " + e);
+                Log.d(TAG, "DownloadFromCloud: ERROR 768 " + e);
                 Crashlytics.logException(e);
-
             }
+
             riversRef.getFile(localFile)
                     .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                         @Override
@@ -236,6 +251,8 @@ try {
                             new Thread(new Runnable() {
                                 public void run() {
                                     File unziped = unzipFile(localFile);
+                                    unziped.deleteOnExit();
+                                    FilesToDelete.add(unziped);
                                     Log.d(TAG, "onSuccess: Unziped: " + unziped.getPath());
                                     String JsonStr = ConvertFileToStrng(unziped);
                                     Type type = new TypeToken<ArrayList<HashMap<String, String>>>() {
@@ -316,7 +333,6 @@ try {
                     // Handle failed download
                     Log.d(TAG, "onFailure: ERROR #546766 " + exception + " \n message: " + exception.getMessage() + " Location:" + BackupStorageDB);
 
-
                     Log.d(TAG, "onFailure: ERROR CloudSms.clear();");
                     CloudSms.clear();
                     CloudThreadSms.clear();
@@ -360,7 +376,10 @@ try {
         File unzip_file = null;
 
         try {
-            unzip_file = File.createTempFile("backuprestore", "json");
+        //    unzip_file = File.createTempFile("backuprestore", "json");
+            unzip_file=new File(getFilesDir(),"backuprestore.json");
+            unzip_file.deleteOnExit();
+            FilesToDelete.add(unzip_file);
             String filename;
             is = new FileInputStream(zipfile);
             zis = new ZipInputStream(new BufferedInputStream(is));
@@ -375,6 +394,7 @@ try {
                 // it will generate an Exception...
                 if (ze.isDirectory()) {
                     File fmd = new File(getFilesDir(), filename);
+                    fmd.deleteOnExit();
                     fmd.mkdirs();
                     continue;
                 }
@@ -531,6 +551,22 @@ try {
 
     }
 
+    private boolean deleteTempFiles(File file) {
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    if (f.isDirectory()) {
+                        deleteTempFiles(f);
+                    } else {
+                        f.delete();
+                    }
+                }
+            }
+        }
+        return file.delete();
+    }
+
     class AddSmsDB extends AsyncTask<String, Void, String> {
         final String TAG = "CloudSMS2DBService ";
 
@@ -581,11 +617,12 @@ try {
             notificationManager.notify(002, nmbuilder.build());
 
             try {
+                Log.d(TAG, "AddSmsDB | doInBackground: PROGRESS " );
                 for (int j = 0; j <= CloudSms.size(); j++) {
 
                     progress = j / t * 100;
                     String prg = new DecimalFormat("##.##").format(progress);
-                    Log.d(TAG, "AddSmsDB | doInBackground: PROGRESS: " + progress + "% \n j=" + j + "/" + t);
+               //     Log.d(TAG, "AddSmsDB | doInBackground: PROGRESS: " + progress + "% \n j=" + j + "/" + t);
                     PROGRESS_CURRENT = (int) progress;
                     nmbuilder.setProgress(PROGRESS_MAX, PROGRESS_CURRENT, false).setContentText("" + prg + "%");
                     notificationManager.notify(002, nmbuilder.build());

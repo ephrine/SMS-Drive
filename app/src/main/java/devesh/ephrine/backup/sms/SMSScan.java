@@ -493,7 +493,7 @@ public class SMSScan {
         sharedPrefAutoBackup = PreferenceManager.getDefaultSharedPreferences(mContext /* Activity context */);
         SMSAutoBackup = sharedPrefAutoBackup.getBoolean(mContext.getResources().getString(R.string.settings_sync), false);
 //isDefaultApp=false;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+  /*      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             final String myPackageName = mContext.getPackageName();
             if (!Telephony.Sms.getDefaultSmsPackage(mContext).equals(myPackageName)) {
                 //        isDefaultApp=false;
@@ -505,7 +505,7 @@ public class SMSScan {
             //    isDefaultApp=true;
             // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
         }
-
+*/
 
     }
 

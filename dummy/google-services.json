@@ -1,0 +1,431 @@
+{
+  "project_info": {
+    "project_number": "377416678462",
+    "firebase_url": "https://ephrinelab.firebaseio.com",
+    "project_id": "ephrinelab",
+    "storage_bucket": "ephrinelab.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:377416678462:android:612bef393ad71e1eb7e56f",
+        "android_client_info": {
+          "package_name": "app.test"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "377416678462-548bh8n0uvm9st17qeilhvhveddcvq3s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCs-MRigJB4NNnWGBKBgnww80c0A6kAtuk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "377416678462-nrocmea9cpes91l19v12u9i3ioovfnfv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:377416678462:android:f6f1187a50f4ce36b7e56f",
+        "android_client_info": {
+          "package_name": "com.google.firebase.samples.apps.mlkit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "377416678462-548bh8n0uvm9st17qeilhvhveddcvq3s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCs-MRigJB4NNnWGBKBgnww80c0A6kAtuk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "377416678462-nrocmea9cpes91l19v12u9i3ioovfnfv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:377416678462:android:180300937fbc0095",
+        "android_client_info": {
+          "package_name": "devesh.ephrine.backup"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "377416678462-uc1qf2848fse4h5rd761qp9e6cidqm73.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "devesh.ephrine.backup",
+            "certificate_hash": "06c1298111e582c3baffa29b3ba7a446436daf57"
+          }
+        },
+        {
+          "client_id": "377416678462-548bh8n0uvm9st17qeilhvhveddcvq3s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCs-MRigJB4NNnWGBKBgnww80c0A6kAtuk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "377416678462-nrocmea9cpes91l19v12u9i3ioovfnfv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:377416678462:android:3d89e676ecacbac5b7e56f",
+        "android_client_info": {
+          "package_name": "devesh.ephrine.backup.sms.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "377416678462-548bh8n0uvm9st17qeilhvhveddcvq3s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCs-MRigJB4NNnWGBKBgnww80c0A6kAtuk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "377416678462-nrocmea9cpes91l19v12u9i3ioovfnfv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:377416678462:android:db1283011c2dacab",
+        "android_client_info": {
+          "package_name": "devesh.ephrine.doctor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "377416678462-6c11itfj4hm6ekdrmsca62ms1rfm2cop.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "devesh.ephrine.doctor",
+            "certificate_hash": "06c1298111e582c3baffa29b3ba7a446436daf57"
+          }
+        },
+        {
+          "client_id": "377416678462-2i9svvtm8d7ggcgd4hsct9djohvkborc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "devesh.ephrine.doctor",
+            "certificate_hash": "431662419165de2ee33edf6aebf70f72883dee1f"
+          }
+        },
+        {
+          "client_id": "377416678462-53aa9h2a6t282e8jm9upin4vug07h9s4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "devesh.ephrine.doctor",
+            "certificate_hash": "cba7d35e5efdba1429c02b60642e66e12f29e332"
+          }
+        },
+        {
+          "client_id": "377416678462-548bh8n0uvm9st17qeilhvhveddcvq3s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCs-MRigJB4NNnWGBKBgnww80c0A6kAtuk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "377416678462-nrocmea9cpes91l19v12u9i3ioovfnfv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:377416678462:android:1f3c99f8e0ea7cd1b7e56f",
+        "android_client_info": {
+          "package_name": "devesh.ephrine.fileshare"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "377416678462-548bh8n0uvm9st17qeilhvhveddcvq3s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCs-MRigJB4NNnWGBKBgnww80c0A6kAtuk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "377416678462-nrocmea9cpes91l19v12u9i3ioovfnfv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:377416678462:android:60009718fd781727b7e56f",
+        "android_client_info": {
+          "package_name": "devesh.ephrine.fileshare.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "377416678462-i05lkl3kfptd5dgg19h95udkl03u49to.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "devesh.ephrine.fileshare.debug",
+            "certificate_hash": "06c1298111e582c3baffa29b3ba7a446436daf57"
+          }
+        },
+        {
+          "client_id": "377416678462-548bh8n0uvm9st17qeilhvhveddcvq3s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCs-MRigJB4NNnWGBKBgnww80c0A6kAtuk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "377416678462-nrocmea9cpes91l19v12u9i3ioovfnfv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:377416678462:android:736973ed6ad1c7a3b7e56f",
+        "android_client_info": {
+          "package_name": "devesh.ephrine.mentalhealth.ayurveda.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "377416678462-548bh8n0uvm9st17qeilhvhveddcvq3s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCs-MRigJB4NNnWGBKBgnww80c0A6kAtuk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "377416678462-nrocmea9cpes91l19v12u9i3ioovfnfv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:377416678462:android:f880da74c5d6d169b7e56f",
+        "android_client_info": {
+          "package_name": "devesh.ephrine.messager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "377416678462-kh44j0u47rc3aqjj0oljt9nlqb53moot.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "devesh.ephrine.messager",
+            "certificate_hash": "431662419165de2ee33edf6aebf70f72883dee1f"
+          }
+        },
+        {
+          "client_id": "377416678462-iar4a4erbbum9unph6gs5naj265h5dd9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "devesh.ephrine.messager",
+            "certificate_hash": "06c1298111e582c3baffa29b3ba7a446436daf57"
+          }
+        },
+        {
+          "client_id": "377416678462-548bh8n0uvm9st17qeilhvhveddcvq3s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCs-MRigJB4NNnWGBKBgnww80c0A6kAtuk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "377416678462-nrocmea9cpes91l19v12u9i3ioovfnfv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:377416678462:android:2be9df9996b76311b7e56f",
+        "android_client_info": {
+          "package_name": "devesh.ephrine.notifications"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "377416678462-548bh8n0uvm9st17qeilhvhveddcvq3s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCs-MRigJB4NNnWGBKBgnww80c0A6kAtuk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "377416678462-nrocmea9cpes91l19v12u9i3ioovfnfv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:377416678462:android:8ef0b2483342bbcf",
+        "android_client_info": {
+          "package_name": "devesh.ephrine.security.imei"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "377416678462-rf7egmdu21asitvpbe0efb0732j7k7v9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "devesh.ephrine.security.imei",
+            "certificate_hash": "06c1298111e582c3baffa29b3ba7a446436daf57"
+          }
+        },
+        {
+          "client_id": "377416678462-548bh8n0uvm9st17qeilhvhveddcvq3s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCs-MRigJB4NNnWGBKBgnww80c0A6kAtuk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "377416678462-nrocmea9cpes91l19v12u9i3ioovfnfv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:377416678462:android:a25f4c00c6ab50fd",
+        "android_client_info": {
+          "package_name": "ephrine.apps.orru"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "377416678462-e3fpuifkqfqdtru676ib2vfjtqchdfmu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ephrine.apps.orru",
+            "certificate_hash": "cba7d35e5efdba1429c02b60642e66e12f29e332"
+          }
+        },
+        {
+          "client_id": "377416678462-548bh8n0uvm9st17qeilhvhveddcvq3s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCs-MRigJB4NNnWGBKBgnww80c0A6kAtuk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "377416678462-nrocmea9cpes91l19v12u9i3ioovfnfv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

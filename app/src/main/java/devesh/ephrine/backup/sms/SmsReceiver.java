@@ -52,7 +52,7 @@ public class SmsReceiver extends BroadcastReceiver {
             Log.d(TAG, "onReceive: SMS Received \n" + str + "\n--------");
             long smsReceiveTime = System.currentTimeMillis();
             saveSms(address, msg, "0", String.valueOf(smsReceiveTime), "inbox");
-CreateNotification(Function.getContactbyPhoneNumber(mContext,address),msg);
+            CreateNotification(Function.getContactbyPhoneNumber(mContext, address), msg);
 
         }
 

@@ -6,8 +6,8 @@
     background-size: cover;
     background-color: rgba(5, 121, 255, 0.534);
     background-blend-mode: overlay;
-z-index: 0;
-position: relative;
+    z-index: 0;
+    position: relative;
 }
 
 .header-text {
@@ -17,7 +17,6 @@ position: relative;
 
 .header-text2 {
     font-family: 'Roboto', sans-serif;
-
 }
 
 @media screen and (min-width: 500px) and (max-height: 2000px) {
@@ -25,7 +24,6 @@ position: relative;
         font-size: 40pt;
         text-align: left;
     }
-
 }
 
 .sub-header {
@@ -36,7 +34,6 @@ position: relative;
 
 .navbar-bg {
     background-color: rgba(255, 255, 255, 0) !important;
-
 }
 
 .navbar-bg-trans {
@@ -51,8 +48,7 @@ position: relative;
     color: rgb(255, 255, 255);
 }
 
-html,
-body {
+html, body {
     height: 100%;
 }
 
@@ -78,133 +74,142 @@ body {
 
 @media (max-width: 575.98px) {
     .box-header-image {
-
         margin-top: 0px;
         text-align: center;
     }
 }
 
-
-.desc{
+.desc {
     position: relative;
     background-image: linear-gradient(to bottom, #62289d, #040999);
-min-height: 100px;
-   /* background-color: #62289d !important;*/
-color: #fff;
-   z-index: 1;
-   overflow: hidden;
+    min-height: 100px;
+    /* background-color: #62289d !important;*/
+    color: #fff;
+    z-index: 1;
+    overflow: hidden;
 }
 
-.desc-box1{
-max-width: 800px;
-float: right;
-margin-top: 100px;
-color: #fff;
-
+.desc-box1 {
+    max-width: 800px;
+    float: right;
+    margin-top: 100px;
+    color: #fff;
 }
+
 @media (max-width: 575.98px) {
     .desc-box1 {
-
-float: top; 
-text-align: center;
-max-width: auto;
-
-margin-top: 0px;
-color: #fff;
-}
+        float: top;
+        text-align: center;
+        max-width: auto;
+        margin-top: 0px;
+        color: #fff;
+    }
 }
 
-
-.feature{
-  
+.feature {
     position: relative;
     background-image: linear-gradient(to top, #62289d, #040999);
-
-min-height: 100px;
-background-position: top left;
-   /* background-color: #62289d !important;*/
-
-   z-index: 2;
-   overflow: hidden;
+    min-height: 100px;
+    background-position: top left;
+    /* background-color: #62289d !important;*/
+    z-index: 2;
+    overflow: hidden;
 }
-.featurex{
+
+.featurex {
     position: relative;
     background-image: linear-gradient(to bottom, #62289d, #040999);
-min-height: 100px;
-   /* background-color: #62289d !important;*/
-
-   z-index: 2;
-   overflow: hidden;
+    min-height: 100px;
+    /* background-color: #62289d !important;*/
+    z-index: 2;
+    overflow: hidden;
 }
 
-.text-center-mobile-right-desktop{
-    
-text-align: left !important;
-
-color: #fff;
+.text-center-mobile-right-desktop {
+    text-align: left !important;
+    color: #fff;
 }
+
 @media (max-width: 575.98px) {
     .text-center-mobile-right-desktop {
-
-text-align: center !important;
-
-color: #fff;
-}
+        text-align: center !important;
+        color: #fff;
+    }
 }
 
-.para4mobile{
+.para4mobile {
     width: 80%;
     color: #fff;
     text-align: justify;
-
 }
+
 @media (max-width: 575.98px) {
     .para4mobile {
         text-align: justify;
         width: 90%;
-color: #fff;
+        color: #fff;
+    }
 }
-}
-
-
 
 @media (max-width: 575.98px) {
     .footer-block {
         text-align: center;
-      padding: 0px;
-        
-}
+        padding: 0px;
+    }
 }
 
-.footer-left{
+.footer-left {
     text-align: left;
     float: left;
-padding: 20px;
+    padding: 20px;
 }
+
 @media (max-width: 575.98px) {
     .footer-left {
         text-align: center;
-      float: none;
-padding: 20px;
-        
-}
+        float: none;
+        padding: 20px;
+    }
 }
 
-.footer-right{
+.footer-right {
     text-align: right;
     float: right;
-padding: 20px;
+    padding: 20px;
 }
+
 @media (max-width: 575.98px) {
     .footer-right {
         text-align: center;
-      float: none;
-      
+        float: none;
         padding: 0px;
+    }
 }
+
+.desktop-only {
+    visibility: visible;
+    display: block;
+}
+
+.mobile-only {
+    visibility: hidden;
+    display: none;
+}
+
+@media (max-width: 575.98px) {
+    .desktop-only {
+        visibility: hidden;
+        display: none;
+    }
+    .mobile-only {
+        visibility: visible;
+        display: block;
+    }
+
 }
 
 /*---------------------------------*/
+
 /*Custom Bootstrap CSS*/
 
 .btn-primary-custom {
@@ -219,28 +224,19 @@ padding: 20px;
     border-color: #c300ffc4
 }
 
-.btn-primary-custom.focus,
-.btn-primary-custom:focus {
+.btn-primary-custom.focus, .btn-primary-custom:focus {
     color: #fff;
     background-color: #9700c5;
     border-color: #700092;
     box-shadow: 0 0 0 .2rem rgba(38, 143, 255, .5)
 }
 
-
-.btn-primary-custom:not(:disabled):not(.disabled).active,
-.btn-primary-custom:not(:disabled):not(.disabled):active,
-.show>.btn-primary-custom.dropdown-toggle {
+.btn-primary-custom:not(:disabled):not(.disabled).active, .btn-primary-custom:not(:disabled):not(.disabled):active, .show>.btn-primary-custom.dropdown-toggle {
     color: #fff;
     background-color: #7e00a5b4;
     border-color: #9a55afb4
 }
 
-.btn-primary-custom:not(:disabled):not(.disabled).active:focus,
-.btn-primary-custom:not(:disabled):not(.disabled):active:focus,
-.show>.btn-primary-custom.dropdown-toggle:focus {
+.btn-primary-custom:not(:disabled):not(.disabled).active:focus, .btn-primary-custom:not(:disabled):not(.disabled):active:focus, .show>.btn-primary-custom.dropdown-toggle:focus {
     box-shadow: 0 0 0 .2rem rgba(0, 0, 0, 0.5)
 }
-
-
-

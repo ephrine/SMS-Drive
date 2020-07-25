@@ -4,7 +4,7 @@ ext {
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'io.fabric'
-//apply plugin: 'com.google.firebase.firebase-perf'
+apply plugin: 'com.google.firebase.firebase-perf'
 
 def paymentserverurl
 def gplaysubscriptionid1
@@ -50,9 +50,9 @@ if (!lp.exists()) {
     MoPubAdUnitID = properties.getProperty('mopubadunitid')
     FacebookAppID = properties.getProperty('facebookappid')
     FacebookLoginScheme = properties.getProperty('fbloginprotocolscheme')
-     AdColonyAppID= properties.getProperty('adcolonyappid')
-     AdColonyZoneID1= properties.getProperty('adcolonyzoneid1')
-     AdColonyZoneID2= properties.getProperty('adcolonyzoneid2')
+    AdColonyAppID = properties.getProperty('adcolonyappid')
+    AdColonyZoneID1 = properties.getProperty('adcolonyzoneid1')
+    AdColonyZoneID2 = properties.getProperty('adcolonyzoneid2')
 } else {
     project.logger.info('Located local.properties file')
 
@@ -71,9 +71,9 @@ if (!lp.exists()) {
     keypassword = properties.getProperty('sign.key.password')
     keyalias = properties.getProperty('sign.key.alias')
     keypath = properties.getProperty('sign.key.path')
-    AdColonyAppID= properties.getProperty('adcolonyappid')
-    AdColonyZoneID1= properties.getProperty('adcolonyzoneid1')
-    AdColonyZoneID2= properties.getProperty('adcolonyzoneid2')
+    AdColonyAppID = properties.getProperty('adcolonyappid')
+    AdColonyZoneID1 = properties.getProperty('adcolonyzoneid1')
+    AdColonyZoneID2 = properties.getProperty('adcolonyzoneid2')
 }
 //def keypassword = properties.getProperty('sign.key.password')
 
@@ -133,26 +133,26 @@ if (!kk.exists()) {
 keypath=kk
 } */
 
-def AppVersionName = "0.1.3"
+def AppVersionName = "0.1.4 Alpha"
 
 android {
-lintOptions {
-         abortOnError false
-      }
+    lintOptions {
+        abortOnError false
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
 
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    compileSdkVersion 30
+    buildToolsVersion "30.0.1"
     signingConfigs {
         release {
             if (System.getenv("CLCD")) {
-            }else{
+            } else {
 
-                storeFile  file(keypath)
+                storeFile file(keypath)
                 storePassword keypassword
                 keyAlias = keyalias
                 keyPassword keypassword
@@ -171,10 +171,10 @@ lintOptions {
 
 
         applicationId "devesh.ephrine.backup.sms"
-        minSdkVersion 19
-        targetSdkVersion 29
-        versionCode 36
-        versionName "" + AppVersionName + " Beta Version"
+        minSdkVersion 21
+        targetSdkVersion 30
+        versionCode 37
+        versionName "" + AppVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
 
@@ -200,9 +200,9 @@ lintOptions {
 
         resValue "string", "AdColony_App_ID", "\"" + AdColonyAppID + "\""
 
-       resValue "string", "AdColony_ZoneID1", "\"" + AdColonyZoneID1+ "\""
+        resValue "string", "AdColony_ZoneID1", "\"" + AdColonyZoneID1 + "\""
 
-        resValue "string", "AdColony_ZoneID2", "\"" + AdColonyZoneID2 +"\""
+        resValue "string", "AdColony_ZoneID2", "\"" + AdColonyZoneID2 + "\""
 
         //     resValue "string", "AppVersionName", "\"" + versionName + "\""
         //     signingConfig signingConfigs.release
@@ -240,9 +240,9 @@ lintOptions {
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
-                      if (System.getenv("CLCD")) {
+            if (System.getenv("CLCD")) {
 
-            }else{
+            } else {
                 signingConfig signingConfigs.release
             }
 
@@ -252,17 +252,19 @@ lintOptions {
 
 
     flavorDimensions "appstore"
+  //  flavorDimensions "nightly"
+
     productFlavors {
         master {
             dimension "appstore"
-            versionName "" + AppVersionName + " Beta Version"
+            versionName "" + AppVersionName
             //  applicationId "devesh.ephrine.backup.sms"
             resValue "string", "AppFlavour", "\"" + "master" + "\""
             resValue "string", "AppVersionName", "\"" + versionName + "\""
         }
         galaxy {
             dimension "appstore"
-            versionName "" + AppVersionName + " Beta (Samsung)"
+            versionName "" + AppVersionName + " (Samsung)"
             //     applicationId "devesh.ephrine.backup.sms"
             resValue "string", "AppFlavour", "\"" + "galaxy" + "\""
             resValue "string", "AppVersionName", "\"" + versionName + "\""
@@ -271,6 +273,24 @@ lintOptions {
 
 
         }
+
+
+    /*    galaxybeta {
+            dimension 'appstore'
+            versionName "" + AppVersionName + " (Samsung)"
+            resValue "string", "AppFlavour", "\"" + "galaxybeta" + "\""
+            resValue "string", "AppVersionName", "\"" + versionName + "\""
+            buildConfigField "String", "SamsungIAP_Item", "\"" + samsungIAP_Item + "\""
+
+        }
+        masterbeta {
+            dimension 'appstore'
+            versionName "" + AppVersionName
+            resValue "string", "AppFlavour", "\"" + "masterbeta" + "\""
+            resValue "string", "AppVersionName", "\"" + versionName + "\""
+
+        } */
+
         /*huawei {
             dimension "appstore"
             versionName "" + AppVersionName + " Beta (Huawei)"
@@ -302,7 +322,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-ads:+'
     //  implementation 'com.google.firebase:firebase-ads:+'
 // Add the dependency for the Performance Monitoring library
-    //  implementation 'com.google.firebase:firebase-perf:+'
+      implementation 'com.google.firebase:firebase-perf:+'
     //  implementation 'androidx.work:work-runtime:2.4.0-alpha01'
 
 
@@ -371,14 +391,14 @@ dependencies {
     //Samsung Galaxy In-App-purchases
     galaxyImplementation project(':IAP6Helper')
 
-  //  huaweiImplementation 'com.huawei.hms:iap:4.0.0.300'
+    //  huaweiImplementation 'com.huawei.hms:iap:4.0.0.300'
 
     //Chrome Custom Tab
     implementation 'androidx.browser:browser:+'
 
     implementation 'com.google.guava:guava:27.0.1-android'
 
-    implementation project(':nativetemplates')
+  //  implementation project(':nativetemplates')
 
     //MoPub-Admob Mediatation
     implementation 'com.google.ads.mediation:mopub:+'
@@ -387,10 +407,12 @@ dependencies {
     implementation 'com.google.ads.mediation:facebook:+'
 
     //Facebook SDK
-   // implementation 'com.facebook.android:facebook-android-sdk:+'
+    // implementation 'com.facebook.android:facebook-android-sdk:+'
 
     //AdColony-AdMob Mediatation
     implementation 'com.google.ads.mediation:adcolony:+'
 
+    // Encryption
+    implementation "androidx.security:security-crypto:+"
 
 }

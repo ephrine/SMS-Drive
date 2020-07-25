@@ -32,9 +32,9 @@ import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
@@ -88,6 +88,7 @@ public class ThreadSmsActivity extends AppCompatActivity {
     SharedPreferences sharedPrefAppGeneral;
     boolean isSubscribed;
     private Handler handler = new Handler();
+    FloatingActionButton FABSendMsg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +98,8 @@ public class ThreadSmsActivity extends AppCompatActivity {
         setContentView(R.layout.sms_activity_thread);
 
         testDeviceIds = Arrays.asList(getString(R.string.Admob_TestDeviceID));
+        FABSendMsg=findViewById(R.id.FABSendMsg);
+
         //      SmsThreadHashMap = (HashMap<String, DataSnapshot>)intent.getSerializableExtra("smsthread");
         //  SmsThreadHashMap = Parcels.unwrap(getIntent().getParcelableExtra("mylist"))(HashMap<String, DataSnapshot>)intent.getBundleExtra("smsthread");
         //  id = intent.getStringExtra("smsthreadid");
@@ -143,11 +146,11 @@ public class ThreadSmsActivity extends AppCompatActivity {
             mAdView.loadAd(adRequest);
         }
         //  listView = (ListView) findViewById(R.id.listView);
-           new_message = (EditText) findViewById(R.id.newTextBox);
+     //   new_message = (EditText) findViewById(R.id.newTextBox);
 //        send_message = (ImageButton) findViewById(R.id.send_message);
         LLBottomLayout = (LinearLayout) findViewById(R.id.LLBottomLayout);
         // setContentView(R.layout.sms_activity_thread);
-        LLBottomLayout.setVisibility(View.GONE);
+   //     LLBottomLayout.setVisibility(View.GONE);
 
         if (name != null) {
             getSupportActionBar().setTitle(name);
@@ -165,8 +168,8 @@ public class ThreadSmsActivity extends AppCompatActivity {
         progressBarHorizontal = findViewById(R.id.progressBar2Horizontal45);
         progressBarHorizontal.setVisibility(View.VISIBLE);
 
-        LLDeleteMSG = findViewById(R.id.LLDeleteMSG);
-        LLDeleteMSG.setVisibility(View.GONE);
+      //  LLDeleteMSG = findViewById(R.id.LLDeleteMSG);
+//        LLDeleteMSG.setVisibility(View.GONE);
         isDeleteMsgMode = false;
         //   DataSnapshot g=SmsThreadHashMap.get(id);
         // Log.d(TAG, "onCreate: Datasnapshot: "+g.toString());
@@ -212,6 +215,13 @@ public class ThreadSmsActivity extends AppCompatActivity {
         }
       */
 
+
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
+
+            FABSendMsg.setVisibility(View.VISIBLE);
+        }else{
+            FABSendMsg.setVisibility(View.GONE);
+        }
 
     }
 
@@ -353,7 +363,7 @@ public class ThreadSmsActivity extends AppCompatActivity {
 
     public void SendMSG(View v) {
 
-        new_message = (EditText) findViewById(R.id.newTextBox);
+     //   new_message = (EditText) findViewById(R.id.newTextBox);
 
         String msgtext = new_message.getText().toString();
 
@@ -386,7 +396,14 @@ public class ThreadSmsActivity extends AppCompatActivity {
 
     }
 
+    public void SendMSGbyDefaultApp(View v){
 
+        Uri uri = Uri.parse("smsto:"+address);
+        Intent intent = new Intent(Intent.ACTION_SENDTO, uri);
+        intent.putExtra("sms_body", "");
+        startActivity(intent);
+
+    }
 
     void loadCloudMsgRecycleView() {
         Collections.sort(SortSMS, new MapComparator(Function.KEY_TIMESTAMP, "asc"));
@@ -458,22 +475,16 @@ public class ThreadSmsActivity extends AppCompatActivity {
     }
 
     boolean isDefaultApp() {
-
-
         boolean a;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             final String myPackageName = getPackageName();
             if (!Telephony.Sms.getDefaultSmsPackage(this).equals(myPackageName)) {
-
-                a=false;
-
-
-            }else {
-                a=true;
+                a = false;
+            } else {
+                a = true;
             }
-
         } else {
-            a=true;
+            a = true;
             // saveSms("111111", "mmmmssssggggg", "0", "", "inbox");
         }
 
@@ -566,7 +577,9 @@ public class ThreadSmsActivity extends AppCompatActivity {
 
     }
 
-    //--- ASYNC
+
+
+    //--- ASYNC-----
     class LoadSms extends AsyncTask<String, Void, String> {
         @Override
         protected void onPreExecute() {

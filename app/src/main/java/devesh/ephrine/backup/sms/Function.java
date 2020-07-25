@@ -90,10 +90,13 @@ public class Function {
         ArrayList<HashMap<String, String>> gpList = new ArrayList<HashMap<String, String>>();
         double total = smsList.size();
         double progress;
+  Log.d(TAG, "removeDuplicates() ");
+
+
         for (int i = 0; i < smsList.size(); i++) {
 
             progress = i / total * 100;
-            Log.d(TAG, "removeDuplicates: " + progress + "% | " + i + "/" + total);
+           // Log.d(TAG, "removeDuplicates: " + progress + "% | " + i + "/" + total);
             boolean available = false;
             for (int j = 0; j < gpList.size(); j++) {
                 if (gpList.get(j).get(KEY_THREAD_ID) != null && smsList.get(i).get(KEY_THREAD_ID) != null) {
@@ -119,13 +122,14 @@ public class Function {
     }
 
     public static List<Sms> removeDuplicates1(List<Sms> smsList) {
+        Log.d(TAG, "removeDuplicates1 " );
         List<Sms> gpList = new ArrayList<>();
         double total = smsList.size();
         double progress;
         for (int i = 0; i < smsList.size(); i++) {
 
             progress = i / total * 100;
-            Log.d(TAG, "removeDuplicates1: " + progress + "% | " + i + "/" + total);
+       //     Log.d(TAG, "removeDuplicates1: " + progress + "% | " + i + "/" + total);
             boolean available = false;
             for (int j = 0; j < gpList.size(); j++) {
                 if (gpList.get(j).KEY_PHONE != null) {
@@ -170,27 +174,32 @@ public class Function {
 
 
     public static String getContactbyPhoneNumber(Context c, String phoneNumber) {
+        try {
+            Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
+            String[] projection = {ContactsContract.PhoneLookup.DISPLAY_NAME};
+            Cursor cursor = c.getContentResolver().query(uri, projection, null, null, null);
 
-        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
-        String[] projection = {ContactsContract.PhoneLookup.DISPLAY_NAME};
-        Cursor cursor = c.getContentResolver().query(uri, projection, null, null, null);
+            if (cursor == null) {
+                return phoneNumber;
+            } else {
+                String name = phoneNumber;
+                try {
 
-        if (cursor == null) {
-            return phoneNumber;
-        } else {
-            String name = phoneNumber;
-            try {
+                    if (cursor.moveToFirst()) {
+                        name = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+                    }
 
-                if (cursor.moveToFirst()) {
-                    name = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+                } finally {
+                    cursor.close();
                 }
 
-            } finally {
-                cursor.close();
+                return name;
             }
-
-            return name;
+        } catch (Exception e) {
+            Log.e("Function Error: ", e.toString());
+            return phoneNumber;
         }
+
     }
 
 
@@ -239,8 +248,10 @@ public class Function {
         Log.d(TAG, "ConvertArraylist2ListSms: START");
         int al_t = al.size();
         List<Sms> smsc = new ArrayList<>();
+        Log.d(TAG, "ConvertArraylist2ListSms: FOR LOOP");
+
         for (int i = 0; i < al_t; i++) {
-            Log.d(TAG, "ConvertArraylist2ListSms: FOR LOOP: " + i + "/" + al_t);
+          //  Log.d(TAG, "ConvertArraylist2ListSms: FOR LOOP: " + i + "/" + al_t);
             Sms sms = new Sms();
             sms.KEY_PHONE = al.get(i).get(KEY_PHONE);
             sms.KEY_MSG = al.get(i).get(KEY_MSG);
@@ -259,8 +270,9 @@ public class Function {
         Log.d(TAG, "ConvertListSms2Arraylist: START");
         int total = ls.size();
         LinkedHashSet<HashMap<String, String>> al = new LinkedHashSet<>();
+        Log.d(TAG, "ConvertListSms2Arraylist: FOR LOOP2");
         for (int i = 0; i < total; i++) {
-            Log.d(TAG, "ConvertListSms2Arraylist: FOR LOOP: " + i + "/" + total);
+        //    Log.d(TAG, "ConvertListSms2Arraylist: FOR LOOP: " + i + "/" + total);
             HashMap<String, String> map = new HashMap<>();
 
             map.put(KEY_MSG, ls.get(i).KEY_MSG);

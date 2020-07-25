@@ -15,14 +15,19 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
 import android.os.Process;
+import android.security.keystore.KeyGenParameterSpec;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.JobIntentService;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
+import androidx.security.crypto.EncryptedFile;
+import androidx.security.crypto.MasterKey;
+import androidx.security.crypto.MasterKeys;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -56,6 +61,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -76,6 +82,7 @@ import devesh.ephrine.backup.sms.R;
 import devesh.ephrine.backup.sms.StartActivity;
 import io.fabric.sdk.android.Fabric;
 
+import static androidx.security.crypto.MasterKeys.getOrCreate;
 import static devesh.ephrine.backup.sms.Function.KEY_THREAD_ID;
 
 /**
@@ -85,6 +92,7 @@ import static devesh.ephrine.backup.sms.Function.KEY_THREAD_ID;
  * TODO: Customize class - update intent actions, extra parameters and static
  * helper methods.
  */
+
 public class SyncIntentService extends JobIntentService {
     public static final int JOB_ID = 1;
     // TODO: Rename actions, choose action names that describe tasks that this
@@ -112,8 +120,8 @@ public class SyncIntentService extends JobIntentService {
     boolean SMSAutoBackup;
     boolean isSubscribed;
     LinkedHashSet<HashMap<String, String>> smsList = new LinkedHashSet<>();
-    LinkedHashSet<HashMap<String, String>> customList = new LinkedHashSet<HashMap<String, String>>();
-    LinkedHashSet<HashMap<String, String>> tmpList = new LinkedHashSet<HashMap<String, String>>();
+   // LinkedHashSet<HashMap<String, String>> customList = new LinkedHashSet<HashMap<String, String>>();
+   // LinkedHashSet<HashMap<String, String>> tmpList = new LinkedHashSet<HashMap<String, String>>();
     String BackupStorageDB;
     String name;
     /*
@@ -132,6 +140,7 @@ public class SyncIntentService extends JobIntentService {
     File cache_temp2;
     SharedPreferences sharedPrefAppGeneral;
     // Trace myTrace;
+    ArrayList<File> FilesToDelete=new ArrayList<>();
 
     public static void enqueueWork(Context context, Intent work) {
         enqueueWork(context, SyncIntentService.class, JOB_ID, work);
@@ -283,13 +292,14 @@ public class SyncIntentService extends JobIntentService {
                     BackupStorageDB = "SMSDrive/Users/" + UserUID + "/backup/file_cloud_sms.zip";
 
 
-                    try {
+                   /* try {
                         tmpList.clear();
                         tmpList = (LinkedHashSet<HashMap<String, String>>) Function.readCachedFile(mContext, "orgsms");
                     } catch (Exception e) {
                         Log.d(TAG, "startSync: ERROR " + e);
                         Crashlytics.logException(e);
                     }
+                    */
 
                     sms1();
 
@@ -338,6 +348,7 @@ public class SyncIntentService extends JobIntentService {
                 double progress;
 
                 Log.d(TAG, "sms1: Cursor Count: " + i);
+                Log.d(TAG, "sms1: Cursor Count: cursor.moveToNext()");
                 while (cursor.moveToNext()) {
                     ii++;
                     progress = ii / TOTAL_DEVICE_SMS * 100;
@@ -347,7 +358,7 @@ public class SyncIntentService extends JobIntentService {
                     builder.setContentText("Preparing Messages (" + prg + "%)")
                             .setProgress(100, p, false);
                     notificationManager.notify(001, builder.build());
-                    Log.d(TAG, "sms1: Cursor Count: cursor.moveToNext()");
+//                    Log.d(TAG, "sms1: Cursor Count: cursor.moveToNext()");
 
                     HashMap<String, String> sms = new HashMap<>();
 
@@ -597,7 +608,6 @@ public class SyncIntentService extends JobIntentService {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
 
         isIntentServiceRunning = true;
         Log.d(TAG, "onDestroy: SyncIntentService() #9086");
@@ -619,6 +629,14 @@ public class SyncIntentService extends JobIntentService {
             Log.e(TAG, "onDestroy: ERROR #564 ", e);
         }
 
+        for(File f:FilesToDelete){
+            if(f.exists()){
+                f.delete();
+            }
+
+        }
+
+        super.onDestroy();
 
     }
 
@@ -681,18 +699,22 @@ public class SyncIntentService extends JobIntentService {
                     localFile = null;
                     gson = new Gson();
 
-                    try {
+                   /* try {
                         tmpList.clear();
                         tmpList = (LinkedHashSet<HashMap<String, String>>) Function.readCachedFile(mContext, getString(R.string.file_device_sms));
                         Log.d(TAG, "DownloadFromCloud: tmpList.clear() ");
                     } catch (Exception e) {
-                        Log.d(TAG, "DownloadFromCloud: ERROR " + e);
+                        Log.d(TAG, "DownloadFromCloud: ERROR 678" + e);
                         Crashlytics.logException(e);
 
-                    }
+                    }*/
 
                     try {
-                        localFile = File.createTempFile("smscloud", "backup");
+                 //       localFile = File.createTempFile("smscloud", "backup");
+                        localFile=new File(getFilesDir(), "smscloud_backup.zip");
+                        localFile.deleteOnExit();
+                        FilesToDelete.add(localFile);
+
                         Log.d(TAG, "DownloadFromCloud: localFile smscloud.backup");
                     } catch (Exception e) {
                         Log.d(TAG, "DownloadFromCloud: #ERROR " + e);
@@ -708,6 +730,7 @@ public class SyncIntentService extends JobIntentService {
 
 
                                     File unziped = unzipFile(localFile);
+                                    unziped.deleteOnExit();
                                     Log.d(TAG, "onSuccess: Unziped: " + unziped.getPath());
                                     String JsonStr = ConvertFileToStrng(unziped);
                                     Type type = new TypeToken<LinkedHashSet<HashMap<String, String>>>() {
@@ -775,7 +798,9 @@ public class SyncIntentService extends JobIntentService {
         File unzip_file = null;
 
         try {
-            unzip_file = File.createTempFile("backuprestore", "json");
+         //   unzip_file = File.createTempFile("backuprestore", "json");
+            unzip_file=new File(getFilesDir(),"backuprestore.json");
+            FilesToDelete.add(unzip_file);
             String filename;
             is = new FileInputStream(zipfile);
             zis = new ZipInputStream(new BufferedInputStream(is));
@@ -858,7 +883,10 @@ public class SyncIntentService extends JobIntentService {
 
                     File mfile = null;
                     try {
-                        mfile = File.createTempFile("mbackup", "json");
+                        //mfile = File.createTempFile("mbackup", "json");
+                        mfile =new File(getFilesDir(),"mbackup.json");
+                        FilesToDelete.add(mfile);
+                        mfile.deleteOnExit();
                         Log.d(TAG, "UploadToCloud: mfile mbackup.json");
                     } catch (Exception e) {
                         Log.d(TAG, "DownloadFromCloud: #ERROR " + e);
@@ -869,7 +897,8 @@ public class SyncIntentService extends JobIntentService {
                     try {
                         mfile.createNewFile();
                         cache_temp1 = mfile;
-
+                        cache_temp1.deleteOnExit();
+                        FilesToDelete.add(cache_temp1);
                         FileOutputStream fOut = new FileOutputStream(mfile);
                         OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
                         myOutWriter.append(jsonSTR);
@@ -890,12 +919,16 @@ public class SyncIntentService extends JobIntentService {
                     OutputStream out;
                     try {
                         Log.d(TAG, "UploadToCloud: zip_file backup.zip");
-                        zip_file = File.createTempFile("backup", "zip");
+                        //zip_file = File.createTempFile("backup", "zip");
+                        zip_file=new File(getFilesDir(),"backup.zip");
+                        zip_file.deleteOnExit();
+                        FilesToDelete.add(zip_file);
                         //out = new FileOutputStream(Environment.getExternalStorageDirectory().getAbsolutePath()+"/backup.zip");
                         out = new FileOutputStream(zip_file);
                         //   out = new FileOutputStream("backup.zip");
                         ZipOutputStream zipOut = new ZipOutputStream(out);
                         File fileToZip = mfile;
+                        fileToZip.deleteOnExit();
                         FileInputStream fis = new FileInputStream(fileToZip);
                         ZipEntry zipEntry = new ZipEntry(fileToZip.getName());
                         zipOut.putNextEntry(zipEntry);
@@ -916,6 +949,8 @@ public class SyncIntentService extends JobIntentService {
 
                     }
                     cache_temp2 = zip_file;
+                    cache_temp2.deleteOnExit();
+                    FilesToDelete.add(cache_temp2);
                     BackupStorageDB = "SMSDrive/Users/" + UserUID + "/backup/file_cloud_sms.zip";
 
                     StorageReference mStorageRef;
@@ -923,6 +958,7 @@ public class SyncIntentService extends JobIntentService {
                     StorageReference riversRef = mStorageRef.child(BackupStorageDB);
 
                     File cfile = zip_file;
+                    cfile.deleteOnExit();
                     Uri file = Uri.fromFile(cfile);
 
                     UploadTask uploadTask = riversRef.putFile(file);
@@ -1388,4 +1424,3 @@ public class SyncIntentService extends JobIntentService {
 
 
 }
-

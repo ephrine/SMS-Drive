@@ -1,4 +1,6 @@
-include ':app', ':IAP6Helper', ':nativetemplates'
+include ':dummy'
+include ':app', ':IAP6Helper'
+
 rootProject.name='SMS Drive'
 
 project(':IAP6Helper').projectDir = new File('app/libs/IAP6Helper')
