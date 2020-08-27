@@ -11,8 +11,8 @@
       "type": "SINGLE",
       "filters": [],
       "properties": [],
-      "versionCode": 37,
-      "versionName": "0.1.4 Alpha",
+      "versionCode": 38,
+      "versionName": "0.1.4.1 Alpha",
       "enabled": true,
       "outputFile": "app-master-release.apk"
     }

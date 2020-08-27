@@ -861,7 +861,10 @@ public class RestoreWizardActivity extends AppCompatActivity {
                 }
 
                 try {
-                    localFile = File.createTempFile("smscloud", "backup");
+                    //localFile = File.createTempFile("smscloud", "backup");
+                    localFile=new File(getFilesDir(), "smscloudbackuprestore.zip");
+                    localFile.deleteOnExit();
+
                 } catch (Exception e) {
                     Log.d(TAG, "DownloadFromCloud: #ERROR " + e);
                     Crashlytics.logException(e);
@@ -942,7 +945,9 @@ public class RestoreWizardActivity extends AppCompatActivity {
             File unzip_file = null;
 
             try {
-                unzip_file = File.createTempFile("backuprestore", "json");
+               // unzip_file = File.createTempFile("backuprestore", "json");
+                unzip_file=new File(getFilesDir(), "backuprestore_restore.json");
+
                 String filename;
                 is = new FileInputStream(zipfile);
                 zis = new ZipInputStream(new BufferedInputStream(is));

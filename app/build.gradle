@@ -133,7 +133,7 @@ if (!kk.exists()) {
 keypath=kk
 } */
 
-def AppVersionName = "0.1.4 Alpha"
+def AppVersionName = "0.1.4.2"
 
 android {
     lintOptions {
@@ -173,7 +173,7 @@ android {
         applicationId "devesh.ephrine.backup.sms"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 37
+        versionCode 38
         versionName "" + AppVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true

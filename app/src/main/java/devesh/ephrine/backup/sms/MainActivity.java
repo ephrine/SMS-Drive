@@ -658,6 +658,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case PERMISSION_ALL: {
                 // If request is cancelled, the result arrays are empty.
@@ -1768,15 +1769,15 @@ Log.e(TAG,e.toString());
 
     }
 
-    public ArrayList<HashMap<String, String>> removeDuplicatesCreateList(ArrayList<HashMap<String, String>> smsList) {
+  /*  public ArrayList<HashMap<String, String>> removeDuplicatesCreateList(ArrayList<HashMap<String, String>> smsList) {
         ArrayList<HashMap<String, String>> gpList = new ArrayList<HashMap<String, String>>();
         double total = smsList.size();
-        int progress = 0;
+        double progress = 0;
         for (int i = 0; i < smsList.size(); i++) {
 
             double prg = i / total * 100;
             progress = (int) prg;
-            cloudRefreshProgressBar.setProgress(progress);
+            cloudRefreshProgressBar.setProgress(String.valueOf(progress));
 
             Log.d("SMS Drive|MainActivity", "removeDuplicates: " + progress + "% | " + i + "/" + total);
             boolean available = false;
@@ -1802,7 +1803,7 @@ Log.e(TAG,e.toString());
     public void cloudSmsRefreshFinish() {
 
     }
-
+*/
     void setPreferenceListner() {
         //  LLBGmsgprocessing=findViewById(R.id.LLBGmsgprocessing);
 

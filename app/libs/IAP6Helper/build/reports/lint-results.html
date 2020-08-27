@@ -173,10 +173,10 @@ document.getElementById(id).style.display = 'none';
 <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
   <header class="mdl-layout__header">
     <div class="mdl-layout__header-row">
-      <span class="mdl-layout-title">Lint Report: 26 warnings</span>
+      <span class="mdl-layout-title">Lint Report: 25 warnings</span>
       <div class="mdl-layout-spacer"></div>
       <nav class="mdl-navigation mdl-layout--large-screen-only">
-Check performed at Sat Jul 25 12:47:13 IST 2020      </nav>
+Check performed at Thu Aug 27 12:58:47 IST 2020      </nav>
     </div>
   </header>
   <div class="mdl-layout__drawer">
@@ -185,7 +185,6 @@ Check performed at Sat Jul 25 12:47:13 IST 2020      </nav>
       <a class="mdl-navigation__link" href="#overview"><i class="material-icons">dashboard</i>Overview</a>
       <a class="mdl-navigation__link" href="#OldTargetApi"><i class="material-icons warning-icon">warning</i>Target SDK attribute is not targeting latest version (1)</a>
       <a class="mdl-navigation__link" href="#InflateParams"><i class="material-icons warning-icon">warning</i>Layout Inflation without a Parent (1)</a>
-      <a class="mdl-navigation__link" href="#GradleDependency"><i class="material-icons warning-icon">warning</i>Obsolete Gradle Dependency (1)</a>
       <a class="mdl-navigation__link" href="#SpUsage"><i class="material-icons warning-icon">warning</i>Using <code>dp</code> instead of <code>sp</code> for text sizes (1)</a>
       <a class="mdl-navigation__link" href="#PackageManagerGetSignatures"><i class="material-icons warning-icon">warning</i>Potential Multiple Certificate Exploit (1)</a>
       <a class="mdl-navigation__link" href="#ObsoleteLayoutParam"><i class="material-icons warning-icon">warning</i>Obsolete layout params (1)</a>
@@ -218,9 +217,6 @@ Check performed at Sat Jul 25 12:47:13 IST 2020      </nav>
 <tr>
 <td class="countColumn">1</td><td class="issueColumn"><i class="material-icons warning-icon">warning</i>
 <a href="#InflateParams">InflateParams</a>: Layout Inflation without a Parent</td></tr>
-<tr>
-<td class="countColumn">1</td><td class="issueColumn"><i class="material-icons warning-icon">warning</i>
-<a href="#GradleDependency">GradleDependency</a>: Obsolete Gradle Dependency</td></tr>
 <tr>
 <td class="countColumn">1</td><td class="issueColumn"><i class="material-icons warning-icon">warning</i>
 <a href="#SpUsage">SpUsage</a>: Using <code>dp</code> instead of <code>sp</code> for text sizes</td></tr>
@@ -371,51 +367,6 @@ When inflating a layout, avoid passing in null as the parent view, since otherwi
               <div class="mdl-card__actions mdl-card--border">
 <button class="mdl-button mdl-js-button mdl-js-ripple-effect" id="explanationInflateParamsLink" onclick="reveal('explanationInflateParams');">
 Explain</button><button class="mdl-button mdl-js-button mdl-js-ripple-effect" id="InflateParamsCardLink" onclick="hideid('InflateParamsCard');">
-Dismiss</button>            </div>
-            </div>
-          </section><a name="GradleDependency"></a>
-<section class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp" id="GradleDependencyCard" style="display: block;">
-            <div class="mdl-card mdl-cell mdl-cell--12-col">
-  <div class="mdl-card__title">
-    <h2 class="mdl-card__title-text">Obsolete Gradle Dependency</h2>
-  </div>
-              <div class="mdl-card__supporting-text">
-<div class="issue">
-<div class="warningslist">
-<span class="location"><a href="../../build.gradle">../../build.gradle</a>:4</span>: <span class="message">Old buildToolsVersion 28.0.3; recommended version is 30.0.1 or later</span><br /><pre class="errorlines">
-<span class="lineno">  1 </span>apply plugin: <span class="string">'com.android.library'</span>
-<span class="lineno">  2 </span>android {
-<span class="lineno">  3 </span>    compileSdkVersion <span class="number">26</span>
-<span class="caretline"><span class="lineno">  4 </span>    <span class="warning">buildToolsVersion <span class="string">'28.0.3'</span></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-<span class="lineno">  5 </span>
-<span class="lineno">  6 </span>    defaultConfig {
-<span class="lineno">  7 </span>        minSdkVersion <span class="number">18</span></pre>
-
-</div>
-<div class="metadata"><div class="explanation" id="explanationGradleDependency" style="display: none;">
-This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find.<br/>Note: This issue has an associated quickfix operation in Android Studio and IntelliJ IDEA.<br>
-To suppress this error, use the issue id "GradleDependency" as explained in the <a href="#SuppressInfo">Suppressing Warnings and Errors</a> section.<br/>
-<br/></div>
-</div>
-</div>
-<div class="chips">
-<span class="mdl-chip">
-    <span class="mdl-chip__text">GradleDependency</span>
-</span>
-<span class="mdl-chip">
-    <span class="mdl-chip__text">Correctness</span>
-</span>
-<span class="mdl-chip">
-    <span class="mdl-chip__text">Warning</span>
-</span>
-<span class="mdl-chip">
-    <span class="mdl-chip__text">Priority 4/10</span>
-</span>
-</div>
-              </div>
-              <div class="mdl-card__actions mdl-card--border">
-<button class="mdl-button mdl-js-button mdl-js-ripple-effect" id="explanationGradleDependencyLink" onclick="reveal('explanationGradleDependency');">
-Explain</button><button class="mdl-button mdl-js-button mdl-js-ripple-effect" id="GradleDependencyCardLink" onclick="hideid('GradleDependencyCard');">
 Dismiss</button>            </div>
             </div>
           </section><a name="SpUsage"></a>

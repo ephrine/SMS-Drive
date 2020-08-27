@@ -14,7 +14,6 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/app/libs/IAP6Helper" />
             <option value="$PROJECT_DIR$/dummy" />
-            <option value="$PROJECT_DIR$/nativetemplates" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
